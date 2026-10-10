@@ -71,8 +71,7 @@ contract MarketplaceFactory is PoolManagerLogic {
 
         if (bytes(_title).length < 10) revert TitleNotLongEnough();
 
-        // if (_deadline < block.timestamp + 1 days)
-        //     revert DeadlineNotLongEnough(); block.timestamp can be ahead of time on testnet
+        // if (_deadline < block.timestamp + 1 days) revert DeadlineNotLongEnough(); block.timestamp can be ahead of time on testnet
 
         uint256 amountAfterFee = msg.value - PROTOCOL_FEE;
         protocolFeeBalance += PROTOCOL_FEE;
