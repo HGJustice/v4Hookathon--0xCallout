@@ -11,7 +11,6 @@ abstract contract BaseTest is Test, Deployers {
     MarketplaceFactory public marketplaceContract;
 
     address multiSig = makeAddr("multiSig");
-    address chainlinkCre = makeAddr("chainlinkCre");
     address user1 = makeAddr("user1");
     address user2 = makeAddr("user2");
     address user3 = makeAddr("user3");
@@ -20,7 +19,6 @@ abstract contract BaseTest is Test, Deployers {
 
     function setUp() public virtual {
         deal(multiSig, 1 ether);
-        deal(chainlinkCre, 1 ether);
         deal(user1, 1 ether);
         deal(user2, 1 ether);
         deal(user3, 1 ether);
@@ -30,8 +28,7 @@ abstract contract BaseTest is Test, Deployers {
         deployFreshManagerAndRouters();
         marketplaceContract = new MarketplaceFactory(
             IPoolManager(address(manager)),
-            multiSig,
-            chainlinkCre
+            multiSig
         );
     }
 
@@ -47,5 +44,23 @@ abstract contract BaseTest is Test, Deployers {
         uint256 _marketplaceID
     ) internal view returns (MarketplaceFactory.Marketplace memory) {
         return marketplaceContract.getMarket(_marketplaceID);
+    }
+
+    function _betYes(
+        address _user,
+        uint256 _amount,
+        uint256 _marketID
+    ) internal {
+        vm.prank(_user);
+        marketplaceContract.betMarket{value: _amount}(_marketID, true);
+    }
+
+    function _betNo(
+        address _user,
+        uint256 _amount,
+        uint256 _marketID
+    ) internal {
+        vm.prank(_user);
+        marketplaceContract.betMarket{value: _amount}(_marketID, false);
     }
 }

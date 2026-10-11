@@ -21,4 +21,26 @@ contract MarketplaceFactoryReverts is BaseTest {
     //     vm.expectRevert(DeadlineNotLongEnough.selector);
     //     _createDefaultMarket(user1, 0.05 ether);
     // }
+
+    function test_invalidBetAmountFail() external {
+        _createDefaultMarket(user1, 0.05 ether);
+
+        vm.prank(user2);
+        vm.expectRevert(InsufficientBetAmount.selector);
+        marketplaceContract.betMarket{value: 0 ether}(1, true);
+    }
+
+    function test_invalidMarketplaceIDFail() external {
+        _createDefaultMarket(user1, 1 ether);
+        vm.prank(user2);
+        vm.expectRevert(InvalidMarketplaceID.selector);
+        marketplaceContract.betMarket{value: 0.5 ether}(2, true);
+    }
+
+    function test_withdrawProtocolFeesFail() external {
+        _createDefaultMarket(user1, 0.05 ether);
+        vm.prank(user1);
+        vm.expectRevert(OnlyOwnerAccess.selector);
+        marketplaceContract.withdrawFees();
+    }
 }

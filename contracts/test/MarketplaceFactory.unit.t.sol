@@ -74,4 +74,56 @@ contract MarketplaceFactoryUnit is BaseTest {
         assertEq(market3.balance, 0.04 ether);
         assertEq(marketplaceContract.marketplaceID(), 4);
     }
+
+    function test_betMarket() external {
+        _createDefaultMarket(user1, 1 ether);
+
+        _betYes(user2, 0.1 ether, 1);
+
+        MarketplaceFactory.Marketplace memory market = _getMarket(1);
+        assertEq(market.balance, 1.09 ether);
+        YesToken yesToken = YesToken(market.yesToken);
+        NoToken noToken = NoToken(market.noToken);
+        assertGt(yesToken.balanceOf(user2), 0);
+        assertEq(noToken.balanceOf(user2), 0);
+
+        _betNo(user3, 0.1 ether, 1);
+        MarketplaceFactory.Marketplace memory marketUpdated = _getMarket(1);
+        assertEq(marketUpdated.balance, 1.19 ether);
+        assertGt(noToken.balanceOf(user3), 0);
+        assertEq(yesToken.balanceOf(user3), 0);
+    }
+
+    function test_betMultiple() external {
+        _createDefaultMarket(user1, 1 ether);
+
+        vm.startPrank(user2);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        vm.stopPrank();
+        vm.startPrank(user3);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        vm.stopPrank();
+        vm.startPrank(user4);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        vm.stopPrank();
+
+        MarketplaceFactory.Marketplace memory market = _getMarket(1);
+
+        YesToken yesToken = YesToken(market.yesToken);
+        NoToken noToken = NoToken(market.noToken);
+        assertEq(market.balance, 1.99 ether);
+        assertGt(yesToken.balanceOf(user2), 0);
+        assertEq(noToken.balanceOf(user2), 0);
+        assertGt(noToken.balanceOf(user3), 0);
+        assertEq(yesToken.balanceOf(user3), 0);
+        assertGt(yesToken.balanceOf(user4), 0);
+        assertGt(noToken.balanceOf(user4), 0);
+    }
 }

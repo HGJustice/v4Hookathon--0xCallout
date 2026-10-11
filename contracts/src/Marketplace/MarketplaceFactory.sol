@@ -40,7 +40,6 @@ contract MarketplaceFactory is PoolManagerLogic {
     uint256 public protocolFeeBalance = 0;
     address immutable owner;
     address immutable multiSig;
-    address immutable chainlinkCre;
 
     event MarketCreated(
         uint256 marketplaceID,
@@ -53,14 +52,25 @@ contract MarketplaceFactory is PoolManagerLogic {
         address noToken
     );
 
+    event MarketBet(
+        uint256 marketplaceID,
+        string title,
+        uint256 newBalance,
+        address user,
+        PoolKey pool
+    );
+
     constructor(
         IPoolManager _poolManager,
-        address _multiSig,
-        address _chainlinkCre
+        address _multiSig
     ) PoolManagerLogic(_poolManager) {
         owner = msg.sender;
         multiSig = _multiSig;
-        chainlinkCre = _chainlinkCre;
+    }
+
+    modifier checkMarketplaceID(uint256 _marketplaceID) {
+        if (_marketplaceID >= marketplaceID) revert InvalidMarketplaceID();
+        _;
     }
 
     function createMarket(
@@ -119,6 +129,62 @@ contract MarketplaceFactory is PoolManagerLogic {
         uint256 _marketplaceID
     ) external view returns (Marketplace memory) {
         return marketplaces[_marketplaceID];
+    }
+
+    function betMarket(
+        uint256 _marketplaceID,
+        bool _decision
+    ) external payable checkMarketplaceID(_marketplaceID) {
+        if (msg.value == 0) revert InsufficientBetAmount();
+        Marketplace storage currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.resolved) revert MarketEnded();
+        // if (block.timestamp >= currentMarket.deadline) revert BettingClosed();  testnet timestamp buggy
+
+        currentMarket.balance += msg.value;
+
+        YesToken yesToken = YesToken(currentMarket.yesToken);
+        NoToken noToken = NoToken(currentMarket.noToken);
+        yesToken.mintYesToken(msg.value);
+        yesToken.approve(address(poolManager), msg.value);
+        noToken.mintNoToken(msg.value);
+        noToken.approve(address(poolManager), msg.value);
+
+        bool zeroForOne = _decision
+            ? currentMarket.noToken ==
+                Currency.unwrap(currentMarket.pool.currency0)
+            : currentMarket.yesToken ==
+                Currency.unwrap(currentMarket.pool.currency0);
+
+        bytes memory data = abi.encode(
+            currentMarket.pool,
+            msg.value,
+            CallbackAction.PlaceBet,
+            zeroForOne,
+            msg.sender
+        );
+        poolManager.unlock(data);
+
+        if (_decision) {
+            yesToken.transfer(msg.sender, msg.value);
+        } else {
+            noToken.transfer(msg.sender, msg.value);
+        }
+        emit MarketBet(
+            _marketplaceID,
+            currentMarket.title,
+            currentMarket.balance,
+            msg.sender,
+            currentMarket.pool
+        );
+    }
+
+    function withdrawFees() external {
+        if (msg.sender != owner) revert OnlyOwnerAccess();
+
+        (bool success, ) = payable(owner).call{value: address(this).balance}( //testing purpeses withdraw all eth
+            ""
+        );
+        require(success, "Transfer of protocolFees failed");
     }
 
     function _mintApproveYesNoTokens(
