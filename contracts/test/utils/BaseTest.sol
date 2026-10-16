@@ -63,4 +63,32 @@ abstract contract BaseTest is Test, Deployers {
         vm.prank(_user);
         marketplaceContract.betMarket{value: _amount}(_marketID, false);
     }
+
+    function _proposeMarket(
+        address _user,
+        uint256 _amount,
+        MarketplaceFactory.PredictionOutcome _outcome,
+        uint256 _marketID
+    ) internal {
+        vm.prank(_user);
+        marketplaceContract.proposeOutcome{value: _amount}(
+            _marketID,
+            _outcome,
+            7328329
+        );
+    }
+
+    function _disputeMarket(
+        address _user,
+        uint256 _amount,
+        MarketplaceFactory.PredictionOutcome _outcome,
+        uint256 _marketID
+    ) internal {
+        vm.prank(_user);
+        marketplaceContract.disputeOutcome{value: _amount}(
+            _marketID,
+            _outcome,
+            7328329
+        );
+    }
 }

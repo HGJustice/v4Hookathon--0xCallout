@@ -9,6 +9,7 @@ import "../Marketplace/PoolManagerLogic.sol";
 contract MarketplaceFactory is PoolManagerLogic {
     uint256 constant PROTOCOL_FEE = 0.01 ether;
     uint256 constant MARKET_SETUP_FEE = 0.05 ether;
+    uint256 constant PROPOSE_OUTCOME_FEE = 0.05 ether;
 
     enum PredictionOutcome {
         Unresolved,
@@ -58,6 +59,20 @@ contract MarketplaceFactory is PoolManagerLogic {
         uint256 newBalance,
         address user,
         PoolKey pool
+    );
+
+    event OutcomeProposed(
+        uint256 marketplaceID,
+        PredictionOutcome proposedOutcome,
+        address user,
+        uint256 timestamp
+    );
+
+    event OutcomeDisputed(
+        uint256 marketplaceID,
+        PredictionOutcome disputedOutcome,
+        address user,
+        uint256 timestamp
     );
 
     constructor(
@@ -177,8 +192,48 @@ contract MarketplaceFactory is PoolManagerLogic {
             currentMarket.pool
         );
     }
+    function proposeOutcome(
+        uint256 _marketplaceID,
+        PredictionOutcome _outcome,
+        uint256 _currentTimestamp
+    ) external payable checkMarketplaceID(_marketplaceID) {
+        if (msg.value < PROPOSE_OUTCOME_FEE) revert InsufficientProposeFee();
+        Marketplace storage currentMarket = marketplaces[_marketplaceID];
 
-    function withdrawFees() external {
+        protocolFeeBalance += PROPOSE_OUTCOME_FEE;
+        currentMarket.proposedOutcome = _outcome;
+
+        emit OutcomeProposed(
+            _marketplaceID,
+            _outcome,
+            msg.sender,
+            _currentTimestamp
+        );
+    }
+
+    function disputeOutcome(
+        uint256 _marketplaceID,
+        PredictionOutcome _outcome,
+        uint256 _currentTimestamp
+    ) external payable checkMarketplaceID(_marketplaceID) {
+        if (msg.value < PROPOSE_OUTCOME_FEE) revert InsufficientProposeFee();
+        Marketplace storage currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.proposedOutcome == PredictionOutcome.Unresolved)
+            revert MarketStillUnresolved();
+
+        protocolFeeBalance += PROPOSE_OUTCOME_FEE;
+        currentMarket.outcomeDisputed = true;
+        currentMarket.disputedOutcome = _outcome;
+
+        emit OutcomeDisputed(
+            _marketplaceID,
+            _outcome,
+            msg.sender,
+            _currentTimestamp
+        );
+    }
+
+    function withdrawProtocolFees() external {
         if (msg.sender != owner) revert OnlyOwnerAccess();
 
         (bool success, ) = payable(owner).call{value: address(this).balance}( //testing purpeses withdraw all eth

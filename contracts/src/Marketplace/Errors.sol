@@ -9,3 +9,5 @@ error InsufficientBetAmount();
 error MarketEnded();
 error OnlyOwnerAccess();
 error BettingClosed();
+error InsufficientProposeFee();
+error MarketStillUnresolved();
