@@ -26,6 +26,7 @@ contract MarketplaceFactory is PoolManagerLogic {
         uint256 balance;
         uint256 deadline;
         PredictionOutcome proposedOutcome;
+        uint256 proposedAt;
         bool outcomeDisputed;
         PredictionOutcome disputedOutcome;
         PredictionOutcome finalOutcome;
@@ -41,6 +42,7 @@ contract MarketplaceFactory is PoolManagerLogic {
     uint256 public protocolFeeBalance = 0;
     address immutable owner;
     address immutable multiSig;
+    address immutable chainlinkCre;
 
     event MarketCreated(
         uint256 marketplaceID,
@@ -77,10 +79,12 @@ contract MarketplaceFactory is PoolManagerLogic {
 
     constructor(
         IPoolManager _poolManager,
-        address _multiSig
+        address _multiSig,
+        address _chainlinkCre
     ) PoolManagerLogic(_poolManager) {
         owner = msg.sender;
         multiSig = _multiSig;
+        chainlinkCre = _chainlinkCre;
     }
 
     modifier checkMarketplaceID(uint256 _marketplaceID) {
@@ -116,6 +120,7 @@ contract MarketplaceFactory is PoolManagerLogic {
             balance: amountAfterFee,
             deadline: _deadline,
             proposedOutcome: PredictionOutcome.Unresolved,
+            proposedAt: 0,
             outcomeDisputed: false,
             disputedOutcome: PredictionOutcome.Unresolved,
             finalOutcome: PredictionOutcome.Unresolved,
@@ -138,12 +143,6 @@ contract MarketplaceFactory is PoolManagerLogic {
             newNoToken
         );
         marketplaceID++;
-    }
-
-    function getMarket(
-        uint256 _marketplaceID
-    ) external view returns (Marketplace memory) {
-        return marketplaces[_marketplaceID];
     }
 
     function betMarket(
@@ -194,32 +193,40 @@ contract MarketplaceFactory is PoolManagerLogic {
     }
     function proposeOutcome(
         uint256 _marketplaceID,
-        PredictionOutcome _outcome,
-        uint256 _currentTimestamp
+        PredictionOutcome _outcome
     ) external payable checkMarketplaceID(_marketplaceID) {
         if (msg.value < PROPOSE_OUTCOME_FEE) revert InsufficientProposeFee();
+        if (_outcome == PredictionOutcome.Unresolved)
+            revert CannotBeUnresolved();
         Marketplace storage currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.proposedOutcome != PredictionOutcome.Unresolved)
+            revert MarketplaceAlreadyProposed();
 
         protocolFeeBalance += PROPOSE_OUTCOME_FEE;
         currentMarket.proposedOutcome = _outcome;
+        currentMarket.proposedAt = block.timestamp;
 
         emit OutcomeProposed(
             _marketplaceID,
             _outcome,
             msg.sender,
-            _currentTimestamp
+            block.timestamp
         );
     }
 
     function disputeOutcome(
         uint256 _marketplaceID,
-        PredictionOutcome _outcome,
-        uint256 _currentTimestamp
+        PredictionOutcome _outcome
     ) external payable checkMarketplaceID(_marketplaceID) {
         if (msg.value < PROPOSE_OUTCOME_FEE) revert InsufficientProposeFee();
         Marketplace storage currentMarket = marketplaces[_marketplaceID];
         if (currentMarket.proposedOutcome == PredictionOutcome.Unresolved)
             revert MarketStillUnresolved();
+        if (currentMarket.outcomeDisputed) revert MarketplaceAlreadyDisputed();
+        if (_outcome == PredictionOutcome.Unresolved)
+            revert CannotBeUnresolved();
+        if (_outcome == currentMarket.proposedOutcome)
+            revert DisputedOutcomeCannotBeProposed();
 
         protocolFeeBalance += PROPOSE_OUTCOME_FEE;
         currentMarket.outcomeDisputed = true;
@@ -229,8 +236,77 @@ contract MarketplaceFactory is PoolManagerLogic {
             _marketplaceID,
             _outcome,
             msg.sender,
-            _currentTimestamp
+            block.timestamp
         );
+    }
+
+    function finaliseUndisputedMarket(
+        uint256 _marketplaceID
+    ) external checkMarketplaceID(_marketplaceID) {
+        if (msg.sender != chainlinkCre) revert OnlyChainlinkCreAccess();
+        Marketplace memory currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.resolved) revert MarketplaceResolved();
+        if (currentMarket.outcomeDisputed) revert MarketplaceDisputed();
+        if (currentMarket.proposedOutcome == PredictionOutcome.Unresolved)
+            revert CannotBeUnresolved();
+
+        _resolveMarket(_marketplaceID, currentMarket.proposedOutcome);
+    }
+
+    function finaliseDisputedMarket(
+        uint256 _marketplaceID,
+        PredictionOutcome _outcome
+    ) external checkMarketplaceID(_marketplaceID) {
+        if (_outcome == PredictionOutcome.Unresolved)
+            revert CannotBeUnresolved();
+        if (msg.sender != multiSig) revert OnlyMultiSigAccess();
+        Marketplace memory currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.resolved) revert MarketplaceResolved();
+
+        _resolveMarket(_marketplaceID, _outcome);
+    }
+
+    function redeemMarket(
+        uint256 _marketplaceID
+    ) external checkMarketplaceID(_marketplaceID) {
+        Marketplace storage currentMarket = marketplaces[_marketplaceID];
+        if (!currentMarket.resolved) revert MarketUnresolved();
+
+        YesToken yesToken = YesToken(currentMarket.yesToken);
+        NoToken noToken = NoToken(currentMarket.noToken);
+
+        uint256 circulatingWinningSupply = currentMarket
+            .winningSupplyAtResolve - currentMarket.poolWinningBalanceAtResolve;
+
+        if (currentMarket.finalOutcome == PredictionOutcome.Void) {
+            return; // need to return all funds if prediciton is called off
+        } else if (currentMarket.finalOutcome == PredictionOutcome.Yes) {
+            uint256 yesBalance = yesToken.balanceOf(msg.sender);
+            if (yesBalance == 0) revert NoTokensToRedeem();
+            yesToken.burnYesToken(msg.sender, yesBalance);
+
+            uint256 userShare = (currentMarket.balance * yesBalance) /
+                circulatingWinningSupply;
+
+            currentMarket.balance -= userShare;
+            currentMarket.winningSupplyAtResolve -= yesBalance;
+
+            (bool sent, ) = payable(msg.sender).call{value: userShare}("");
+            if (!sent) revert RedeemETHFailed();
+        } else if (currentMarket.finalOutcome == PredictionOutcome.No) {
+            uint256 noBalance = noToken.balanceOf(msg.sender);
+            if (noBalance == 0) revert NoTokensToRedeem();
+            noToken.burnNoToken(msg.sender, noBalance);
+
+            uint256 userShare = (currentMarket.balance * noBalance) /
+                circulatingWinningSupply;
+
+            currentMarket.balance -= userShare;
+            currentMarket.winningSupplyAtResolve -= noBalance;
+
+            (bool sent, ) = payable(msg.sender).call{value: userShare}("");
+            if (!sent) revert RedeemETHFailed();
+        }
     }
 
     function withdrawProtocolFees() external {
@@ -242,10 +318,44 @@ contract MarketplaceFactory is PoolManagerLogic {
         require(success, "Transfer of protocolFees failed");
     }
 
+    function _resolveMarket(
+        uint256 _marketplaceID,
+        PredictionOutcome _outcome
+    ) private {
+        Marketplace storage currentMarket = marketplaces[_marketplaceID];
+        if (currentMarket.resolved) revert MarketEnded();
+
+        currentMarket.resolved = true;
+        currentMarket.finalOutcome = _outcome;
+
+        (uint256 poolAmount0, uint256 poolAmount1) = _getPoolTokenBalance(
+            currentMarket.pool
+        );
+
+        if (currentMarket.finalOutcome == PredictionOutcome.Yes) {
+            currentMarket.winningSupplyAtResolve = YesToken(
+                currentMarket.yesToken
+            ).totalSupply();
+
+            currentMarket.poolWinningBalanceAtResolve = currentMarket
+                .yesToken == Currency.unwrap(currentMarket.pool.currency0)
+                ? poolAmount0
+                : poolAmount1;
+        } else if (currentMarket.finalOutcome == PredictionOutcome.No) {
+            currentMarket.winningSupplyAtResolve = NoToken(
+                currentMarket.noToken
+            ).totalSupply();
+            currentMarket.poolWinningBalanceAtResolve = currentMarket.noToken ==
+                Currency.unwrap(currentMarket.pool.currency0)
+                ? poolAmount0
+                : poolAmount1;
+        }
+    }
+
     function _mintApproveYesNoTokens(
         uint256 _marketplaceID,
         uint256 _amount
-    ) internal returns (address, address) {
+    ) private returns (address, address) {
         YesToken newYesToken = new YesToken(_marketplaceID);
         NoToken newNoToken = new NoToken(_marketplaceID);
         newYesToken.mintYesToken(_amount);
@@ -255,4 +365,6 @@ contract MarketplaceFactory is PoolManagerLogic {
 
         return (address(newYesToken), address(newNoToken));
     }
+
+    receive() external payable {}
 }
