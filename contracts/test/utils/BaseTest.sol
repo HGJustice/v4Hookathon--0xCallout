@@ -11,6 +11,7 @@ abstract contract BaseTest is Test, Deployers {
     MarketplaceFactory public marketplaceContract;
 
     address multiSig = makeAddr("multiSig");
+    address chainlinkCre = makeAddr("chainlinkCre");
     address user1 = makeAddr("user1");
     address user2 = makeAddr("user2");
     address user3 = makeAddr("user3");
@@ -19,6 +20,7 @@ abstract contract BaseTest is Test, Deployers {
 
     function setUp() public virtual {
         deal(multiSig, 1 ether);
+        deal(chainlinkCre, 1 ether);
         deal(user1, 1 ether);
         deal(user2, 1 ether);
         deal(user3, 1 ether);
@@ -28,7 +30,8 @@ abstract contract BaseTest is Test, Deployers {
         deployFreshManagerAndRouters();
         marketplaceContract = new MarketplaceFactory(
             IPoolManager(address(manager)),
-            multiSig
+            multiSig,
+            chainlinkCre
         );
     }
 
@@ -71,11 +74,7 @@ abstract contract BaseTest is Test, Deployers {
         uint256 _marketID
     ) internal {
         vm.prank(_user);
-        marketplaceContract.proposeOutcome{value: _amount}(
-            _marketID,
-            _outcome,
-            7328329
-        );
+        marketplaceContract.proposeOutcome{value: _amount}(_marketID, _outcome);
     }
 
     function _disputeMarket(
@@ -85,10 +84,24 @@ abstract contract BaseTest is Test, Deployers {
         uint256 _marketID
     ) internal {
         vm.prank(_user);
-        marketplaceContract.disputeOutcome{value: _amount}(
-            _marketID,
-            _outcome,
-            7328329
-        );
+        marketplaceContract.disputeOutcome{value: _amount}(_marketID, _outcome);
+    }
+
+    function _finaliseMarketChainlinkCre(uint256 _marketplaceID) internal {
+        vm.prank(chainlinkCre);
+        marketplaceContract.finaliseUndisputedMarket(_marketplaceID);
+    }
+
+    function _finaliseMarketMultiSig(
+        uint256 _marketplaceID,
+        MarketplaceFactory.PredictionOutcome _outcome
+    ) internal {
+        vm.prank(multiSig);
+        marketplaceContract.finaliseDisputedMarket(_marketplaceID, _outcome);
+    }
+
+    function _redeemMarket(uint256 _marketplaceID, address _user) internal {
+        vm.prank(_user);
+        marketplaceContract.redeemMarket(_marketplaceID);
     }
 }

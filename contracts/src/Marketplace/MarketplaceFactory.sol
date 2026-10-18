@@ -38,7 +38,7 @@ contract MarketplaceFactory is PoolManagerLogic {
     }
 
     uint256 public marketplaceID = 1;
-    mapping(uint256 => Marketplace) public marketplaces;
+    mapping(uint256 => Marketplace) marketplaces;
     uint256 public protocolFeeBalance = 0;
     address immutable owner;
     address immutable multiSig;
@@ -143,6 +143,12 @@ contract MarketplaceFactory is PoolManagerLogic {
             newNoToken
         );
         marketplaceID++;
+    }
+
+    function getMarket(
+        uint256 _marketplaceID
+    ) external view returns (Marketplace memory) {
+        return marketplaces[_marketplaceID];
     }
 
     function betMarket(
