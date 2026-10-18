@@ -126,4 +126,60 @@ contract MarketplaceFactoryUnit is BaseTest {
         assertGt(yesToken.balanceOf(user4), 0);
         assertGt(noToken.balanceOf(user4), 0);
     }
+
+    function test_proposeCreFinaliseRedeemOutcome() external {
+        _createDefaultMarket(user1, 1 ether);
+        vm.startPrank(user2);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        vm.stopPrank();
+        vm.startPrank(user3);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        vm.stopPrank();
+
+        _proposeMarket(
+            user4,
+            0.1 ether,
+            MarketplaceFactory.PredictionOutcome.Yes,
+            1
+        );
+        _finaliseMarketChainlinkCre(1);
+        _redeemMarket(1, user2);
+
+        assertGt(user2.balance, user3.balance);
+    }
+
+    function test_proposeDisputeMultiSigFinaliseRedeemOutcome() external {
+        _createDefaultMarket(user1, 1 ether);
+        vm.startPrank(user2);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, true);
+        vm.stopPrank();
+        vm.startPrank(user3);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        marketplaceContract.betMarket{value: 0.1 ether}(1, false);
+        vm.stopPrank();
+
+        _proposeMarket(
+            user4,
+            0.05 ether,
+            MarketplaceFactory.PredictionOutcome.Yes,
+            1
+        );
+
+        _disputeMarket(
+            user5,
+            0.05 ether,
+            MarketplaceFactory.PredictionOutcome.No,
+            1
+        );
+        _finaliseMarketMultiSig(1, MarketplaceFactory.PredictionOutcome.No);
+        _redeemMarket(1, user3);
+        assertGt(user3.balance, user2.balance);
+    }
 }
