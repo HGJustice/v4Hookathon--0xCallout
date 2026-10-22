@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280"><defs>
+  <filter id="brush" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.9" numOctaves="2" seed="28" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"/>
+  </filter>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <filter id="haze" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+</defs>
+<linearGradient id="bg4" x1="0" y1="1" x2="1" y2="0">
+  <stop offset="0" stop-color="#3a2f45"/><stop offset=".4" stop-color="#141318"/><stop offset="1" stop-color="#2b2a31"/></linearGradient>
+<linearGradient id="s4" x1="0" y1="1" x2="1" y2="0">
+  <stop offset="0" stop-color="#ffd2ea"/><stop offset=".4" stop-color="#c084fc"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+<rect width="280" height="280" fill="url(#bg4)"/>
+<ellipse cx="40" cy="250" rx="130" ry="110" fill="#a855f7" filter="url(#haze)" opacity=".75"/>
+<ellipse cx="250" cy="40" rx="90" ry="70" fill="#e9e7ef" filter="url(#haze)" opacity=".35"/>
+<path d="M-20 230 C 70 210, 160 140, 300 20" fill="none" stroke="#b46cff" stroke-width="22" filter="url(#glow)" opacity=".85"/>
+<path d="M-20 230 C 70 210, 160 140, 300 20" fill="none" stroke="url(#s4)" stroke-width="3.5"/>
+<path d="M-20 262 C 80 240, 180 170, 300 60" fill="none" stroke="#ffffff" stroke-width="1" opacity=".35"/>
+<rect width="280" height="280" filter="url(#brush)" opacity=".15" style="mix-blend-mode:overlay"/>
+</svg>

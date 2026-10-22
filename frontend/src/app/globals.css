@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+:root {
+  --background: #1a1a1a;
+  --foreground: #ededed;
+
+  /* Grid mesh background (matches cian.app: 240px cells, faint lines, dots at crossings) */
+  --grid-cell: 240px;
+  --grid-line: rgba(255, 255, 255, 0.075);
+  --grid-dot: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope);
+}
+
+@theme {
+  /* Blush brand palette. brand-deep is for text on white surfaces. */
+  --color-brand: #f6c1d3;
+  --color-brand-soft: #eba5c1;
+  --color-brand-deep: #b24f7a;
+
+  --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* cian.app sets all text in Manrope ExtraLight; headings step up to 400. */
+  font-weight: 200;
+}
+
+/* Lenis smooth scrolling (from lenis/dist/lenis.css) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
+
+/*
+ * Square mesh: three layered backgrounds tiled every --grid-cell.
+ * 1. a small solid dot where lines cross
+ * 2. vertical 1px lines
+ * 3. horizontal 1px lines
+ * Lines sit on the last pixel of each cell, like the original canvas.
+ */
+.grid-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      circle at calc(var(--grid-cell) - 0.5px) calc(var(--grid-cell) - 0.5px),
+      var(--grid-dot) 0,
+      var(--grid-dot) 1px,
+      rgba(255, 255, 255, 0.55) 1.5px,
+      transparent 2px
+    ),
+    linear-gradient(
+      to right,
+      transparent calc(var(--grid-cell) - 1px),
+      var(--grid-line) calc(var(--grid-cell) - 1px)
+    ),
+    linear-gradient(
+      to bottom,
+      transparent calc(var(--grid-cell) - 1px),
+      var(--grid-line) calc(var(--grid-cell) - 1px)
+    );
+  background-size: var(--grid-cell) var(--grid-cell);
+  background-repeat: repeat;
+}
+
+/* Panel gradient modelled on cian.app's protocol panel, recoloured:
+   a pale-blush → pink → lilac → grey-purple band across the top (cian's
+   yellow → orange → rose-brown → taupe), soft grey deepening toward the bottom-right,
+   and a bright white glow rising diagonally from the bottom-left toward the centre. Layers are listed top-first;
+   each colour fades to its own transparent version so blends stay clean. */
+.panel-glow {
+  background:
+    radial-gradient(85% 85% at 10% 96%, #ffffff 0%, rgb(255 255 255 / 0.9) 28%, rgb(255 255 255 / 0) 72%),
+    radial-gradient(45% 40% at 32% 60%, rgb(255 255 255 / 0.7) 0%, rgb(255 255 255 / 0) 70%),
+    radial-gradient(35% 45% at 46% 0%, rgb(243 154 198 / 0.7) 0%, rgb(243 154 198 / 0) 70%),
+    linear-gradient(to bottom, rgb(170 164 180 / 0) 30%, rgb(170 164 180 / 0.9) 100%),
+    linear-gradient(to right, #ffe3f0 0%, #f4b3d2 38%, #c9a2dd 70%, #9e93ad 100%);
+}
+
+/*
+ * Stainless-steel border. CSS has no metallic border, so this draws one:
+ * a ::before layer the size of the element, masked down to a ring, filled with a
+ * conic gradient of alternating bright and dark steel tones (the way polished steel
+ * catches light at different angles), plus a soft glow that follows the ring.
+ * Works with any border-radius and any background (the ring inherits the radius).
+ *
+ *   <div class="steel-border rounded-3xl">…</div>
+ *   <button class="steel-border steel-shine rounded-full">…</button>   (moving shine)
+ *
+ * Tweak per element with --steel-width (ring thickness) and --steel-glow (glow size).
+ */
+@property --steel-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* Alternating bright and dark steel tones, shared by every steel edge. */
+:root {
+  --steel-stops:
+    #8d929a, #f2f4f6 7%, #ffffff 10%, #b8bdc4 18%, #6f747c 27%, #c9cdd3 36%, #ffffff 42%,
+    #a7acb4 50%, #5d6269 58%, #d7dbe0 68%, #ffffff 74%, #9da2aa 84%, #8d929a;
+}
+
+.steel-border {
+  position: relative;
+}
+
+.steel-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--steel-width, 1.5px);
+  background: conic-gradient(from var(--steel-angle), var(--steel-stops));
+  /* keep only the padding ring: full box minus the content box */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 var(--steel-glow, 6px) rgb(255 255 255 / 0.45));
+  pointer-events: none;
+}
+
+/* Optional: the reflections slowly travel around the edge. */
+.steel-shine::before {
+  animation: steel-shine 6s linear infinite;
+}
+
+@keyframes steel-shine {
+  to {
+    --steel-angle: 360deg;
+  }
+}
+
+/* Privy's sign-in / wallet modal gets the same moving steel edge, drawn as its real border
+   rather than a ::before ring: the box is a scroll container, so an overlay would scroll
+   away with long content. The padding-box layer repaints Privy's background inside the
+   ring, and a soft outer glow stands in for the ring's glow, which the box clips.
+   Colours inside the modal come from the theme and accent in src/lib/privy.ts. */
+#privy-modal-content {
+  border: var(--steel-width, 1.5px) solid transparent;
+  background:
+    linear-gradient(var(--privy-color-background) 0 0) padding-box,
+    conic-gradient(from var(--steel-angle), var(--steel-stops)) border-box;
+  animation: steel-shine 6s linear infinite;
+  box-shadow:
+    0 0 24px rgb(255 255 255 / 0.12),
+    0 8px 32px rgb(0 0 0 / 0.32);
+}
