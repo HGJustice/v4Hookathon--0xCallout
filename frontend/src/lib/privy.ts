@@ -15,9 +15,10 @@ if (rawAppId && !privyAppId) {
 }
 
 export const privyConfig: PrivyClientConfig = {
-  // Socials first: most people arriving from a Farcaster thread don't have a wallet yet.
-  // Each method must also be enabled in the dashboard (User management → Authentication).
-  loginMethods: ["farcaster", "email", "google", "wallet"],
+  // Login methods come from the dashboard (User management → Authentication), so the modal
+  // only offers what's actually enabled there; listing one here that's switched off there
+  // shows a button that fails with "not allowed". Intended set: Farcaster, email, Google,
+  // wallet, with socials above wallets (showWalletLoginFirst below).
   // Anyone who signs in without a wallet gets a self-custodial one, with no seed phrase.
   embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" } },
   supportedChains: [appChain],
@@ -25,7 +26,6 @@ export const privyConfig: PrivyClientConfig = {
   appearance: {
     theme: "#141414",
     accentColor: "#f6c1d3",
-    logo: "",
     landingHeader: "Sign in to Multiverse",
     loginMessage: "Bet on the arguments you care about.",
     showWalletLoginFirst: false,
