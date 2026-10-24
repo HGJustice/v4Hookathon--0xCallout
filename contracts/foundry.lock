@@ -11,6 +11,9 @@
       "rev": "e50237c43811bd9b526eff40f26772152a42daba"
     }
   },
+  "lib/v4-hooks-public": {
+    "rev": "30d3882311525c6a393e1d46e1412c21e2b5c916"
+  },
   "lib/v4-periphery": {
     "rev": "9969eec44cfdf07e24b41de47f40276a58401976"
   }

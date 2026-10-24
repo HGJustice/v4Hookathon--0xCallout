@@ -3,8 +3,8 @@ pragma solidity 0.8.26;
 
 import {console} from "forge-std/console.sol";
 import {BaseTest} from "./utils/Basetest.sol";
-import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
-import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
+import {PoolId, PoolIdLibrary} from "v4-hooks-public/lib/v4-core/src/types/PoolId.sol";
+import {StateLibrary} from "v4-hooks-public/lib/v4-core/src/libraries/StateLibrary.sol";
 import "forge-std/console.sol";
 import "../src/Marketplace/MarketplaceFactory.sol";
 

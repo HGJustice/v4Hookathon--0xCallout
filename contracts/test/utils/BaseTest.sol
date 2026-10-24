@@ -2,9 +2,9 @@
 pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
-import {PoolManager} from "v4-core/src/PoolManager.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {Deployers} from "v4-core/test/utils/Deployers.sol";
+import {PoolManager} from "v4-hooks-public/lib/v4-core/src/PoolManager.sol";
+import {IPoolManager} from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
+import {Deployers} from "v4-hooks-public/lib/v4-core/test/utils/Deployers.sol";
 import {MarketplaceFactory} from "../../src/Marketplace/MarketplaceFactory.sol";
 
 abstract contract BaseTest is Test, Deployers {
