@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "./icons";
+import { LogoMark } from "./Logo";
 
 // Four-column footer, laid out like cian.app's. Links without a real page yet point
 // to the closest section on the home page, or to "#" for external/legal pages.
@@ -45,7 +46,7 @@ export default function Footer() {
         <div className="flex flex-col gap-14 xl:flex-row xl:justify-between">
           <div className="max-w-[360px]">
             <Link href="/" className="flex items-center gap-2.5 text-lg font-medium">
-              <span className="size-8 rounded-full bg-linear-to-br from-brand to-brand-soft" />
+              <LogoMark className="size-8 shrink-0" />
               Multiverse Markets
             </Link>
             <p className="mt-5 leading-7 text-white/60">

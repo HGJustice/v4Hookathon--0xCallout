@@ -67,11 +67,12 @@ export default function Explore() {
             <p className="mt-10 text-xl sm:text-2xl">For Example</p>
             <div className="mt-4 rounded-3xl bg-white p-5 sm:p-6">
               <p className="text-lg">{EXAMPLE.question}</p>
-              <dl className="mt-4 grid grid-cols-3 gap-4">
+              {/* Phones: label and value on one row each. From sm: three columns. */}
+              <dl className="mt-4 divide-y divide-black/5 sm:grid sm:grid-cols-3 sm:gap-4 sm:divide-y-0">
                 {EXAMPLE.details.map(([label, value]) => (
-                  <div key={label}>
+                  <div key={label} className="flex items-baseline justify-between py-2.5 sm:block sm:py-0">
                     <dt className="text-sm text-black/50">{label}</dt>
-                    <dd className="mt-1 text-base sm:text-lg">{value}</dd>
+                    <dd className="text-base sm:mt-1 sm:text-lg">{value}</dd>
                   </div>
                 ))}
               </dl>

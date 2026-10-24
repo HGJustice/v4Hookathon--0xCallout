@@ -152,9 +152,10 @@ export default function Benefits() {
         </div>
       </div>
 
-      {/* Below 1280px: the same cards, simply stacked on the panel. */}
-      <div className="px-5 sm:px-10 xl:hidden">
-        <div className="panel-glow mx-auto flex max-w-[1200px] flex-col gap-4 rounded-3xl p-5">
+      {/* Below 1280px: the same cards on the panel, one column on phones and a 2×2 grid
+          from tablets up. Positioned so it slides over the sticky title like the stage. */}
+      <div className="relative px-5 sm:px-10 xl:hidden">
+        <div className="panel-glow mx-auto grid max-w-[1200px] gap-4 rounded-3xl p-5 md:grid-cols-2 md:p-6">
           {BENEFITS.map((b) => (
             <BenefitCard key={b.title} {...b} />
           ))}
@@ -166,7 +167,7 @@ export default function Benefits() {
 
 function BenefitCard({ image, letter, title, body, detail, tag }: (typeof BENEFITS)[number]) {
   return (
-    <article className="rounded-3xl bg-white p-5 text-black shadow-[0_10px_40px_15px_rgba(0,0,0,0.2)] xl:h-[308px] xl:w-[580px] xl:p-10">
+    <article className="h-full rounded-3xl bg-white p-5 text-black shadow-[0_10px_40px_15px_rgba(0,0,0,0.2)] xl:h-[308px] xl:w-[580px] xl:p-10">
       <h3 className="mb-3 text-2xl xl:mb-10 xl:text-[40px] xl:leading-[48px]">{title}</h3>
       <div className="flex gap-5">
         {/* Abstract steel-and-light artwork (public/benefits), with the letter on top. */}
