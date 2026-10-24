@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {PoolKey} from "v4-core/src/types/PoolKey.sol";
-import {Currency} from "v4-core/src/types/Currency.sol";
-import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
-import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
-import {TickMath} from "v4-core/src/libraries/TickMath.sol";
-import {CurrencySettler} from "v4-core/test/utils/CurrencySettler.sol";
-import {TransientStateLibrary} from "v4-core/src/libraries/TransientStateLibrary.sol";
-import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
-import {PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
-import {LiquidityAmounts} from "v4-core/test/utils/LiquidityAmounts.sol";
-import {SafeCallback} from "v4-periphery/src/base/SafeCallback.sol";
+import {PoolKey} from "v4-hooks-public/lib/v4-core/src/types/PoolKey.sol";
+import {Currency} from "v4-hooks-public/lib/v4-core/src/types/Currency.sol";
+import {IHooks} from "v4-hooks-public/lib/v4-core/src/interfaces/IHooks.sol";
+import {IPoolManager} from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
+import {TickMath} from "v4-hooks-public/lib/v4-core/src/libraries/TickMath.sol";
+import {CurrencySettler} from "v4-hooks-public/lib/v4-core/test/utils/CurrencySettler.sol";
+import {TransientStateLibrary} from "v4-hooks-public/lib/v4-core/src/libraries/TransientStateLibrary.sol";
+import {StateLibrary} from "v4-hooks-public/lib/v4-core/src/libraries/StateLibrary.sol";
+import {PoolIdLibrary} from "v4-hooks-public/lib/v4-core/src/types/PoolId.sol";
+import {LiquidityAmounts} from "v4-hooks-public/lib/v4-core/test/utils/LiquidityAmounts.sol";
+import {SafeCallback} from "v4-hooks-public/lib/v4-periphery/src/base/SafeCallback.sol";
+import {SwapParams, ModifyLiquidityParams} from "v4-hooks-public/lib/v4-core/src/types/PoolOperation.sol";
 
 abstract contract PoolManagerLogic is SafeCallback {
     using CurrencySettler for Currency;
@@ -57,7 +58,7 @@ abstract contract PoolManagerLogic is SafeCallback {
         if (action == CallbackAction.CreateMarket) {
             poolManager.modifyLiquidity(
                 poolKey,
-                IPoolManager.ModifyLiquidityParams({
+                ModifyLiquidityParams({
                     tickLower: -887220,
                     tickUpper: 887220,
                     liquidityDelta: int256(amount),
@@ -84,7 +85,7 @@ abstract contract PoolManagerLogic is SafeCallback {
         } else if (action == CallbackAction.PlaceBet) {
             poolManager.swap(
                 poolKey,
-                IPoolManager.SwapParams({
+                SwapParams({
                     zeroForOne: decision,
                     amountSpecified: -int256(amount),
                     sqrtPriceLimitX96: decision
