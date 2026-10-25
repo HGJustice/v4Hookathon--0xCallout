@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
 import PhoneMockup from "./PhoneMockup";
 import SectionTitle from "./SectionTitle";
 
-// Scroll-driven walkthrough. Desktop: the phone stays pinned on the left while the
-// five steps scroll by on the right; whichever step crosses the middle of the screen
-// becomes active and the phone cross-fades to that step's screen. Below 1280px each
-// step simply shows its own phone. Monochrome on purpose (graphite, white, silver).
-// Only the phones for the current layout are rendered (decided after hydration, since
-// the server can't know the screen width).
+// Desktop (≥1280px): a scroll-driven walkthrough. The phone stays pinned on the left
+// while the five steps scroll by on the right; whichever step crosses the middle of the
+// screen becomes active and the phone cross-fades to that step's screen.
+// Below 1280px: the same steps as a grid of cards. Monochrome on purpose (graphite,
+// white, silver). The phone only renders on desktop (decided after hydration, since the
+// server can't know the screen width).
 const STEPS = [
   {
     title: "Call it out",
@@ -53,12 +53,6 @@ export default function HowItWorks() {
   const listRef = useRef<HTMLOListElement>(null);
   const isDesktop = useIsDesktop();
 
-  // Mounting the phones can change the page height (one phone per step below 1280px),
-  // so re-measure every scroll animation once they're in.
-  useEffect(() => {
-    if (isDesktop !== null) ScrollTrigger.refresh();
-  }, [isDesktop]);
-
   useGSAP(
     () => {
       listRef.current!.querySelectorAll<HTMLElement>(".how-step").forEach((step, i) => {
@@ -77,10 +71,33 @@ export default function HowItWorks() {
     <section id="how-it-works" className="relative">
       <SectionTitle>How it works</SectionTitle>
 
-      <div className="relative w-full bg-[#0d0d0e] px-5 text-white sm:px-10 2xl:px-0">
-        <div className="mx-auto grid max-w-[1200px] py-16 xl:grid-cols-2 xl:gap-20 xl:py-0">
-          {/* Desktop: pinned phone that follows the active step */}
-          <div className="hidden xl:block">
+      <div className="surface-nebula relative w-full border-t border-white/10 px-5 text-white sm:px-10 2xl:px-0">
+        {/* Below 1280px: one card per step. One column on phones, two on tablets, and a
+            3 + 2 grid on small laptops. */}
+        <ol className="mx-auto grid max-w-[1200px] gap-4 py-16 md:grid-cols-2 lg:grid-cols-6 xl:hidden">
+          {STEPS.map((step, i) => (
+            <li
+              key={step.title}
+              className="relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-white/[0.06] to-white/[0.02] p-6 sm:p-8 md:last:col-span-2 lg:col-span-2 lg:last:col-span-3 lg:nth-4:col-span-3"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-yes/60 to-transparent"
+              />
+              <span className="flex size-10 items-center justify-center rounded-full border border-white/15 font-mono text-sm text-white/70">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-8 font-display text-2xl font-medium tracking-tight sm:text-[28px] sm:leading-9">
+                {step.title}
+              </h3>
+              <p className="mt-3 text-base leading-7 text-white/60">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+
+        {/* Desktop: pinned phone on the left, steps scrolling by on the right. */}
+        <div className="mx-auto hidden max-w-[1200px] grid-cols-2 gap-20 xl:grid">
+          <div>
             <div className="sticky top-[max(96px,calc(50vh-328px))] flex justify-center" aria-hidden="true">
               {isDesktop && (
                 <PhoneMockup>
@@ -99,26 +116,28 @@ export default function HowItWorks() {
             </div>
           </div>
 
-          <ol ref={listRef}>
+          {/* The steps hang off a vertical timeline; the active step's node glows. */}
+          <ol ref={listRef} className="relative before:absolute before:inset-y-[10vh] before:left-0 before:w-px before:bg-white/10">
             {STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className={`how-step flex flex-col justify-center py-12 transition-opacity duration-500 xl:min-h-[80vh] ${
-                  i === active ? "xl:opacity-100" : "xl:opacity-30"
+                className={`how-step relative flex min-h-[80vh] flex-col justify-center py-12 pl-14 transition-opacity duration-500 ${
+                  i === active ? "opacity-100" : "opacity-30"
                 }`}
               >
-                <p className="text-sm tracking-[0.2em] text-white/40">
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-1/2 left-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full transition duration-500 ${
+                    i === active
+                      ? "bg-yes shadow-[0_0_0_6px_rgb(246_193_211/0.15),0_0_24px_rgb(246_193_211/0.6)]"
+                      : "bg-white/40"
+                  }`}
+                />
+                <p className="font-mono text-sm tracking-[0.2em] text-white/40">
                   {String(i + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
                 </p>
-                <h3 className="mt-4 text-3xl font-extralight xl:text-[40px] xl:leading-[48px]">{step.title}</h3>
+                <h3 className="mt-4 font-display text-[40px] leading-[48px] font-medium tracking-tight">{step.title}</h3>
                 <p className="mt-4 max-w-[460px] text-lg leading-8 text-white/60">{step.body}</p>
-                {isDesktop === false && (
-                  <div className="mt-10 flex justify-center" aria-hidden="true">
-                    <PhoneMockup>
-                      <div className="absolute inset-0">{step.screen}</div>
-                    </PhoneMockup>
-                  </div>
-                )}
               </li>
             ))}
           </ol>

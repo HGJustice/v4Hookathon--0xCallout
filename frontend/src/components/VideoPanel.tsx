@@ -101,7 +101,7 @@ export default function VideoPanel() {
 
       {open && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         >
           <div
@@ -110,17 +110,17 @@ export default function VideoPanel() {
             aria-modal="true"
             aria-label="Demo video"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-[880px] rounded-3xl bg-white p-5 text-black"
+            className="steel-border w-full max-w-[880px] rounded-3xl bg-surface p-5 text-white"
           >
             <div className="mb-5 flex items-start justify-between gap-4">
-              <p className="text-xl sm:text-[28px] sm:leading-[34px]">
+              <p className="font-display text-xl font-medium tracking-tight sm:text-[28px] sm:leading-[34px]">
                 Multiverse Markets: Don&apos;t just argue, bet on it
               </p>
               <button ref={closeRef} type="button" aria-label="Close" onClick={() => setOpen(false)}>
                 <Close />
               </button>
             </div>
-            <div className="aspect-video overflow-hidden rounded-3xl bg-zinc-900">
+            <div className="aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black">
               {VIDEO_URL ? (
                 <iframe
                   src={VIDEO_URL}

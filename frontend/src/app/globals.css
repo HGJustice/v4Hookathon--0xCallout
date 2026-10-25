@@ -1,19 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #1a1a1a;
+  /* Deep space: near-black with a faint blue cast, so the nebula glows read as light. */
+  --background: #07070a;
   --foreground: #ededed;
-
-  /* Grid mesh background (matches cian.app: 240px cells, faint lines, dots at crossings) */
-  --grid-cell: 240px;
-  --grid-line: rgba(255, 255, 255, 0.075);
-  --grid-dot: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
+  --font-sans: var(--font-geist);
+  --font-display: var(--font-bricolage);
+  --font-mono: var(--font-geist-mono);
 }
 
 @theme {
@@ -21,6 +19,11 @@
   --color-brand: #f6c1d3;
   --color-brand-soft: #eba5c1;
   --color-brand-deep: #b24f7a;
+  /* The two universes: YES glows blush, NO glows violet. */
+  --color-yes: #f6c1d3;
+  --color-no: #b3a6ff;
+  /* Section surfaces that sit on top of the starfield. */
+  --color-surface: #0b0b10;
 
   --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
@@ -36,8 +39,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  /* cian.app sets all text in Manrope ExtraLight; headings step up to 400. */
-  font-weight: 200;
+  /* Light body text keeps the airy feel while staying readable on dark backgrounds;
+     headlines use the display font (font-display) at medium or semibold. */
+  font-weight: 300;
 }
 
 /* Lenis smooth scrolling (from lenis/dist/lenis.css) */
@@ -58,48 +62,101 @@ html.lenis body {
 }
 
 /*
- * Square mesh: three layered backgrounds tiled every --grid-cell.
- * 1. a small solid dot where lines cross
- * 2. vertical 1px lines
- * 3. horizontal 1px lines
- * Lines sit on the last pixel of each cell, like the original canvas.
+ * Deep-space backdrop (CosmicBackground): two star layers tiled at sizes that don't
+ * divide into each other, so the pattern never visibly repeats, plus soft nebula light
+ * in the brand colours. The near layer twinkles slowly.
  */
-.grid-mesh {
-  background-color: var(--background);
+.cosmos-nebula {
+  background:
+    radial-gradient(38% 32% at 88% 6%, rgb(246 193 211 / 0.16), transparent 70%),
+    radial-gradient(42% 38% at 4% 48%, rgb(179 166 255 / 0.12), transparent 70%),
+    radial-gradient(34% 28% at 72% 96%, rgb(178 79 122 / 0.12), transparent 70%);
+}
+.cosmos-stars-far {
   background-image:
-    radial-gradient(
-      circle at calc(var(--grid-cell) - 0.5px) calc(var(--grid-cell) - 0.5px),
-      var(--grid-dot) 0,
-      var(--grid-dot) 1px,
-      rgba(255, 255, 255, 0.55) 1.5px,
-      transparent 2px
-    ),
-    linear-gradient(
-      to right,
-      transparent calc(var(--grid-cell) - 1px),
-      var(--grid-line) calc(var(--grid-cell) - 1px)
-    ),
-    linear-gradient(
-      to bottom,
-      transparent calc(var(--grid-cell) - 1px),
-      var(--grid-line) calc(var(--grid-cell) - 1px)
-    );
-  background-size: var(--grid-cell) var(--grid-cell);
-  background-repeat: repeat;
+    radial-gradient(1px 1px at 23px 41px, rgb(255 255 255 / 0.55), transparent),
+    radial-gradient(1px 1px at 131px 17px, rgb(255 255 255 / 0.35), transparent),
+    radial-gradient(1px 1px at 71px 133px, rgb(255 255 255 / 0.45), transparent),
+    radial-gradient(1px 1px at 197px 101px, rgb(255 255 255 / 0.3), transparent),
+    radial-gradient(1px 1px at 163px 211px, rgb(255 255 255 / 0.5), transparent),
+    radial-gradient(1px 1px at 11px 187px, rgb(255 255 255 / 0.3), transparent);
+  background-size: 233px 233px;
+}
+.cosmos-stars-near {
+  background-image:
+    radial-gradient(1.5px 1.5px at 59px 83px, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 283px 29px, rgb(246 193 211 / 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 211px 307px, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 331px 239px, rgb(179 166 255 / 0.8), transparent);
+  background-size: 377px 377px;
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  from {
+    opacity: 0.45;
+  }
 }
 
-/* Panel gradient modelled on cian.app's protocol panel, recoloured:
-   a pale-blush → pink → lilac → grey-purple band across the top (cian's
-   yellow → orange → rose-brown → taupe), soft grey deepening toward the bottom-right,
-   and a bright white glow rising diagonally from the bottom-left toward the centre. Layers are listed top-first;
-   each colour fades to its own transparent version so blends stay clean. */
+/* Market ticker: two identical lists slide left by their own width, end to end, so the
+   loop is seamless. Hovering pauses it. */
+.ticker-track {
+  animation: ticker 48s linear infinite;
+}
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Timeline split: paths draw in from their start (pathLength="1"). The resting state is
+   fully drawn, so with reduced motion (animations off) everything is simply visible. */
+.timeline-draw {
+  stroke-dasharray: 1;
+  animation: timeline-draw 1.2s cubic-bezier(0.65, 0, 0.35, 1) backwards;
+}
+@keyframes timeline-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.timeline-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: timeline-pulse 2.4s ease-out infinite;
+}
+@keyframes timeline-pulse {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+/* Nebula panel (video panel, benefits deck): a dark violet-black window into space,
+   lit by a blush glow from the top and violet / rose glows from the lower corners, with
+   a hairline edge. Layers are listed top-first. */
 .panel-glow {
   background:
-    radial-gradient(85% 85% at 10% 96%, #ffffff 0%, rgb(255 255 255 / 0.9) 28%, rgb(255 255 255 / 0) 72%),
-    radial-gradient(45% 40% at 32% 60%, rgb(255 255 255 / 0.7) 0%, rgb(255 255 255 / 0) 70%),
-    radial-gradient(35% 45% at 46% 0%, rgb(243 154 198 / 0.7) 0%, rgb(243 154 198 / 0) 70%),
-    linear-gradient(to bottom, rgb(170 164 180 / 0) 30%, rgb(170 164 180 / 0.9) 100%),
-    linear-gradient(to right, #ffe3f0 0%, #f4b3d2 38%, #c9a2dd 70%, #9e93ad 100%);
+    radial-gradient(60% 50% at 50% 0%, rgb(246 193 211 / 0.24), transparent 70%),
+    radial-gradient(45% 55% at 0% 100%, rgb(179 166 255 / 0.22), transparent 70%),
+    radial-gradient(40% 50% at 100% 100%, rgb(178 79 122 / 0.2), transparent 70%),
+    linear-gradient(180deg, #15121f 0%, #0b0a11 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+/* Section surface (Explore, How it works, FAQ): opaque, so content slides cleanly over
+   the sticky section titles, with faint nebula light so it isn't a flat slab. */
+.surface-nebula {
+  background:
+    radial-gradient(50% 40% at 100% 0%, rgb(246 193 211 / 0.07), transparent 70%),
+    radial-gradient(45% 45% at 0% 100%, rgb(179 166 255 / 0.07), transparent 70%),
+    var(--color-surface);
 }
 
 /*

@@ -57,3 +57,9 @@ export const LogOut = ({ className = "size-4" }: Props) => (
     <path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H4" />
   </svg>
 );
+
+export const Menu = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M4 8h16M4 16h16" />
+  </svg>
+);

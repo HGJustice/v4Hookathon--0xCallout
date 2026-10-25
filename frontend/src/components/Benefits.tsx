@@ -152,9 +152,10 @@ export default function Benefits() {
         </div>
       </div>
 
-      {/* Below 1280px: the same cards, simply stacked on the panel. */}
-      <div className="px-5 sm:px-10 xl:hidden">
-        <div className="panel-glow mx-auto flex max-w-[1200px] flex-col gap-4 rounded-3xl p-5">
+      {/* Below 1280px: the same cards on the panel, one column on phones and a 2×2 grid
+          from tablets up. Positioned so it slides over the sticky title like the stage. */}
+      <div className="relative px-5 sm:px-10 xl:hidden">
+        <div className="panel-glow mx-auto grid max-w-[1200px] gap-4 rounded-3xl p-5 md:grid-cols-2 md:p-6">
           {BENEFITS.map((b) => (
             <BenefitCard key={b.title} {...b} />
           ))}
@@ -166,21 +167,24 @@ export default function Benefits() {
 
 function BenefitCard({ image, letter, title, body, detail, tag }: (typeof BENEFITS)[number]) {
   return (
-    <article className="rounded-3xl bg-white p-5 text-black shadow-[0_10px_40px_15px_rgba(0,0,0,0.2)] xl:h-[308px] xl:w-[580px] xl:p-10">
-      <h3 className="mb-3 text-2xl xl:mb-10 xl:text-[40px] xl:leading-[48px]">{title}</h3>
+    // Dark glass, near-opaque so stacked cards in the deck stay legible over each other.
+    <article className="h-full rounded-3xl border border-white/10 bg-[#15121e]/95 p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl xl:h-[308px] xl:w-[580px] xl:p-10">
+      <h3 className="mb-3 font-display text-2xl font-medium tracking-tight xl:mb-10 xl:text-[40px] xl:leading-[48px]">
+        {title}
+      </h3>
       <div className="flex gap-5">
         {/* Abstract steel-and-light artwork (public/benefits), with the letter on top. */}
         <span
           style={{ backgroundImage: `url(${image})` }}
-          className="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-cover bg-center text-[26px] text-white xl:size-[120px] xl:rounded-[20px] xl:text-[60px]"
+          className="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-cover bg-center font-display text-[26px] text-white ring-1 ring-white/15 xl:size-[120px] xl:rounded-[20px] xl:text-[60px]"
         >
           {letter}
         </span>
         <div>
-          <p className="text-sm xl:text-lg xl:leading-[26px]">{body}</p>
-          <p className="mt-2 text-xs text-black/60 xl:text-sm">{detail}</p>
+          <p className="text-sm text-white/85 xl:text-lg xl:leading-[26px]">{body}</p>
+          <p className="mt-2 text-xs text-white/50 xl:text-sm">{detail}</p>
           {tag && (
-            <p className="mt-3 inline-block rounded-full bg-brand/40 px-3 py-1 text-xs text-brand-deep">
+            <p className="mt-3 inline-block rounded-full border border-yes/30 bg-yes/10 px-3 py-1 font-mono text-[11px] text-yes">
               {tag}
             </p>
           )}

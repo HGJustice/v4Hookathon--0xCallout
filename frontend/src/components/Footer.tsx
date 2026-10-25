@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "./icons";
+import { LogoMark } from "./Logo";
 
 // Four-column footer, laid out like cian.app's. Links without a real page yet point
 // to the closest section on the home page, or to "#" for external/legal pages.
@@ -40,12 +41,12 @@ const COLUMNS: [title: string, links: [label: string, href: string][]][] = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-black px-5 pt-20 text-white sm:px-10 2xl:px-0">
+    <footer className="surface-nebula relative overflow-hidden border-t border-white/10 px-5 pt-20 text-white sm:px-10 2xl:px-0">
       <div className="mx-auto max-w-[1200px]">
         <div className="flex flex-col gap-14 xl:flex-row xl:justify-between">
           <div className="max-w-[360px]">
-            <Link href="/" className="flex items-center gap-2.5 text-lg font-medium">
-              <span className="size-8 rounded-full bg-linear-to-br from-brand to-brand-soft" />
+            <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight">
+              <LogoMark className="size-8 shrink-0" />
               Multiverse Markets
             </Link>
             <p className="mt-5 leading-7 text-white/60">
@@ -86,7 +87,7 @@ export default function Footer() {
       {/* Large faint wordmark along the bottom edge */}
       <p
         aria-hidden="true"
-        className="pointer-events-none -mb-[2vw] text-center text-[14vw] leading-[0.8] font-extralight tracking-tight text-white/[0.05] select-none"
+        className="pointer-events-none -mb-[2vw] text-center bg-linear-to-b from-white/[0.09] to-transparent bg-clip-text font-display text-[14vw] leading-[0.8] font-semibold tracking-tight text-transparent select-none"
       >
         Multiverse
       </p>
