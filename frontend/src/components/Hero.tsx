@@ -1,18 +1,18 @@
 import { ArrowRight } from "./icons";
-import StatCard from "./StatCard";
+import TimelineSplit from "./TimelineSplit";
 import VideoPanel from "./VideoPanel";
 
 export default function Hero() {
   return (
-    <section className="mx-auto max-w-[1200px] px-5 pt-28 sm:px-10 sm:pt-36 xl:px-0 xl:pt-[150px]">
+    <section className="mx-auto max-w-[1200px] px-5 pt-12 sm:px-10 sm:pt-16 xl:px-0 xl:pt-20">
       <div className="flex flex-col gap-10 xl:flex-row xl:items-end xl:justify-between">
         <div className="animate-fade-up">
-          <h1 className="text-[40px] font-normal leading-[48px] sm:text-[60px] sm:leading-[68px]">
+          <h1 className="font-display text-[40px] leading-[46px] font-semibold tracking-tight sm:text-[64px] sm:leading-[68px]">
             {"DON'T JUST ARGUE."}
             <br />
             BET ON IT.
           </h1>
-          <p className="mt-4 max-w-[600px] text-lg font-extralight text-white/80 sm:text-2xl">
+          <p className="mt-5 max-w-[600px] text-lg text-white/70 sm:text-[22px] sm:leading-8">
             Tag the bot in any Farcaster argument. Both sides put money in, and
             everyone else can bet too.
           </p>
@@ -31,7 +31,7 @@ export default function Hero() {
             </a>
           </div>
         </div>
-        <StatCard />
+        <TimelineSplit />
       </div>
       <VideoPanel />
     </section>

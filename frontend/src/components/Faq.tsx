@@ -55,10 +55,12 @@ export default function Faq() {
     <section id="faq" className="relative">
       <SectionTitle>Frequently asked questions</SectionTitle>
 
-      <div className="relative w-full bg-[#0d0d0e] px-5 text-white sm:px-10 2xl:px-0">
+      <div className="surface-nebula relative w-full border-t border-white/10 px-5 text-white sm:px-10 2xl:px-0">
         <div className="mx-auto grid max-w-[1200px] gap-12 py-20 xl:grid-cols-[1fr_1.6fr] xl:gap-20 xl:py-28">
           <div className="xl:sticky xl:top-28 xl:self-start">
-            <h3 className="text-3xl font-extralight xl:text-[40px] xl:leading-[48px]">Questions, answered.</h3>
+            <h3 className="font-display text-3xl font-medium tracking-tight xl:text-[40px] xl:leading-[48px]">
+              Questions, answered.
+            </h3>
             <p className="mt-4 max-w-[360px] text-lg leading-8 text-white/60">
               How arguments become markets, who decides the outcome, and how you get paid.
             </p>
@@ -82,7 +84,7 @@ export default function Faq() {
                       aria-expanded={isOpen}
                       aria-controls={`faq-answer-${i}`}
                       onClick={() => setOpen(isOpen ? null : i)}
-                      className="flex w-full items-center justify-between gap-6 py-6 text-left text-lg transition-colors hover:text-white/80 sm:text-xl"
+                      className="flex w-full items-center justify-between gap-6 py-6 text-left text-lg transition-colors hover:text-yes sm:text-xl"
                     >
                       {question}
                       <span

@@ -73,14 +73,14 @@ export default function Navbar() {
       className={`fixed inset-x-0 top-0 z-50 h-16 transition-transform duration-300 focus-within:translate-y-0 has-[[aria-expanded=true]]:translate-y-0 sm:h-20 ${hidden ? "-translate-y-full" : "translate-y-0"}`}
     >
       <div
-        className={`absolute inset-0 bg-black transition-opacity duration-300 ${scrolled || menuOpen ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 bg-background/85 backdrop-blur-md transition-opacity duration-300 ${scrolled || menuOpen ? "opacity-100" : "opacity-0"}`}
       />
       <nav
         aria-label="Main"
         className="relative mx-auto flex h-full max-w-[1200px] items-center justify-between gap-4 px-5 sm:px-10 xl:px-0"
       >
         {/* Phones show the mark alone so the wallet button always fits beside it. */}
-        <Link href="/" className="flex items-center gap-2.5 text-base font-medium sm:text-lg">
+        <Link href="/" className="flex items-center gap-2.5 font-display text-base font-semibold tracking-tight sm:text-lg">
           <LogoMark className="size-8 shrink-0" />
           <span className="sr-only sm:not-sr-only">Multiverse Markets</span>
         </Link>
@@ -121,7 +121,7 @@ export default function Navbar() {
       {menuOpen && (
         <div
           id={menuId}
-          className="absolute inset-x-0 top-full animate-fade-up border-b border-white/10 bg-black px-5 pb-8 sm:px-10 lg:hidden"
+          className="absolute inset-x-0 top-full animate-fade-up border-b border-white/10 bg-background px-5 pb-8 sm:px-10 lg:hidden"
         >
           <ul className="mx-auto max-w-[1200px]">
             {links.map(([label, href]) => (
@@ -129,7 +129,7 @@ export default function Navbar() {
                 <a
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between py-4 text-2xl font-extralight transition-colors hover:text-brand"
+                  className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand"
                 >
                   {label}
                 </a>

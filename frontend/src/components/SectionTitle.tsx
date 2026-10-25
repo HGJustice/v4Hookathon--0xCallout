@@ -74,7 +74,7 @@ export default function SectionTitle({ children }: { children: ReactNode }) {
     >
       <h2
         ref={titleRef}
-        className="text-center text-3xl font-normal xl:text-[40px] xl:leading-[48px]"
+        className="bg-linear-to-b from-white to-white/55 bg-clip-text pb-1 text-center font-display text-3xl font-medium tracking-tight text-transparent xl:text-[40px] xl:leading-[48px]"
       >
         {children}
       </h2>

@@ -71,19 +71,25 @@ export default function HowItWorks() {
     <section id="how-it-works" className="relative">
       <SectionTitle>How it works</SectionTitle>
 
-      <div className="relative w-full bg-[#0d0d0e] px-5 text-white sm:px-10 2xl:px-0">
+      <div className="surface-nebula relative w-full border-t border-white/10 px-5 text-white sm:px-10 2xl:px-0">
         {/* Below 1280px: one card per step. One column on phones, two on tablets, and a
             3 + 2 grid on small laptops. */}
         <ol className="mx-auto grid max-w-[1200px] gap-4 py-16 md:grid-cols-2 lg:grid-cols-6 xl:hidden">
           {STEPS.map((step, i) => (
             <li
               key={step.title}
-              className="flex flex-col rounded-3xl border border-white/10 bg-linear-to-b from-white/[0.06] to-white/[0.02] p-6 sm:p-8 md:last:col-span-2 lg:col-span-2 lg:last:col-span-3 lg:nth-4:col-span-3"
+              className="relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-linear-to-b from-white/[0.06] to-white/[0.02] p-6 sm:p-8 md:last:col-span-2 lg:col-span-2 lg:last:col-span-3 lg:nth-4:col-span-3"
             >
-              <span className="flex size-10 items-center justify-center rounded-full border border-white/15 text-sm text-white/70">
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-yes/60 to-transparent"
+              />
+              <span className="flex size-10 items-center justify-center rounded-full border border-white/15 font-mono text-sm text-white/70">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h3 className="mt-8 text-2xl font-extralight sm:text-[28px] sm:leading-9">{step.title}</h3>
+              <h3 className="mt-8 font-display text-2xl font-medium tracking-tight sm:text-[28px] sm:leading-9">
+                {step.title}
+              </h3>
               <p className="mt-3 text-base leading-7 text-white/60">{step.body}</p>
             </li>
           ))}
@@ -110,18 +116,27 @@ export default function HowItWorks() {
             </div>
           </div>
 
-          <ol ref={listRef}>
+          {/* The steps hang off a vertical timeline; the active step's node glows. */}
+          <ol ref={listRef} className="relative before:absolute before:inset-y-[10vh] before:left-0 before:w-px before:bg-white/10">
             {STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className={`how-step flex min-h-[80vh] flex-col justify-center py-12 transition-opacity duration-500 ${
+                className={`how-step relative flex min-h-[80vh] flex-col justify-center py-12 pl-14 transition-opacity duration-500 ${
                   i === active ? "opacity-100" : "opacity-30"
                 }`}
               >
-                <p className="text-sm tracking-[0.2em] text-white/40">
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-1/2 left-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full transition duration-500 ${
+                    i === active
+                      ? "bg-yes shadow-[0_0_0_6px_rgb(246_193_211/0.15),0_0_24px_rgb(246_193_211/0.6)]"
+                      : "bg-white/40"
+                  }`}
+                />
+                <p className="font-mono text-sm tracking-[0.2em] text-white/40">
                   {String(i + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
                 </p>
-                <h3 className="mt-4 text-[40px] leading-[48px] font-extralight">{step.title}</h3>
+                <h3 className="mt-4 font-display text-[40px] leading-[48px] font-medium tracking-tight">{step.title}</h3>
                 <p className="mt-4 max-w-[460px] text-lg leading-8 text-white/60">{step.body}</p>
               </li>
             ))}
