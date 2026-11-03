@@ -15,10 +15,9 @@
 }
 
 @theme {
-  /* Blush brand palette. brand-deep is for text on white surfaces. */
+  /* Blush brand palette. */
   --color-brand: #f6c1d3;
   --color-brand-soft: #eba5c1;
-  --color-brand-deep: #b24f7a;
   /* The two universes: YES glows blush, NO glows violet. */
   --color-yes: #f6c1d3;
   --color-no: #b3a6ff;
@@ -97,20 +96,6 @@ html.lenis body {
   }
 }
 
-/* Market ticker: two identical lists slide left by their own width, end to end, so the
-   loop is seamless. Hovering pauses it. */
-.ticker-track {
-  animation: ticker 48s linear infinite;
-}
-.ticker:hover .ticker-track {
-  animation-play-state: paused;
-}
-@keyframes ticker {
-  to {
-    transform: translateX(-100%);
-  }
-}
-
 /* Timeline split: paths draw in from their start (pathLength="1"). The resting state is
    fully drawn, so with reduced motion (animations off) everything is simply visible. */
 .timeline-draw {
@@ -168,8 +153,6 @@ html.lenis body {
  *
  *   <div class="steel-border rounded-3xl">…</div>
  *   <button class="steel-border steel-shine rounded-full">…</button>   (moving shine)
- *
- * Tweak per element with --steel-width (ring thickness) and --steel-glow (glow size).
  */
 @property --steel-angle {
   syntax: "<angle>";
@@ -193,7 +176,7 @@ html.lenis body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: var(--steel-width, 1.5px);
+  padding: 1.5px; /* ring thickness */
   background: conic-gradient(from var(--steel-angle), var(--steel-stops));
   /* keep only the padding ring: full box minus the content box */
   -webkit-mask:
@@ -201,7 +184,7 @@ html.lenis body {
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  filter: drop-shadow(0 0 var(--steel-glow, 6px) rgb(255 255 255 / 0.45));
+  filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.45));
   pointer-events: none;
 }
 
@@ -222,7 +205,7 @@ html.lenis body {
    ring, and a soft outer glow stands in for the ring's glow, which the box clips.
    Colours inside the modal come from the theme and accent in src/lib/privy.ts. */
 #privy-modal-content {
-  border: var(--steel-width, 1.5px) solid transparent;
+  border: 1.5px solid transparent;
   background:
     linear-gradient(var(--privy-color-background) 0 0) padding-box,
     conic-gradient(from var(--steel-angle), var(--steel-stops)) border-box;

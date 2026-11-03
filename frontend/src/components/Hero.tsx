@@ -4,7 +4,7 @@ import VideoPanel from "./VideoPanel";
 
 export default function Hero() {
   return (
-    <section className="mx-auto max-w-[1200px] px-5 pt-12 sm:px-10 sm:pt-16 xl:px-0 xl:pt-20">
+    <section className="mx-auto max-w-[1200px] px-5 pt-28 sm:px-10 sm:pt-36 xl:px-0 xl:pt-[150px]">
       <div className="flex flex-col gap-10 xl:flex-row xl:items-end xl:justify-between">
         <div className="animate-fade-up">
           <h1 className="font-display text-[40px] leading-[46px] font-semibold tracking-tight sm:text-[64px] sm:leading-[68px]">
