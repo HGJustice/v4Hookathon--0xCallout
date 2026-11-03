@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import PhoneMockup from "./PhoneMockup";
 import SectionTitle from "./SectionTitle";
 
@@ -40,18 +41,11 @@ const STEPS = [
 ];
 
 const DESKTOP = "(min-width: 1280px)";
-const subscribe = (onChange: () => void) => {
-  const query = matchMedia(DESKTOP);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-// true / false in the browser, null on the server and during hydration.
-const useIsDesktop = () => useSyncExternalStore(subscribe, () => matchMedia(DESKTOP).matches, () => null);
 
 export default function HowItWorks() {
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLOListElement>(null);
-  const isDesktop = useIsDesktop();
+  const isDesktop = useMediaQuery(DESKTOP);
 
   useGSAP(
     () => {

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+import { DEMO_MARKET } from "@/lib/demoMarket";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // One argument, two futures. The trunk is the question; at the fork it splits into the
 // YES and NO universes. Each branch's thickness and its stream of particles follow its
-// odds, and the odds count up once the lines have drawn. Demo market.
-const MARKET = { question: "Will ETH hit $10k in 2026?", resolves: "Dec 31", yes: 41 };
+// odds, and the odds count up once the lines have drawn.
 
 // Geometry in a 600 × 320 viewBox. The container keeps that ratio, so the HTML labels
 // (crisper than SVG text at every size) can be placed with percentages.
@@ -24,13 +25,6 @@ const FLOW_START = 1.7; // s: particles start once both branches have drawn
 const FLOW_DURATION = 2.6; // s for a particle to travel fork → universe
 
 const REDUCE = "(prefers-reduced-motion: reduce)";
-const subscribe = (onChange: () => void) => {
-  const query = matchMedia(REDUCE);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-// false on the server, so the particles (pure decoration) only mount in the browser.
-const useMotionAllowed = () => useSyncExternalStore(subscribe, () => !matchMedia(REDUCE).matches, () => false);
 
 // 0 → 1, eased out, starting after `delay` ms; jumps straight to 1 with reduced motion.
 function useCountUp(delay: number, duration: number) {
@@ -55,21 +49,23 @@ function useCountUp(delay: number, duration: number) {
 }
 
 const UNIVERSES = [
-  { side: "YES", odds: MARKET.yes, y: YES_Y, color: "var(--color-yes)", particles: 2 },
-  { side: "NO", odds: 100 - MARKET.yes, y: NO_Y, color: "var(--color-no)", particles: 3 },
+  { side: "YES", odds: DEMO_MARKET.yesOdds, y: YES_Y, color: "var(--color-yes)", particles: 2 },
+  { side: "NO", odds: 100 - DEMO_MARKET.yesOdds, y: NO_Y, color: "var(--color-no)", particles: 3 },
 ] as const;
 
 export default function TimelineSplit() {
   const t = useCountUp(1000, 1200);
-  const motion = useMotionAllowed();
+  // The particles are pure decoration: only mounted in the browser, and never when the
+  // visitor prefers reduced motion (null, on the server, counts as "not yet").
+  const motion = useMediaQuery(REDUCE) === false;
 
   return (
     <div className="w-full max-w-[580px] shrink-0 animate-fade-up [animation-delay:200ms]">
       <p className="flex items-center gap-3 font-mono text-[11px] tracking-[0.18em] text-white/50 uppercase">
         <span className="rounded-full border border-white/15 px-2.5 py-1 text-white/70">Demo market</span>
-        Resolves {MARKET.resolves}
+        Resolves {DEMO_MARKET.resolves}
       </p>
-      <p className="mt-3 font-display text-xl font-medium tracking-tight sm:text-2xl">{MARKET.question}</p>
+      <p className="mt-3 font-display text-xl font-medium tracking-tight sm:text-2xl">{DEMO_MARKET.question}</p>
 
       <div className="relative mt-6 mb-8 aspect-[600/320]">
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full" aria-hidden="true">
