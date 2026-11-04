@@ -10,11 +10,11 @@ const FAQS: [question: string, answer: string][] = [
   ],
   [
     "How do I create a market?",
-    "Tag @multiverse in the thread with the claim and the deadline, for example \"@multiverse 1+1=3, resolves Friday\". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one costs 0.05 ETH: a 0.01 ETH protocol fee, and the rest seeds the market.",
+    "Tag @multiverse in the thread with the claim and the deadline, for example \"@multiverse 1+1=3, resolves Friday\". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one takes at least 0.05 ETH: a 0.01 ETH protocol fee, and the rest seeds the market.",
   ],
   [
     "When does a market go live?",
-    "Right away. The creator's deposit mints equal YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading starts in the same transaction. The bot then posts the market back in the thread.",
+    "As soon as it's created. The creator's deposit mints equal YES and NO tokens and opens a Uniswap V4 pool at 50/50, so it can be traded right away. The bot then posts the market back in the thread.",
   ],
   [
     "Can I bet if I'm not part of the argument?",
@@ -30,7 +30,7 @@ const FAQS: [question: string, answer: string][] = [
   ],
   [
     "What if someone proposes a wrong result?",
-    "Anyone can dispute it once by proposing a different result, for the same 0.05 ETH fee. The multisig then decides. Proposing and disputing both cost a fee, so neither is free to abuse.",
+    "Anyone can dispute it by proposing a different result, for the same 0.05 ETH fee. Each market can be disputed once, and the multisig then decides. Proposing and disputing both cost a fee, so neither is free to abuse.",
   ],
   [
     "What happens if I'm wrong?",

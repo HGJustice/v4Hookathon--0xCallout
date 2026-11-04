@@ -5,7 +5,7 @@ import { DEMO_MARKET } from "@/lib/demoMarket";
 const TERMS = [
   ["Created with", "0.05 ETH"],
   ["Opened at", "50 / 50"],
-  ["Resolves via", "Chainlink CRE"],
+  ["Resolves via", "CRE or multisig"],
 ];
 
 export default function MarketCard() {

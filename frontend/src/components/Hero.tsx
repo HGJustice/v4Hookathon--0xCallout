@@ -13,8 +13,8 @@ export default function Hero() {
             BET ON IT.
           </h1>
           <p className="mt-5 max-w-[600px] text-lg text-white/70 sm:text-[22px] sm:leading-8">
-            Tag the bot in any Farcaster argument. It opens a market on the spot, and
-            anyone can bet on who&apos;s right.
+            Tag the bot in any Farcaster argument and turn it into a market anyone can
+            bet on.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a

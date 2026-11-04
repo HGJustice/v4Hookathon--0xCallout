@@ -20,12 +20,12 @@ const STEPS = [
   },
   {
     title: "The bot sets it up",
-    body: "The bot replies with a ready-made market and a link to the mini-app, with the question and deadline already filled in.",
+    body: "The bot replies with a draft market and a link to the mini-app, with the question and deadline already filled in.",
     screen: <BotScreen />,
   },
   {
     title: "The market opens",
-    body: "Whoever creates it pays 0.05 ETH. One transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading starts right away.",
+    body: "Whoever creates it pays at least 0.05 ETH. That one transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading can start right away.",
     screen: <OpenScreen />,
   },
   {
@@ -221,7 +221,7 @@ function BotScreen() {
         <span className="font-medium text-white">@multiverse</span> 1+1=3, resolves Friday
       </Post>
       <Post handle="@multiverse" time="now">
-        Market ready. Open it in the mini-app.
+        Market drafted. Create it in the mini-app.
         <div className="mt-3 rounded-xl border border-white/10 bg-black/40 p-3">
           <p className="text-[15px]">Does 1+1=3?</p>
           <p className="mt-1 text-white/45">Opens at 50/50 · Ends Friday</p>
