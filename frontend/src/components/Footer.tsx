@@ -50,7 +50,7 @@ export default function Footer() {
               Multiverse Markets
             </Link>
             <p className="mt-5 leading-7 text-white/60">
-              Turn online arguments into prediction markets. Built on Uniswap V4, resolved by Chainlink CRE.
+              Turn online arguments into prediction markets. Built on Uniswap V4, resolved by Chainlink CRE with a multisig for disputes.
             </p>
             <a
               href="#how-it-works"

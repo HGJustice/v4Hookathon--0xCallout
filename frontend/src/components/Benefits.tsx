@@ -16,16 +16,16 @@ const BENEFITS = [
     image: "/benefits/tile-2.svg",
     letter: "D",
     title: "Deep Liquidity",
-    body: "Both deposits seed the pool, so anyone can trade from the first second.",
+    body: "The creator's deposit seeds the pool, so anyone can trade from the first second.",
     detail: "Prices open at 50/50 and move with every YES or NO trade.",
-    tag: "Built on Uniswap V4 hooks",
+    tag: "Built on Uniswap V4",
   },
   {
     image: "/benefits/tile-3.svg",
     letter: "D",
     title: "Decentralised Resolution",
-    body: "Undisputed outcomes finalise automatically. Disputed ones go to a multisig.",
-    detail: "Proposing or disputing needs a bond, so lying costs money.",
+    body: "Undisputed outcomes are finalised by Chainlink CRE. Disputed ones go to a multisig.",
+    detail: "Proposing or disputing costs a 0.05 ETH fee, so neither is free to abuse.",
     tag: "Powered by Chainlink CRE",
   },
   {
@@ -33,7 +33,7 @@ const BENEFITS = [
     letter: "S",
     title: "Settled On-chain",
     body: "Every trade and payout is public and verifiable.",
-    detail: "Winning tokens redeem for the pot once the market resolves.",
+    detail: "Winners split the market's ETH once it resolves.",
   },
 ];
 

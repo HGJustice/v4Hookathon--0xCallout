@@ -3,9 +3,9 @@ import { DEMO_MARKET } from "@/lib/demoMarket";
 // A prediction-market card in the style of the app: question, live odds bar, YES / NO
 // prices and the market terms, for the same demo market as the hero's timeline.
 const TERMS = [
-  ["Stakes", "$10 each"],
+  ["Created with", "0.05 ETH"],
   ["Opened at", "50 / 50"],
-  ["Resolves via", "Chainlink CRE"],
+  ["Resolves via", "CRE or multisig"],
 ];
 
 export default function MarketCard() {
@@ -31,10 +31,10 @@ export default function MarketCard() {
 
       <div className="mt-6 grid grid-cols-2 gap-3 font-mono text-sm">
         <span className="flex h-12 items-center justify-between rounded-2xl border border-yes/30 bg-yes/10 px-4 text-yes">
-          Buy YES <span className="tabular-nums">{yes}¢</span>
+          Buy YES <span className="tabular-nums">{yes}%</span>
         </span>
         <span className="flex h-12 items-center justify-between rounded-2xl border border-no/30 bg-no/10 px-4 text-no">
-          Buy NO <span className="tabular-nums">{no}¢</span>
+          Buy NO <span className="tabular-nums">{no}%</span>
         </span>
       </div>
 

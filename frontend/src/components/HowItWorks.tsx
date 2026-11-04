@@ -15,27 +15,27 @@ import SectionTitle from "./SectionTitle";
 const STEPS = [
   {
     title: "Call it out",
-    body: "Two people disagree on Farcaster. One of them tags @multiverse with the claim, the stake and the deadline.",
+    body: "Two people disagree on Farcaster. One of them tags @multiverse with the claim and the deadline.",
     screen: <ThreadScreen />,
   },
   {
     title: "The bot sets it up",
-    body: "The bot replies with a ready-made market and a link to the mini-app, with the question, stake and date already filled in.",
+    body: "The bot replies with a draft market and a link to the mini-app, with the question and deadline already filled in.",
     screen: <BotScreen />,
   },
   {
-    title: "Both sides deposit",
-    body: "The market goes live only when both put in their $10. One transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50.",
-    screen: <DepositScreen />,
+    title: "The market opens",
+    body: "Whoever creates it pays at least 0.05 ETH. That one transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading can start right away.",
+    screen: <OpenScreen />,
   },
   {
     title: "Everyone bets",
-    body: "The bot posts the market back into the thread. Anyone can buy YES or NO, and the price becomes the crowd's odds.",
+    body: "The bot posts the market back into the thread. Anyone can buy YES or NO with ETH, and the price becomes the crowd's odds.",
     screen: <TradeScreen />,
   },
   {
     title: "Resolve and redeem",
-    body: "After the deadline a result is proposed with a bond. Undisputed, Chainlink CRE finalises it; disputed, a multisig decides. Winners redeem for the pot.",
+    body: "Anyone proposes the result for a 0.05 ETH fee. Undisputed, Chainlink CRE finalises it; disputed, a multisig decides. Winners split the market's ETH.",
     screen: <ResolveScreen />,
   },
 ];
@@ -200,7 +200,7 @@ function ThreadScreen() {
         1+1=3. Fight me.
       </Post>
       <Post handle="@kim" time="2m">
-        <span className="font-medium text-white">@multiverse</span> 1+1=3, $10 each, resolves Friday
+        <span className="font-medium text-white">@multiverse</span> 1+1=3, resolves Friday
       </Post>
       <p className="flex items-center gap-2 px-1 text-white/40">
         <span className="flex gap-1">
@@ -218,13 +218,13 @@ function BotScreen() {
   return (
     <Screen app="Farcaster">
       <Post handle="@kim" time="2m">
-        <span className="font-medium text-white">@multiverse</span> 1+1=3, $10 each, resolves Friday
+        <span className="font-medium text-white">@multiverse</span> 1+1=3, resolves Friday
       </Post>
       <Post handle="@multiverse" time="now">
-        Market ready. Both sides deposit to open it.
+        Market drafted. Create it in the mini-app.
         <div className="mt-3 rounded-xl border border-white/10 bg-black/40 p-3">
           <p className="text-[15px]">Does 1+1=3?</p>
-          <p className="mt-1 text-white/45">$10 each · Ends Friday</p>
+          <p className="mt-1 text-white/45">Opens at 50/50 · Ends Friday</p>
           <span className="mt-3 block rounded-lg bg-white py-2 text-center font-medium text-black">
             Open in mini-app
           </span>
@@ -234,16 +234,16 @@ function BotScreen() {
   );
 }
 
-function DepositScreen() {
+function OpenScreen() {
   return (
     <Screen app="Multiverse · mini-app">
       <p className="text-xl">Does 1+1=3?</p>
-      <p className="-mt-2 text-white/45">$10 each · Ends Friday</p>
-      <Row left="@dan · YES" right="$10 ✓" />
-      <Row left="@kim · NO" right="$10 ✓" />
+      <p className="-mt-2 text-white/45">Ends Friday</p>
+      <Row left="Created by @kim" right="0.05 ETH ✓" />
       <div className="rounded-xl border border-white/10 p-3 text-white/60">
-        <p className="text-white">Both sides in. Opening market…</p>
-        <p className="mt-2">✓ YES and NO tokens minted</p>
+        <p className="text-white">Opening market…</p>
+        <p className="mt-2">✓ 0.01 ETH protocol fee</p>
+        <p>✓ YES and NO tokens minted</p>
         <p>✓ Uniswap V4 pool seeded at 50/50</p>
       </div>
       <Pill solid>Market live</Pill>
@@ -268,14 +268,14 @@ function TradeScreen() {
         />
       </svg>
       <div className="grid grid-cols-2 gap-2">
-        <Pill solid>YES 34¢</Pill>
-        <Pill>NO 66¢</Pill>
+        <Pill solid>YES 34%</Pill>
+        <Pill>NO 66%</Pill>
       </div>
-      <Row left="Amount" right="$5" />
+      <Row left="Amount" right="0.01 ETH" />
       <Pill solid>Place bet</Pill>
       <div className="space-y-1 px-1 text-white/45">
-        <p>@ana bought YES · $5</p>
-        <p>@leo bought NO · $12</p>
+        <p>@ana bought YES · 0.01 ETH</p>
+        <p>@leo bought NO · 0.03 ETH</p>
       </div>
     </Screen>
   );
@@ -286,12 +286,12 @@ function ResolveScreen() {
     <Screen app="Multiverse · resolved">
       <p className="text-white/45">Does 1+1=3?</p>
       <p className="-mt-2 text-4xl">NO</p>
-      <Row left="✓ Proposed NO" right="Bond posted" />
-      <Row left="✓ Dispute window" right="No disputes" />
+      <Row left="✓ Proposed NO" right="0.05 ETH fee" />
+      <Row left="✓ Disputes" right="None" />
       <Row left="✓ Finalised" right="Chainlink CRE" />
       <div className="mt-1 rounded-2xl bg-white p-4 text-black">
         <p className="text-black/50">@kim, you won</p>
-        <p className="mt-1 text-2xl">$20.00</p>
+        <p className="mt-1 text-2xl">0.06 ETH</p>
         <span className="mt-3 block rounded-lg bg-black py-2.5 text-center font-medium text-white">Redeem</span>
       </div>
     </Screen>
