@@ -6,45 +6,44 @@ import SectionTitle from "./SectionTitle";
 const FAQS: [question: string, answer: string][] = [
   [
     "What is Multiverse Markets?",
-    "It turns online arguments into prediction markets. When two people disagree on Farcaster, they each put money on their side, and anyone else can bet on who's right.",
+    "It turns online arguments into prediction markets. Any claim from a Farcaster thread can become a market, and anyone can bet on who's right.",
   ],
   [
     "How do I create a market?",
-    "Tag @multiverse in the thread with the claim, the amount and the deadline, for example \"@multiverse 1+1=3, $10 USDC each, resolves Friday\". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app.",
+    "Tag @multiverse in the thread with the claim and the deadline, for example \"@multiverse 1+1=3, resolves Friday\". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one costs 0.05 ETH: a 0.01 ETH protocol fee, and the rest seeds the market.",
   ],
   [
     "When does a market go live?",
-    "Only after both people in the argument deposit their stake. Until then nothing is traded, and the bot posts the market back in the thread once it's live.",
+    "Right away. The creator's deposit mints equal YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading starts in the same transaction. The bot then posts the market back in the thread.",
   ],
   [
     "Can I bet if I'm not part of the argument?",
-    "Yes. Once a market is live, anyone can buy YES or NO. The more people bet, the better the price reflects what the crowd actually believes.",
+    "Yes. Anyone can buy YES or NO, with any amount of ETH. The more people bet, the better the price reflects what the crowd actually believes.",
   ],
   [
     "What do YES and NO prices mean?",
-    "The price is the crowd's estimate of the probability. If YES trades at $0.70, the market thinks there's a 70% chance the claim is true. YES + NO always adds up to $1.",
+    "The price is the crowd's estimate of the probability. If YES trades at 70%, the market thinks there's a 70% chance the claim is true. YES and NO always add up to 100%.",
   ],
   [
     "Who decides the outcome?",
-    "After the deadline, someone proposes the result and posts a bond. If nobody disputes it within the dispute window, Chainlink CRE finalises it automatically. If someone disputes it, a multisig of trusted signers reviews and decides.",
+    "Anyone can propose the result, for a 0.05 ETH fee. If nobody disputes it, Chainlink CRE finalises it. If someone disputes it, a multisig of trusted signers reviews it and decides.",
   ],
   [
     "What if someone proposes a wrong result?",
-    "Anyone can dispute it by posting their own bond. The multisig then decides, and whoever was wrong loses their bond, so lying costs money.",
+    "Anyone can dispute it once by proposing a different result, for the same 0.05 ETH fee. The multisig then decides. Proposing and disputing both cost a fee, so neither is free to abuse.",
   ],
   [
     "What happens if I'm wrong?",
-    "Your tokens for the losing side become worthless after resolution, and you lose what you put in. You can sell your position any time before the deadline to cut your losses.",
+    "Your tokens for the losing side are worth nothing once the market resolves, and you lose what you put in.",
   ],
   [
     "How do winners get paid?",
-    "After the outcome is final, each winning token can be redeemed for $1 USDC, minus a small protocol fee.",
+    "Once the outcome is final, winners redeem their tokens and split the market's ETH in proportion to how many winning tokens each holds.",
   ],
   [
-    "What if the other person never deposits?",
-    "The market doesn't go live, and you can withdraw your deposit.",
+    "Which token do I need?",
+    "Only ETH on Base Sepolia. You create, bet and propose in ETH, and it also pays for gas. It's a testnet, so you can get it free from a faucet.",
   ],
-  ["Which token do I need?", "USDC, plus a little of the network's native token for gas."],
   ["Is it on X/Twitter?", "It's on Farcaster first. X/Twitter support is coming next."],
 ];
 

@@ -36,12 +36,11 @@ export default function Explore() {
               </p>
               <p>
                 Here, <Highlight>any argument</Highlight> can become a market. No listing process and no
-                approval, just a question, a stake and a deadline.
+                approval, just a question and a deadline.
               </p>
               <p>
-                Both sides put real money behind their claim, so{" "}
-                <Highlight>the odds actually mean something.</Highlight> It&apos;s what the crowd will bet on,
-                not what it says.
+                Every bet is real money behind a claim, so <Highlight>the odds actually mean something.</Highlight>{" "}
+                It&apos;s what the crowd will bet on, not what it says.
               </p>
             </div>
             <a

@@ -55,16 +55,18 @@ function BetScreen() {
       </svg>
 
       <div className="mt-4 grid grid-cols-2 gap-2 text-sm font-semibold">
-        <span className="rounded-xl bg-brand py-2.5 text-center text-black">YES 34¢</span>
-        <span className="rounded-xl bg-white/5 py-2.5 text-center text-white/70">NO 66¢</span>
+        <span className="rounded-xl bg-brand py-2.5 text-center text-black">YES 34%</span>
+        <span className="rounded-xl bg-white/5 py-2.5 text-center text-white/70">NO 66%</span>
       </div>
 
       <div className="mt-4 rounded-2xl bg-white/5 p-3">
         <p className="text-[11px] text-white/50">Amount</p>
-        <div className="mt-1 flex items-center justify-between">
-          <span className="text-2xl font-semibold">$10</span>
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <span className="text-2xl font-semibold">
+            0.01 <span className="text-sm font-normal text-white/50">ETH</span>
+          </span>
           <span className="flex gap-1.5 text-[11px]">
-            {["$5", "$25", "Max"].map((v) => (
+            {["0.05", "0.1", "Max"].map((v) => (
               <span key={v} className="rounded-full bg-white/10 px-2 py-1">
                 {v}
               </span>
@@ -74,7 +76,7 @@ function BetScreen() {
       </div>
 
       <p className="mt-3 flex justify-between text-xs text-white/50">
-        Payout if YES <span className="text-white">$29.41</span>
+        Est. payout if YES <span className="text-white">≈ 0.029 ETH</span>
       </p>
       <span className="mt-4 block rounded-2xl bg-linear-to-r from-brand to-brand-soft py-3 text-center font-semibold text-black">
         Place bet
