@@ -10,14 +10,18 @@ import {SwapParams, ModifyLiquidityParams} from "v4-hooks-public/lib/v4-core/src
 import {IPoolManager} from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-hooks-public/lib/v4-core/src/libraries/Hooks.sol";
 
+import "../Marketplace/MarketplaceFactory.sol";
+
 contract CalloutHook is BaseHook {
-    address immutable marketplaceFactory;
+    MarketplaceFactory private immutable marketplaceFactory;
+
+    uint8 constant B = 1;
 
     constructor(
         IPoolManager _manager,
-        address _marketplaceFactory
+        address payable _marketplaceFactory
     ) BaseHook(_manager) {
-        marketplaceFactory = _marketplaceFactory;
+        marketplaceFactory = MarketplaceFactory(_marketplaceFactory);
     }
 
     function getHookPermissions()

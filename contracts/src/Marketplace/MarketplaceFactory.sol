@@ -4,38 +4,13 @@ pragma solidity 0.8.26;
 import "../erc20s/yesToken.sol";
 import "../erc20s/noToken.sol";
 import "../Marketplace/Errors.sol";
+import "./IMarketplaceFactory.sol";
 import "../Marketplace/PoolManagerLogic.sol";
 
-contract MarketplaceFactory is PoolManagerLogic {
-    uint256 constant PROTOCOL_FEE = 0.01 ether;
-    uint256 constant MARKET_SETUP_FEE = 0.05 ether;
-    uint256 constant PROPOSE_OUTCOME_FEE = 0.05 ether;
-
-    enum PredictionOutcome {
-        Unresolved,
-        Yes,
-        No,
-        Void
-    }
-
-    struct Marketplace {
-        uint256 marketplaceID;
-        string title;
-        address initializer;
-        bool resolved;
-        uint256 balance;
-        uint256 deadline;
-        PredictionOutcome proposedOutcome;
-        uint256 proposedAt;
-        bool outcomeDisputed;
-        PredictionOutcome disputedOutcome;
-        PredictionOutcome finalOutcome;
-        PoolKey pool;
-        address yesToken;
-        address noToken;
-        uint256 winningSupplyAtResolve;
-        uint256 poolWinningBalanceAtResolve;
-    }
+contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
+    uint256 constant PROTOCOL_FEE = 0.001 ether;
+    uint256 constant MARKET_SETUP_FEE = 0.005 ether;
+    uint256 constant PROPOSE_OUTCOME_FEE = 0.005 ether;
 
     uint256 public marketplaceID = 1;
     mapping(uint256 => Marketplace) marketplaces;
@@ -43,39 +18,6 @@ contract MarketplaceFactory is PoolManagerLogic {
     address immutable owner;
     address immutable multiSig;
     address immutable chainlinkCre;
-
-    event MarketCreated(
-        uint256 marketplaceID,
-        string title,
-        address initializer,
-        uint256 balance,
-        uint256 deadline,
-        PoolKey pool,
-        address yesToken,
-        address noToken
-    );
-
-    event MarketBet(
-        uint256 marketplaceID,
-        string title,
-        uint256 newBalance,
-        address user,
-        PoolKey pool
-    );
-
-    event OutcomeProposed(
-        uint256 marketplaceID,
-        PredictionOutcome proposedOutcome,
-        address user,
-        uint256 timestamp
-    );
-
-    event OutcomeDisputed(
-        uint256 marketplaceID,
-        PredictionOutcome disputedOutcome,
-        address user,
-        uint256 timestamp
-    );
 
     constructor(
         IPoolManager _poolManager,
@@ -128,7 +70,9 @@ contract MarketplaceFactory is PoolManagerLogic {
             yesToken: newYesToken,
             noToken: newNoToken,
             winningSupplyAtResolve: 0,
-            poolWinningBalanceAtResolve: 0
+            poolWinningBalanceAtResolve: 0,
+            yesReserves: amountAfterFee,
+            noReserves: amountAfterFee
         });
         marketplaces[marketplaceID] = newMarketplace;
 
@@ -197,6 +141,7 @@ contract MarketplaceFactory is PoolManagerLogic {
             currentMarket.pool
         );
     }
+
     function proposeOutcome(
         uint256 _marketplaceID,
         PredictionOutcome _outcome
