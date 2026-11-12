@@ -4,6 +4,7 @@ pragma solidity 0.8.26;
 import {BaseTest} from "./utils/Basetest.sol";
 import "../src/Marketplace/MarketplaceFactory.sol";
 import "../src/Marketplace/Errors.sol";
+import "../src/Marketplace/IMarketplaceFactory.sol";
 
 contract MarketplaceFactoryReverts is BaseTest {
     function test_insufficientFundsFail() external {
@@ -49,7 +50,7 @@ contract MarketplaceFactoryReverts is BaseTest {
         _proposeMarket(
             user3,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
         _finaliseMarketChainlinkCre(1);
@@ -64,7 +65,7 @@ contract MarketplaceFactoryReverts is BaseTest {
         _proposeMarket(
             user2,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
         _finaliseMarketChainlinkCre(1);
@@ -106,7 +107,7 @@ contract MarketplaceFactoryReverts is BaseTest {
         _proposeMarket(
             user4,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.No,
+            IMarketplaceFactory.PredictionOutcome.No,
             1
         );
         _finaliseMarketChainlinkCre(1);
@@ -131,7 +132,7 @@ contract MarketplaceFactoryReverts is BaseTest {
         _proposeMarket(
             user4,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
         _finaliseMarketChainlinkCre(1);
@@ -157,13 +158,13 @@ contract MarketplaceFactoryReverts is BaseTest {
         _proposeMarket(
             user4,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
         _disputeMarket(
             user5,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.No,
+            IMarketplaceFactory.PredictionOutcome.No,
             1
         );
 

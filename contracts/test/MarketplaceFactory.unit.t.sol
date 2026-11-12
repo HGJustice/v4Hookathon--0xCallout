@@ -23,15 +23,15 @@ contract MarketplaceFactoryUnit is BaseTest {
         assertEq(market.initializer, user1);
         assertEq(
             uint8(market.proposedOutcome),
-            uint8(MarketplaceFactory.PredictionOutcome.Unresolved)
+            uint8(IMarketplaceFactory.PredictionOutcome.Unresolved)
         );
         assertEq(
             uint8(market.disputedOutcome),
-            uint8(MarketplaceFactory.PredictionOutcome.Unresolved)
+            uint8(IMarketplaceFactory.PredictionOutcome.Unresolved)
         );
         assertEq(
             uint8(market.finalOutcome),
-            uint8(MarketplaceFactory.PredictionOutcome.Unresolved)
+            uint8(IMarketplaceFactory.PredictionOutcome.Unresolved)
         );
         PoolId poolId = market.pool.toId();
         (uint160 sqrtPriceX96, int24 tick, , ) = manager.getSlot0(poolId);
@@ -143,7 +143,7 @@ contract MarketplaceFactoryUnit is BaseTest {
         _proposeMarket(
             user4,
             0.1 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
         _finaliseMarketChainlinkCre(1);
@@ -168,17 +168,17 @@ contract MarketplaceFactoryUnit is BaseTest {
         _proposeMarket(
             user4,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.Yes,
+            IMarketplaceFactory.PredictionOutcome.Yes,
             1
         );
 
         _disputeMarket(
             user5,
             0.05 ether,
-            MarketplaceFactory.PredictionOutcome.No,
+            IMarketplaceFactory.PredictionOutcome.No,
             1
         );
-        _finaliseMarketMultiSig(1, MarketplaceFactory.PredictionOutcome.No);
+        _finaliseMarketMultiSig(1, IMarketplaceFactory.PredictionOutcome.No);
         _redeemMarket(1, user3);
         assertGt(user3.balance, user2.balance);
     }
