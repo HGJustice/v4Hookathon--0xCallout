@@ -1,9 +1,10 @@
 import { DEMO_MARKET } from "@/lib/demoMarket";
+import { FEES } from "@/lib/protocol";
 
 // A prediction-market card in the style of the app: question, live odds bar, YES / NO
 // prices and the market terms, for the same demo market as the hero's timeline.
 const TERMS = [
-  ["Created with", "0.05 ETH"],
+  ["Created with", `${FEES.marketSetup} ETH`],
   ["Opened at", "50 / 50"],
   ["Resolves via", "CRE or multisig"],
 ];

@@ -2,39 +2,21 @@ import Link from "next/link";
 import { ArrowRight } from "./icons";
 import { LogoMark } from "./Logo";
 
-// Four-column footer, laid out like cian.app's. Links without a real page yet point
-// to the closest section on the home page, or to "#" for external/legal pages.
+// Footer link columns. Only links with a real destination: add Community (social
+// profiles), Legal and Docs once those pages exist.
 const COLUMNS: [title: string, links: [label: string, href: string][]][] = [
   [
     "Product",
     [
       ["Create a market", "#how-it-works"],
       ["Explore markets", "#markets"],
-      ["Leaderboard", "#markets"],
     ],
   ],
   [
     "Learn",
     [
       ["How it works", "#how-it-works"],
-      ["Docs", "#faq"],
       ["FAQ", "#faq"],
-    ],
-  ],
-  [
-    "Community",
-    [
-      ["Farcaster", "#"],
-      ["X", "#"],
-      ["Telegram", "#"],
-    ],
-  ],
-  [
-    "Legal",
-    [
-      ["Terms", "#"],
-      ["Privacy", "#"],
-      ["Risk disclosure", "#"],
     ],
   ],
 ];
@@ -56,11 +38,11 @@ export default function Footer() {
               href="#how-it-works"
               className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-linear-to-r from-brand to-brand-soft px-6 text-black transition hover:brightness-110"
             >
-              Launch App <ArrowRight />
+              Get started <ArrowRight />
             </a>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-4 xl:gap-20">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 xl:gap-20">
             {COLUMNS.map(([title, links]) => (
               <div key={title}>
                 <p className="text-sm text-white/40">{title}</p>

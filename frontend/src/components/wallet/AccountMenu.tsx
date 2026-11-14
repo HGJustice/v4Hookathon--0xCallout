@@ -10,6 +10,13 @@ import { pill } from "./walletStyles";
 
 const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 
+/** Up to 4 decimals; a positive balance below that shows as "<0.0001" rather than "0". */
+function formatBalance(formatted: string, symbol: string) {
+  const value = Number(formatted);
+  if (value > 0 && value < 0.0001) return `<0.0001 ${symbol}`;
+  return `${value.toLocaleString("en-US", { maximumFractionDigits: 4 })} ${symbol}`;
+}
+
 /** Who the user is, in the most recognisable form available: Farcaster handle, email, address. */
 function displayName(user: User | null, address: Address) {
   if (user?.farcaster?.username) return `@${user.farcaster.username}`;
@@ -73,7 +80,8 @@ export default function AccountMenu({ address }: { address: Address }) {
   };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(address).then(
+    // navigator.clipboard only exists in secure contexts (HTTPS or localhost).
+    navigator.clipboard?.writeText(address).then(
       () => setCopied(true),
       () => {}, // clipboard blocked: the address stays visible in the panel
     );
@@ -101,9 +109,7 @@ export default function AccountMenu({ address }: { address: Address }) {
               <div className="min-w-0">
                 <p className="truncate text-base font-normal">{name}</p>
                 <p className="text-white/50">
-                  {balance
-                    ? `${Number(balance.formatted).toLocaleString("en-US", { maximumFractionDigits: 4 })} ${balance.symbol}`
-                    : "…"}{" "}
+                  {balance ? formatBalance(balance.formatted, balance.symbol) : "…"}{" "}
                   · {appChain.name}
                 </p>
               </div>

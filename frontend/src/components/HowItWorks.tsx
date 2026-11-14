@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { FEES } from "@/lib/protocol";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import PhoneMockup from "./PhoneMockup";
 import SectionTitle from "./SectionTitle";
@@ -25,7 +26,7 @@ const STEPS = [
   },
   {
     title: "The market opens",
-    body: "Whoever creates it pays at least 0.05 ETH. That one transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading can start right away.",
+    body: `Whoever creates it pays at least ${FEES.marketSetup} ETH. That one transaction mints YES and NO tokens and opens a Uniswap V4 pool at 50/50, so trading can start right away.`,
     screen: <OpenScreen />,
   },
   {
@@ -35,7 +36,7 @@ const STEPS = [
   },
   {
     title: "Resolve and redeem",
-    body: "Anyone proposes the result for a 0.05 ETH fee. Undisputed, Chainlink CRE finalises it; disputed, a multisig decides. Winners split the market's ETH.",
+    body: `Anyone proposes the result for a ${FEES.outcome} ETH fee. Undisputed, Chainlink CRE finalises it; disputed, a multisig decides. Winners split the market's ETH.`,
     screen: <ResolveScreen />,
   },
 ];
@@ -239,10 +240,10 @@ function OpenScreen() {
     <Screen app="Multiverse · mini-app">
       <p className="text-xl">Does 1+1=3?</p>
       <p className="-mt-2 text-white/45">Ends Friday</p>
-      <Row left="Created by @kim" right="0.05 ETH ✓" />
+      <Row left="Created by @kim" right={`${FEES.marketSetup} ETH ✓`} />
       <div className="rounded-xl border border-white/10 p-3 text-white/60">
         <p className="text-white">Opening market…</p>
-        <p className="mt-2">✓ 0.01 ETH protocol fee</p>
+        <p className="mt-2">✓ {FEES.protocol} ETH protocol fee</p>
         <p>✓ YES and NO tokens minted</p>
         <p>✓ Uniswap V4 pool seeded at 50/50</p>
       </div>
@@ -286,7 +287,7 @@ function ResolveScreen() {
     <Screen app="Multiverse · resolved">
       <p className="text-white/45">Does 1+1=3?</p>
       <p className="-mt-2 text-4xl">NO</p>
-      <Row left="✓ Proposed NO" right="0.05 ETH fee" />
+      <Row left="✓ Proposed NO" right={`${FEES.outcome} ETH fee`} />
       <Row left="✓ Disputes" right="None" />
       <Row left="✓ Finalised" right="Chainlink CRE" />
       <div className="mt-1 rounded-2xl bg-white p-4 text-black">

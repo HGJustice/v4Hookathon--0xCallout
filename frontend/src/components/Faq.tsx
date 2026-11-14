@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FEES } from "@/lib/protocol";
 import SectionTitle from "./SectionTitle";
 
 const FAQS: [question: string, answer: string][] = [
@@ -10,7 +11,7 @@ const FAQS: [question: string, answer: string][] = [
   ],
   [
     "How do I create a market?",
-    "Tag @multiverse in the thread with the claim and the deadline, for example \"@multiverse 1+1=3, resolves Friday\". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one takes at least 0.05 ETH: a 0.01 ETH protocol fee, and the rest seeds the market.",
+    `Tag @multiverse in the thread with the claim and the deadline, for example "@multiverse 1+1=3, resolves Friday". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one takes at least ${FEES.marketSetup} ETH: a ${FEES.protocol} ETH protocol fee, and the rest seeds the market.`,
   ],
   [
     "When does a market go live?",
@@ -26,11 +27,11 @@ const FAQS: [question: string, answer: string][] = [
   ],
   [
     "Who decides the outcome?",
-    "Anyone can propose the result, for a 0.05 ETH fee. If nobody disputes it, Chainlink CRE finalises it. If someone disputes it, a multisig of trusted signers reviews it and decides.",
+    `Anyone can propose the result, for a ${FEES.outcome} ETH fee. If nobody disputes it, Chainlink CRE finalises it. If someone disputes it, a multisig of trusted signers reviews it and decides.`,
   ],
   [
     "What if someone proposes a wrong result?",
-    "Anyone can dispute it by proposing a different result, for the same 0.05 ETH fee. Each market can be disputed once, and the multisig then decides. Proposing and disputing both cost a fee, so neither is free to abuse.",
+    `Anyone can dispute it by proposing a different result, for the same ${FEES.outcome} ETH fee. Each market can be disputed once, and the multisig then decides. Proposing and disputing both cost a fee, so neither is free to abuse.`,
   ],
   [
     "What happens if I'm wrong?",
@@ -42,7 +43,7 @@ const FAQS: [question: string, answer: string][] = [
   ],
   [
     "Which token do I need?",
-    "Only ETH on Base Sepolia. You create, bet and propose in ETH, and it also pays for gas. It's a testnet, so you can get it free from a faucet.",
+    "Only ETH on Arbitrum Sepolia. You create, bet and propose in ETH, and it also pays for gas. It's a testnet, so you can get it free from a faucet.",
   ],
   ["Is it on X/Twitter?", "It's on Farcaster first. X/Twitter support is coming next."],
 ];
@@ -63,12 +64,6 @@ export default function Faq() {
             <p className="mt-4 max-w-[360px] text-lg leading-8 text-white/60">
               How arguments become markets, who decides the outcome, and how you get paid.
             </p>
-            <a
-              href="#faq"
-              className="steel-border mt-8 inline-flex h-11 items-center rounded-full px-6 transition-colors hover:text-brand"
-            >
-              Read the docs
-            </a>
           </div>
 
           <ul className="border-t border-white/10">

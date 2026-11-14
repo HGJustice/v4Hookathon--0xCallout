@@ -10,7 +10,6 @@ const links = [
   ["Markets", "#markets"],
   ["How it works", "#how-it-works"],
   ["Use cases", "#benefits"],
-  ["Docs", "#faq"],
   ["FAQ", "#faq"],
 ];
 
