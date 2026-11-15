@@ -1,9 +1,6 @@
 import { createConfig } from "@privy-io/wagmi";
 import { http } from "wagmi";
-import { arbitrumSepolia } from "wagmi/chains";
-
-/** The one chain the app runs on. Change it here (and redeploy contracts) to switch. */
-export const appChain = arbitrumSepolia;
+import { appChain } from "./chain";
 
 /** Optional dedicated RPC for appChain; falls back to the chain's public endpoint. */
 const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || undefined;

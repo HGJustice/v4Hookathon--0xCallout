@@ -5,7 +5,7 @@ import { useConnectWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSetActiveWallet } from "@privy-io/wagmi";
 import { useAccount, useSwitchChain } from "wagmi";
 import { privyAppId } from "@/lib/privy";
-import { appChain } from "@/lib/wagmi";
+import { appChain } from "@/lib/chain";
 import AccountMenu from "./AccountMenu";
 import { primaryPill } from "./walletStyles";
 
