@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
 import { useExportWallet, usePrivy, useWallets, type User } from "@privy-io/react-auth";
 import type { Address } from "viem";
 import { useBalance } from "wagmi";
-import { appChain } from "@/lib/wagmi";
+import { appChain } from "@/lib/chain";
 import { Check, Copy, ExternalLink, Key, LogOut } from "../icons";
 import { pill } from "./walletStyles";
 

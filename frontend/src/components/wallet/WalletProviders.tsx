@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { PrivyProvider, useModalStatus } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider as BaseWagmiProvider } from "wagmi";
 import { getLenis } from "@/lib/lenis";
 import { privyAppId, privyConfig } from "@/lib/privy";
 import { wagmiConfig } from "@/lib/wagmi";
@@ -11,14 +12,20 @@ import FarcasterMiniApp from "./FarcasterMiniApp";
 
 /**
  * Sign-in and wallets (Privy), wallet state (wagmi) and query caching for everything inside.
- * Order matters: Privy → React Query → wagmi. Without a Privy app id the site still renders,
- * and ConnectWalletButton shows sign-in as unavailable.
+ * Order matters: Privy → React Query → wagmi. Without a Privy app id there's no sign-in
+ * (ConnectWalletButton shows it as unavailable), but wagmi still runs so markets can be read.
  */
 export default function WalletProviders({ children }: { children: ReactNode }) {
   // One client per browser session; created lazily so it isn't shared across requests.
   const [queryClient] = useState(() => new QueryClient());
 
-  if (!privyAppId) return children;
+  if (!privyAppId) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <BaseWagmiProvider config={wagmiConfig}>{children}</BaseWagmiProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <PrivyProvider appId={privyAppId} config={privyConfig}>

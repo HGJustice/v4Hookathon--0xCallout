@@ -1,5 +1,5 @@
 import type { PrivyClientConfig } from "@privy-io/react-auth";
-import { appChain } from "./wagmi";
+import { appChain } from "./chain";
 
 const rawAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID?.trim() ?? "";
 
