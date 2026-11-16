@@ -5,6 +5,7 @@ import { ExternalLink } from "../../icons";
 import { monoLabel } from "../styles";
 
 const explorer = appChain.blockExplorers.default;
+
 function ExplorerLink({ path, children }: { path: string; children: string }) {
   return (
     <a
@@ -18,34 +19,32 @@ function ExplorerLink({ path, children }: { path: string; children: string }) {
   );
 }
 
-/** The market's key numbers and where to verify them on-chain. */
+/** The market's key numbers and where to verify them on-chain, as a strip along the bottom of the odds stage. */
 export default function MarketFacts({ market, now }: { market: Market; now: number }) {
   const deadline = Number(market.deadline) * 1000;
   return (
-    <section aria-label="Market details" className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
-        <div>
-          <dt className={monoLabel}>At stake</dt>
-          <dd className="mt-1.5 font-mono text-[15px] font-medium tabular-nums">{formatEth(market.balance)}</dd>
-        </div>
-        <div>
-          <dt className={monoLabel}>{deadline > now ? "Ends" : "Ended"}</dt>
-          <dd className="mt-1.5 text-[15px] font-medium">{formatDateTime(deadline)}</dd>
-        </div>
-        <div>
-          <dt className={monoLabel}>Created by</dt>
-          <dd className="mt-1.5 font-mono text-[15px]">
-            <ExplorerLink path={`address/${market.initializer}`}>{shortAddress(market.initializer)}</ExplorerLink>
-          </dd>
-        </div>
-        <div>
-          <dt className={monoLabel}>Tokens</dt>
-          <dd className="mt-1.5 flex gap-4 text-[15px]">
-            <ExplorerLink path={`address/${market.yesToken}`}>YES</ExplorerLink>
-            <ExplorerLink path={`address/${market.noToken}`}>NO</ExplorerLink>
-          </dd>
-        </div>
-      </dl>
-    </section>
+    <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-white/10 pt-6 xl:grid-cols-4">
+      <div>
+        <dt className={monoLabel}>At stake</dt>
+        <dd className="mt-1.5 font-mono text-[15px] font-medium tabular-nums">{formatEth(market.balance)}</dd>
+      </div>
+      <div>
+        <dt className={monoLabel}>{deadline > now ? "Ends" : "Ended"}</dt>
+        <dd className="mt-1.5 text-[15px] font-medium">{formatDateTime(deadline)}</dd>
+      </div>
+      <div>
+        <dt className={monoLabel}>Created by</dt>
+        <dd className="mt-1.5 font-mono text-[15px]">
+          <ExplorerLink path={`address/${market.initializer}`}>{shortAddress(market.initializer)}</ExplorerLink>
+        </dd>
+      </div>
+      <div>
+        <dt className={monoLabel}>Tokens</dt>
+        <dd className="mt-1.5 flex gap-4 text-[15px]">
+          <ExplorerLink path={`address/${market.yesToken}`}>YES</ExplorerLink>
+          <ExplorerLink path={`address/${market.noToken}`}>NO</ExplorerLink>
+        </dd>
+      </div>
+    </dl>
   );
 }

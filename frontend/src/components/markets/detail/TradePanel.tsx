@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import { appChain } from "@/lib/chain";
@@ -9,8 +9,9 @@ import { formatAmount, formatEth, formatShares, parseEthInput } from "@/lib/form
 import { usePlaceBet, usePoolState } from "@/lib/markets/hooks";
 import { Outcome, quoteBet, type Market, type Side } from "@/lib/markets/market";
 import { monoLabel } from "../styles";
+import Card from "./Card";
 import ConnectPrompt from "./ConnectPrompt";
-import SidePicker from "./SidePicker";
+import OutcomeCards from "./OutcomeCards";
 import TxStatus from "./TxStatus";
 
 const QUICK_AMOUNTS = ["0.01", "0.05", "0.1"];
@@ -66,21 +67,17 @@ export default function TradePanel({ market }: { market: Market }) {
   }
 
   return (
-    <div
-      className="market-card rounded-3xl border p-6 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]"
-      data-lean={side === Outcome.Yes ? "yes" : "no"}
-      style={{ "--tint-a": 0.2 } as CSSProperties}
-    >
+    <Card lean={side === Outcome.Yes ? "yes" : "no"}>
       <h2 className="font-display text-xl font-semibold tracking-tight">Place a bet</h2>
 
       <div className="mt-5">
-        <SidePicker
+        <OutcomeCards
           value={side}
           onChange={(next) => {
             touch();
             setSide(next);
           }}
-          label="Side to bet on"
+          yes={market.yesProbability === null ? null : Math.round(market.yesProbability * 100)}
           disabled={bet.isPending}
         />
       </div>
@@ -184,7 +181,7 @@ export default function TradePanel({ market }: { market: Market }) {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

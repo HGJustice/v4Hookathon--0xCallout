@@ -1,6 +1,7 @@
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
 import { getMarketStatus, getOutcomeLabel, Outcome, type Market } from "@/lib/markets/market";
 import { Check } from "../../icons";
+import Card, { leanOf } from "./Card";
 
 type StepState = "done" | "current" | "todo";
 type Step = { title: string; detail?: string; state: StepState };
@@ -47,7 +48,7 @@ function buildSteps(market: Market, now: number): Step[] {
 export default function StatusTimeline({ market, now }: { market: Market; now: number }) {
   const steps = buildSteps(market, now);
   return (
-    <section aria-label="Progress" className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+    <Card aria-label="Progress" lean={leanOf(market)}>
       <h2 className="font-display text-lg font-semibold tracking-tight">Progress</h2>
       <ol className="mt-5">
         {steps.map((step, i) => (
@@ -79,6 +80,6 @@ export default function StatusTimeline({ market, now }: { market: Market; now: n
           </li>
         ))}
       </ol>
-    </section>
+    </Card>
   );
 }
