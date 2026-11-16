@@ -4,8 +4,7 @@ import { useAccount } from "wagmi";
 import { formatShares } from "@/lib/format";
 import { usePosition } from "@/lib/markets/hooks";
 import type { Market } from "@/lib/markets/market";
-
-const label = "font-mono text-[11px] tracking-[0.14em] text-white/50 uppercase";
+import { monoLabel } from "../styles";
 
 /** How many YES and NO shares the connected wallet holds. Hidden until a wallet is connected. */
 export default function PositionCard({ market }: { market: Market }) {
@@ -26,11 +25,11 @@ export default function PositionCard({ market }: { market: Market }) {
       ) : (
         <dl className="mt-4 grid grid-cols-2 gap-6">
           <div>
-            <dt className={label}>YES shares</dt>
+            <dt className={monoLabel}>YES shares</dt>
             <dd className="mt-1.5 font-mono text-xl font-medium tabular-nums text-yes">{formatShares(position.data!.yes)}</dd>
           </div>
           <div>
-            <dt className={label}>NO shares</dt>
+            <dt className={monoLabel}>NO shares</dt>
             <dd className="mt-1.5 font-mono text-xl font-medium tabular-nums text-no">{formatShares(position.data!.no)}</dd>
           </div>
         </dl>

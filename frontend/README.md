@@ -37,6 +37,7 @@ The **App secret** is for servers only. Never put it in a `NEXT_PUBLIC_` variabl
 | `npm run start` | Serve the production build       |
 | `npm run lint`  | ESLint, plus a check that `src/lib/protocol.ts` fees match the contract |
 | `npm run generate` | Regenerate the contract ABI from `../contracts` (needs Foundry) |
+| `npm test`      | Unit tests for the quote, payout and amount-parsing math (`tests/`) |
 
 ## Contracts
 
@@ -53,6 +54,9 @@ Market code lives in `src/lib/markets/`:
 - `hooks.ts`: React hooks over them: `useMarkets`, `useMarket`, `usePosition` and
   `useCreateMarket`, `usePlaceBet`, `useProposeOutcome`, `useDisputeOutcome`, `useRedeem`.
 - `market.ts`: types and pure helpers (outcomes, status, odds, bet quotes, redeem amounts).
+
+`scripts/verify-quotes-on-fork.mts` checks those quotes against the real contract on a local
+fork (instructions in its header); run it whenever the contract's bet or redeem logic changes.
 
 Show any failure with `getErrorMessage` from `src/lib/contracts/errors.ts`, which turns
 contract errors and wallet rejections into short messages.

@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { formatEth, formatRelativeTime } from "@/lib/format";
-import { getMarketStatus, Outcome, type Market, type MarketStatus } from "@/lib/markets/market";
+import { getMarketStatus, getOutcomeLabel, Outcome, type Market, type MarketStatus } from "@/lib/markets/market";
 import OddsGauge from "./OddsGauge";
+import { monoLabel } from "./styles";
 
 /** An outcome in its own colour: YES in blush, NO in violet. */
 function OutcomeWord({ outcome }: { outcome: Outcome }) {
   if (outcome === Outcome.Yes) return <span className="font-semibold text-yes">YES</span>;
   if (outcome === Outcome.No) return <span className="font-semibold text-no">NO</span>;
-  return <span className="font-semibold">Void</span>;
+  return <span className="font-semibold">{getOutcomeLabel(outcome)}</span>;
 }
 
 /** What the card says once a market is past betting. */
@@ -36,9 +37,6 @@ function summary(market: Market, status: Exclude<MarketStatus, "open">): ReactNo
 // Outlined at rest; fills with its colour on hover, so the choice reads as a real control.
 const sideButton =
   "relative z-10 flex h-11 flex-1 items-center justify-between rounded-full border px-5 text-[15px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2";
-
-// The small label above a value in the card's footer: the landing page's mono caps style.
-const label = "font-mono text-[11px] tracking-[0.14em] text-white/50 uppercase";
 
 /** A market in the grid: the question, the chance of YES, and a way in. The whole card opens the market. */
 export default function MarketTile({ market, now }: { market: Market; now: number }) {
@@ -91,12 +89,12 @@ export default function MarketTile({ market, now }: { market: Market; now: numbe
 
       <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
         <div>
-          <dt className={label}>At stake</dt>
+          <dt className={monoLabel}>At stake</dt>
           <dd className="mt-1.5 font-mono text-sm font-medium text-white tabular-nums">{formatEth(market.balance)}</dd>
         </div>
         {status !== "resolved" && (
           <div className="text-right">
-            <dt className={label}>{deadline > now ? "Ends" : "Ended"}</dt>
+            <dt className={monoLabel}>{deadline > now ? "Ends" : "Ended"}</dt>
             <dd className="mt-1.5 text-sm font-medium text-white">{formatRelativeTime(deadline, now)}</dd>
           </div>
         )}

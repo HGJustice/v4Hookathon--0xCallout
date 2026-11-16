@@ -1,4 +1,4 @@
-import type { ContractFunctionReturnType } from "viem";
+import type { Address, ContractFunctionReturnType } from "viem";
 import type { marketplaceFactoryAbi } from "@/lib/contracts/generated";
 
 /** A market as stored on-chain: the return value of MarketplaceFactory.getMarket. */
@@ -7,11 +7,21 @@ export type MarketData = ContractFunctionReturnType<typeof marketplaceFactoryAbi
 export type Market = MarketData & {
   /** Chance of YES implied by the pool's current price, from 0 to 1. Null if it has no price. */
   yesProbability: number | null;
+  /** The Uniswap v4 PoolManager that holds this market's pool. */
+  poolManager: Address;
 };
 
 /** The contract's PredictionOutcome enum. */
 export const Outcome = { Unresolved: 0, Yes: 1, No: 2, Void: 3 } as const;
 export type Outcome = (typeof Outcome)[keyof typeof Outcome];
+
+/**
+ * An outcome in words: "YES", "NO" or "Void". Empty for Unresolved, so an undecided market
+ * is never described as voided.
+ */
+export function getOutcomeLabel(outcome: number): string {
+  return outcome === Outcome.Yes ? "YES" : outcome === Outcome.No ? "NO" : outcome === Outcome.Void ? "Void" : "";
+}
 
 /**
  * YES or NO: what a user bets on, proposes or disputes. Void is left out on purpose: the

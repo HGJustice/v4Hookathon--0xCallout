@@ -1,4 +1,4 @@
-const label = "font-mono text-[11px] tracking-[0.14em] text-white/50 uppercase";
+import { monoLabel } from "../styles";
 
 /** The market's odds at full size: YES and NO as big percentages over a split bar. `yes` is 0–100, or null with no price yet. */
 export default function OddsHero({ yes }: { yes: number | null }) {
@@ -7,13 +7,13 @@ export default function OddsHero({ yes }: { yes: number | null }) {
     <div>
       <div className="flex items-end justify-between gap-6">
         <div>
-          <p className={label}>Yes</p>
+          <p className={monoLabel}>Yes</p>
           <p className="mt-1 font-display text-5xl leading-none font-semibold tabular-nums text-yes sm:text-6xl">
             {yes ?? "–"}%
           </p>
         </div>
         <div className="text-right">
-          <p className={label}>No</p>
+          <p className={monoLabel}>No</p>
           <p className="mt-1 font-display text-5xl leading-none font-semibold tabular-nums text-no sm:text-6xl">
             {no ?? "–"}%
           </p>

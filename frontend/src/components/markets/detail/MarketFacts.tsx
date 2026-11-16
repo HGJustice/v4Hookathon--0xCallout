@@ -2,10 +2,9 @@ import { appChain } from "@/lib/chain";
 import { formatDateTime, formatEth, shortAddress } from "@/lib/format";
 import type { Market } from "@/lib/markets/market";
 import { ExternalLink } from "../../icons";
+import { monoLabel } from "../styles";
 
 const explorer = appChain.blockExplorers.default;
-const label = "font-mono text-[11px] tracking-[0.14em] text-white/50 uppercase";
-
 function ExplorerLink({ path, children }: { path: string; children: string }) {
   return (
     <a
@@ -26,21 +25,21 @@ export default function MarketFacts({ market, now }: { market: Market; now: numb
     <section aria-label="Market details" className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
       <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
         <div>
-          <dt className={label}>At stake</dt>
+          <dt className={monoLabel}>At stake</dt>
           <dd className="mt-1.5 font-mono text-[15px] font-medium tabular-nums">{formatEth(market.balance)}</dd>
         </div>
         <div>
-          <dt className={label}>{deadline > now ? "Ends" : "Ended"}</dt>
+          <dt className={monoLabel}>{deadline > now ? "Ends" : "Ended"}</dt>
           <dd className="mt-1.5 text-[15px] font-medium">{formatDateTime(deadline)}</dd>
         </div>
         <div>
-          <dt className={label}>Created by</dt>
+          <dt className={monoLabel}>Created by</dt>
           <dd className="mt-1.5 font-mono text-[15px]">
             <ExplorerLink path={`address/${market.initializer}`}>{shortAddress(market.initializer)}</ExplorerLink>
           </dd>
         </div>
         <div>
-          <dt className={label}>Tokens</dt>
+          <dt className={monoLabel}>Tokens</dt>
           <dd className="mt-1.5 flex gap-4 text-[15px]">
             <ExplorerLink path={`address/${market.yesToken}`}>YES</ExplorerLink>
             <ExplorerLink path={`address/${market.noToken}`}>NO</ExplorerLink>

@@ -4,7 +4,7 @@ import type { Hash } from "viem";
 import { useAccount, useConfig, type Config } from "wagmi";
 import { hashFn } from "wagmi/query";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
-import type { MarketData } from "./market";
+import type { Market, MarketData } from "./market";
 import { fetchMarket, fetchMarkets, fetchPoolState, fetchPosition } from "./reads";
 import { createMarket, disputeOutcome, placeBet, proposeOutcome, redeem } from "./writes";
 
@@ -47,7 +47,7 @@ export function useMarket(id: bigint | undefined) {
 }
 
 /** What a market's pool holds and how much of each token exists, for quoting bets. Idle until the market is known. */
-export function usePoolState(market: Pick<MarketData, "marketplaceID" | "pool" | "yesToken" | "noToken"> | undefined) {
+export function usePoolState(market: Pick<Market, "marketplaceID" | "pool" | "yesToken" | "noToken" | "poolManager"> | undefined) {
   const config = useConfig();
   return useQuery({
     ...queryOptions,

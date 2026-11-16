@@ -121,6 +121,7 @@ async function withOdds(config: Config, poolManager: Address, markets: readonly 
   });
   return markets.map((market, i) => ({
     ...market,
+    poolManager,
     yesProbability: getYesProbability(
       BigInt(slots[i]) & SQRT_PRICE_MASK,
       isAddressEqual(market.yesToken, market.pool.currency0),
@@ -131,12 +132,12 @@ async function withOdds(config: Config, poolManager: Address, markets: readonly 
 /** The numbers a bet quote needs: what the market's pool holds and how much of each token exists. */
 export type PoolState = { reserves: TokenAmounts; supplies: TokenAmounts };
 
-export async function fetchPoolState(config: Config, market: Pick<MarketData, "pool" | "yesToken" | "noToken">): Promise<PoolState> {
-  const factory = requireMarketplaceFactory();
-  const [poolManager] = await readContracts(config, {
-    allowFailure: false,
-    contracts: [{ ...factory, functionName: "poolManager" }],
-  });
+export async function fetchPoolState(
+  config: Config,
+  market: Pick<Market, "pool" | "yesToken" | "noToken" | "poolManager">,
+): Promise<PoolState> {
+  requireMarketplaceFactory();
+  const { poolManager } = market;
   const slot = poolStateSlot(market.pool);
   const liquiditySlot = toHex(BigInt(slot) + LIQUIDITY_OFFSET, { size: 32 });
   const [slot0, liquidity, yesSupply, noSupply] = await readContracts(config, {

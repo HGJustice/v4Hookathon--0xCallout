@@ -8,6 +8,7 @@ import { appChain } from "@/lib/chain";
 import { formatAmount, formatEth, formatShares, parseEthInput } from "@/lib/format";
 import { usePlaceBet, usePoolState } from "@/lib/markets/hooks";
 import { Outcome, quoteBet, type Market, type Side } from "@/lib/markets/market";
+import { monoLabel } from "../styles";
 import ConnectPrompt from "./ConnectPrompt";
 import SidePicker from "./SidePicker";
 import TxStatus from "./TxStatus";
@@ -25,6 +26,15 @@ export default function TradePanel({ market }: { market: Market }) {
   const balance = useBalance({ address, chainId: appChain.id });
   const pool = usePoolState(market);
   const bet = usePlaceBet();
+  const [checking, setChecking] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // Editing the bet clears the result of the last one, so "Bet placed." or an old error
+  // never sits under a new amount.
+  function touch() {
+    if (!bet.isIdle) bet.reset();
+    setNotice(null);
+  }
 
   const amount = parseEthInput(input);
   const sideName = side === Outcome.Yes ? "YES" : "NO";
@@ -36,10 +46,22 @@ export default function TradePanel({ market }: { market: Market }) {
     [amount, pool.data, side, market.balance],
   );
   const tooMuch = amount !== null && balance.data !== undefined && amount > balance.data.value;
-  const canBuy = !!quote && !tooMuch && !bet.isPending;
+  const canBuy = !!quote && !tooMuch && !bet.isPending && !checking;
 
-  function buy() {
-    if (!amount || !canBuy) return;
+  async function buy() {
+    if (!amount || !quote || !canBuy) return;
+    // The quote on screen can be a few seconds old and the contract accepts any price, so
+    // re-read the pool first. If it now gives noticeably fewer shares, stop and let the
+    // user look at the updated quote before confirming.
+    setChecking(true);
+    const fresh = await pool.refetch();
+    setChecking(false);
+    if (fresh.isError || !fresh.data) return;
+    const latest = quoteBet({ side, amount, reserves: fresh.data.reserves, supplies: fresh.data.supplies, balance: market.balance });
+    if (latest.shares < (quote.shares * 99n) / 100n) {
+      setNotice(`The price moved: you'd now get ${formatShares(latest.shares)} ${sideName} shares. Check the quote and buy again.`);
+      return;
+    }
     bet.mutate({ marketId: market.marketplaceID, side, amount }, { onSuccess: () => setInput("") });
   }
 
@@ -52,11 +74,19 @@ export default function TradePanel({ market }: { market: Market }) {
       <h2 className="font-display text-xl font-semibold tracking-tight">Place a bet</h2>
 
       <div className="mt-5">
-        <SidePicker value={side} onChange={setSide} label="Side to bet on" disabled={bet.isPending} />
+        <SidePicker
+          value={side}
+          onChange={(next) => {
+            touch();
+            setSide(next);
+          }}
+          label="Side to bet on"
+          disabled={bet.isPending}
+        />
       </div>
 
       <label className="mt-5 block">
-        <span className="font-mono text-[11px] tracking-[0.14em] text-white/50 uppercase">Amount</span>
+        <span className={monoLabel}>Amount</span>
         <div className="relative mt-2">
           <input
             inputMode="decimal"
@@ -66,7 +96,10 @@ export default function TradePanel({ market }: { market: Market }) {
             disabled={bet.isPending}
             onChange={(event) => {
               // Plain decimals only, up to 18 places; anything else is ignored as it's typed.
-              if (event.target.value === "" || /^\d*\.?\d{0,18}$/.test(event.target.value)) setInput(event.target.value);
+              if (event.target.value === "" || /^\d*\.?\d{0,18}$/.test(event.target.value)) {
+                touch();
+                setInput(event.target.value);
+              }
             }}
             className="h-14 w-full rounded-full border border-white/15 bg-white/[0.03] pr-16 pl-6 font-mono text-xl tabular-nums transition-colors placeholder:text-white/30 hover:border-white/30 focus:border-white/40 focus:outline-none disabled:opacity-60"
           />
@@ -80,7 +113,10 @@ export default function TradePanel({ market }: { market: Market }) {
             key={quick}
             type="button"
             disabled={bet.isPending}
-            onClick={() => setInput(quick)}
+            onClick={() => {
+              touch();
+              setInput(quick);
+            }}
             className="h-9 rounded-full border border-white/15 px-4 font-mono text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white disabled:opacity-50"
           >
             {quick}
@@ -116,7 +152,7 @@ export default function TradePanel({ market }: { market: Market }) {
               side === Outcome.Yes ? "bg-yes hover:brightness-110" : "bg-no hover:brightness-110"
             }`}
           >
-            {bet.isPending ? "Placing bet…" : `Buy ${sideName}`}
+            {bet.isPending ? "Placing bet…" : checking ? "Checking price…" : `Buy ${sideName}`}
           </button>
         ) : (
           <ConnectPrompt>Sign in to place a bet.</ConnectPrompt>
@@ -125,6 +161,17 @@ export default function TradePanel({ market }: { market: Market }) {
           {tooMuch ? (
             <p role="alert" className="text-sm text-red-300">
               That&apos;s more than your balance.
+            </p>
+          ) : notice ? (
+            <p role="alert" className="text-sm text-white/80">
+              {notice}
+            </p>
+          ) : pool.isError ? (
+            <p role="alert" className="text-sm text-red-300">
+              Couldn&apos;t load the latest prices.{" "}
+              <button type="button" onClick={() => pool.refetch()} className="underline underline-offset-4 hover:text-white">
+                Try again
+              </button>
             </p>
           ) : (
             <TxStatus

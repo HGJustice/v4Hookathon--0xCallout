@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 import { formatEth, formatShares } from "@/lib/format";
 import { useDisputeOutcome, usePosition, useProposeOutcome, useRedeem } from "@/lib/markets/hooks";
-import { getRedeemAmount, Outcome, type Market, type Side } from "@/lib/markets/market";
+import { getOutcomeLabel, getRedeemAmount, Outcome, type Market, type Side } from "@/lib/markets/market";
 import { FEES } from "@/lib/protocol";
 import ConnectPrompt from "./ConnectPrompt";
 import Panel from "./Panel";
@@ -15,8 +15,6 @@ const body = "text-[15px] leading-7 text-white/70";
 
 const primaryButton =
   "h-12 w-full rounded-full bg-linear-to-r from-brand to-brand-soft font-medium text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40";
-
-const outcomeName = (outcome: number) => (outcome === Outcome.Yes ? "YES" : outcome === Outcome.No ? "NO" : "Void");
 
 /** After the deadline, before anyone has said how it ended: propose the result. */
 export function ProposePanel({ market }: { market: Market }) {
@@ -30,7 +28,15 @@ export function ProposePanel({ market }: { market: Market }) {
         The deadline has passed. Anyone can propose how this market ended; proposing costs {FEES.outcome} ETH, paid to
         the protocol.
       </p>
-      <SidePicker value={outcome} onChange={setOutcome} label="Outcome to propose" disabled={propose.isPending} />
+      <SidePicker
+        value={outcome}
+        onChange={(next) => {
+          if (!propose.isIdle) propose.reset();
+          setOutcome(next);
+        }}
+        label="Outcome to propose"
+        disabled={propose.isPending}
+      />
       {address ? (
         <button
           type="button"
@@ -38,7 +44,7 @@ export function ProposePanel({ market }: { market: Market }) {
           onClick={() => outcome && propose.mutate({ marketId: market.marketplaceID, outcome })}
           className={primaryButton}
         >
-          {propose.isPending ? "Proposing…" : outcome ? `Propose ${outcomeName(outcome)}` : "Choose an outcome"}
+          {propose.isPending ? "Proposing…" : outcome ? `Propose ${getOutcomeLabel(outcome)}` : "Choose an outcome"}
         </button>
       ) : (
         <ConnectPrompt>Sign in to propose a result.</ConnectPrompt>
@@ -65,13 +71,21 @@ export function DisputePanel({ market }: { market: Market }) {
   const dispute = useDisputeOutcome();
 
   return (
-    <Panel title={`Proposed result: ${outcomeName(proposed)}`}>
+    <Panel title={`Proposed result: ${getOutcomeLabel(proposed)}`}>
       <p className={body}>
         If nobody disputes it, the resolver finalises this result and winners can redeem. If you think it&apos;s wrong,
         dispute it for {FEES.outcome} ETH (paid to the protocol) and the multisig decides.
       </p>
       {opposite === null && (
-        <SidePicker value={picked} onChange={setPicked} label="Outcome to dispute with" disabled={dispute.isPending} />
+        <SidePicker
+          value={picked}
+          onChange={(next) => {
+            if (!dispute.isIdle) dispute.reset();
+            setPicked(next);
+          }}
+          label="Outcome to dispute with"
+          disabled={dispute.isPending}
+        />
       )}
       {address ? (
         <button
@@ -80,7 +94,7 @@ export function DisputePanel({ market }: { market: Market }) {
           onClick={() => outcome && dispute.mutate({ marketId: market.marketplaceID, outcome })}
           className="h-12 w-full rounded-full border border-white/25 font-medium text-white transition-colors hover:border-white/50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {dispute.isPending ? "Disputing…" : outcome ? `Dispute: it was ${outcomeName(outcome)}` : "Choose an outcome"}
+          {dispute.isPending ? "Disputing…" : outcome ? `Dispute: it was ${getOutcomeLabel(outcome)}` : "Choose an outcome"}
         </button>
       ) : (
         <ConnectPrompt>Sign in to dispute this result.</ConnectPrompt>
@@ -101,7 +115,7 @@ export function DisputedPanel({ market }: { market: Market }) {
   return (
     <Panel title="Result disputed">
       <p className={body}>
-        {outcomeName(market.proposedOutcome)} was proposed and then disputed with {outcomeName(market.disputedOutcome)}.
+        {getOutcomeLabel(market.proposedOutcome)} was proposed and then disputed with {getOutcomeLabel(market.disputedOutcome)}.
         The multisig will decide, and winners can redeem once it has.
       </p>
     </Panel>
@@ -113,7 +127,7 @@ export function RedeemPanel({ market }: { market: Market }) {
   const { address } = useAccount();
   const position = usePosition(market);
   const redeem = useRedeem();
-  const result = outcomeName(market.finalOutcome);
+  const result = getOutcomeLabel(market.finalOutcome);
 
   if (market.finalOutcome === Outcome.Void) {
     return (
@@ -132,6 +146,13 @@ export function RedeemPanel({ market }: { market: Market }) {
         <ConnectPrompt>Sign in to see whether you have winnings to redeem.</ConnectPrompt>
       ) : position.isPending ? (
         <p className={body}>Checking your position…</p>
+      ) : !position.data ? (
+        <p role="alert" className="text-sm text-red-300">
+          Couldn&apos;t load your shares.{" "}
+          <button type="button" onClick={() => position.refetch()} className="underline underline-offset-4 hover:text-white">
+            Try again
+          </button>
+        </p>
       ) : winningShares === 0n ? (
         // Right after redeeming there's nothing left, and the status below says why.
         redeem.isSuccess ? null : <p className={body}>You hold no {result} shares, so there&apos;s nothing to redeem.</p>

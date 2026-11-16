@@ -1,43 +1,43 @@
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
-import { getMarketStatus, Outcome, type Market } from "@/lib/markets/market";
+import { getMarketStatus, getOutcomeLabel, Outcome, type Market } from "@/lib/markets/market";
 import { Check } from "../../icons";
 
 type StepState = "done" | "current" | "todo";
 type Step = { title: string; detail?: string; state: StepState };
 
-const outcomeName = (outcome: number) => (outcome === Outcome.Yes ? "YES" : outcome === Outcome.No ? "NO" : "Void");
-
 function buildSteps(market: Market, now: number): Step[] {
   const status = getMarketStatus(market, BigInt(Math.floor(now / 1000)));
   const deadline = Number(market.deadline) * 1000;
   const proposedAt = Number(market.proposedAt) * 1000;
-  const proposedDetail = `${outcomeName(market.proposedOutcome)} · ${formatRelativeTime(proposedAt, now)}`;
+  // The multisig can resolve a market that was never proposed, and before its deadline.
+  const wasProposed = market.proposedOutcome !== Outcome.Unresolved;
+  const proposedDetail = `${getOutcomeLabel(market.proposedOutcome)} · ${formatRelativeTime(proposedAt, now)}`;
 
   const steps: Step[] = [
     status === "open"
       ? { title: "Betting open", detail: `Closes ${formatDateTime(deadline)}`, state: "current" }
-      : { title: "Betting closed", detail: formatDateTime(deadline), state: "done" },
+      : { title: "Betting closed", detail: deadline > now ? "Closed early" : formatDateTime(deadline), state: "done" },
   ];
 
   if (status === "open") {
     steps.push({ title: "Result proposed", state: "todo" });
   } else if (status === "closed") {
     steps.push({ title: "Result proposed", detail: "Waiting for someone to propose it", state: "current" });
-  } else {
+  } else if (wasProposed) {
     steps.push({ title: "Result proposed", detail: proposedDetail, state: status === "proposed" ? "current" : "done" });
   }
 
   if (market.outcomeDisputed) {
     steps.push({
       title: "Disputed",
-      detail: `With ${outcomeName(market.disputedOutcome)}`,
+      detail: `With ${getOutcomeLabel(market.disputedOutcome)}`,
       state: status === "disputed" ? "current" : "done",
     });
   }
 
   steps.push(
     status === "resolved"
-      ? { title: `Resolved ${outcomeName(market.finalOutcome)}`, detail: "Winners can redeem", state: "done" }
+      ? { title: `Resolved ${getOutcomeLabel(market.finalOutcome)}`, detail: "Winners can redeem", state: "done" }
       : { title: "Resolved", state: "todo" },
   );
   return steps;
