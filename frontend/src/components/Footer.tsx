@@ -2,21 +2,21 @@ import Link from "next/link";
 import { ArrowRight } from "./icons";
 import { LogoMark } from "./Logo";
 
-// Footer link columns. Only links with a real destination: add Community (social
-// profiles), Legal and Docs once those pages exist.
+// Footer link columns, as absolute links so they work from every page. Only links with a
+// real destination: add Community (social profiles), Legal and Docs once those pages exist.
 const COLUMNS: [title: string, links: [label: string, href: string][]][] = [
   [
     "Product",
     [
-      ["Create a market", "#how-it-works"],
-      ["Explore markets", "#markets"],
+      ["Create a market", "/#how-it-works"],
+      ["Explore markets", "/markets"],
     ],
   ],
   [
     "Learn",
     [
-      ["How it works", "#how-it-works"],
-      ["FAQ", "#faq"],
+      ["How it works", "/#how-it-works"],
+      ["FAQ", "/#faq"],
     ],
   ],
 ];
@@ -34,12 +34,12 @@ export default function Footer() {
             <p className="mt-5 leading-7 text-white/60">
               Turn online arguments into prediction markets. Built on Uniswap V4, resolved by Chainlink CRE with a multisig for disputes.
             </p>
-            <a
-              href="#how-it-works"
+            <Link
+              href="/#how-it-works"
               className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-linear-to-r from-brand to-brand-soft px-6 text-black transition hover:brightness-110"
             >
               Get started <ArrowRight />
-            </a>
+            </Link>
           </div>
 
           <nav aria-label="Footer" className="grid grid-cols-2 gap-10 xl:gap-20">
@@ -49,9 +49,9 @@ export default function Footer() {
                 <ul className="mt-5 space-y-3">
                   {links.map(([label, href]) => (
                     <li key={label}>
-                      <a href={href} className="transition-colors hover:text-brand">
+                      <Link href={href} className="transition-colors hover:text-brand">
                         {label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>

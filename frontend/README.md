@@ -61,8 +61,11 @@ contract errors and wallet rejections into short messages.
 
 ```
 src/
-  app/              layout (fonts, providers), page, global styles, favicon
+  app/              root layout (fonts, providers, navbar), global styles, favicon
+    (landing)/      home page; its layout adds the site footer
+    markets/        /markets (app pages have no footer)
   components/       page sections (Hero, Explore, HowItWorks, Benefits, Faq, Footer)
+    markets/        market list, market tile, odds bar
     wallet/         Privy/wagmi providers, sign-in button, account menu, mini-app login
   lib/              chain, wagmi and Privy config, GSAP/Lenis setup, shared hooks, demo data
     contracts/      generated ABI, factory address and config, error messages

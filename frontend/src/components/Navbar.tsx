@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Close, Menu } from "./icons";
 import { LogoMark } from "./Logo";
 import ConnectWalletButton from "./wallet/ConnectWalletButton";
 
+// Absolute links, so the section links work from every page, not just the home page.
 const links = [
-  ["Markets", "#markets"],
-  ["How it works", "#how-it-works"],
-  ["Use cases", "#benefits"],
-  ["FAQ", "#faq"],
+  ["Markets", "/markets"],
+  ["How it works", "/#how-it-works"],
+  ["Use cases", "/#benefits"],
+  ["FAQ", "/#faq"],
 ];
 
 // Behaves like cian.app's navbar: transparent at the very top, hidden while you
@@ -26,6 +28,8 @@ export default function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+  const pathname = usePathname();
+  const current = (href: string) => (href === pathname ? "page" : undefined);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -87,9 +91,13 @@ export default function Navbar() {
         <ul className="hidden gap-10 lg:flex">
           {links.map(([label, href]) => (
             <li key={label}>
-              <a href={href} className="transition-colors hover:text-brand">
+              <Link
+                href={href}
+                aria-current={current(href)}
+                className="transition-colors hover:text-brand aria-[current=page]:text-brand"
+              >
                 {label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -125,13 +133,14 @@ export default function Navbar() {
           <ul className="mx-auto max-w-[1200px]">
             {links.map(([label, href]) => (
               <li key={label} className="border-b border-white/10 last:border-b-0">
-                <a
+                <Link
                   href={href}
+                  aria-current={current(href)}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand"
+                  className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand aria-[current=page]:text-brand"
                 >
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

@@ -60,6 +60,17 @@ html.lenis body {
   }
 }
 
+/* Odds gauge (OddsGauge): the YES arc sweeps in from empty when a card appears. */
+@keyframes gauge-fill {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.gauge-fill {
+  animation: gauge-fill 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+
 /*
  * Deep-space backdrop (CosmicBackground): two star layers tiled at sizes that don't
  * divide into each other, so the pattern never visibly repeats, plus soft nebula light
@@ -197,6 +208,64 @@ html.lenis body {
   to {
     --steel-angle: 360deg;
   }
+}
+
+/*
+ * Market card surface (MarketTile): a violet-ink panel, in the same family as the nebula
+ * panels but lighter so it lifts off the page, with a corner glow in the colour of the
+ * side the market leans toward (--tint, blush for YES or violet for NO) and a deep-violet
+ * glow bottom-left for depth. --tint-a sets the glow strength; the tile scales it with how
+ * lopsided the odds are.
+ *
+ * The edge is a 1px hairline cut from a diagonal gradient with a mask: bright at the
+ * top-left, through the card's tint, fading almost to nothing at the bottom-right, as if
+ * lit from one corner. It's still; hovering only brightens it.
+ */
+.market-card {
+  --tint: 150 150 170; /* neutral, for markets that aren't taking bets */
+  --tint-a: 0.07;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(var(--tint) / var(--tint-a)), transparent 72%),
+    radial-gradient(60% 70% at 0% 100%, rgb(110 84 190 / 0.12), transparent 72%),
+    linear-gradient(180deg, #181326 0%, #0f0d17 100%);
+  border-color: transparent; /* the hairline below is the visible edge */
+  position: relative;
+}
+
+.market-card[data-lean="yes"] {
+  --tint: 246 193 211;
+}
+
+.market-card[data-lean="no"] {
+  --tint: 179 166 255;
+}
+
+.market-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px; /* cover the transparent 1px border */
+  border-radius: inherit;
+  padding: 1px; /* hairline thickness */
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.4) 0%,
+    rgb(var(--tint) / 0.5) 30%,
+    rgb(var(--tint) / 0.12) 65%,
+    rgb(255 255 255 / 0.05) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.market-card:hover::before,
+.market-card:has(a:focus-visible)::before {
+  opacity: 1;
 }
 
 /* Privy's sign-in / wallet modal gets the same moving steel edge, drawn as its real border
