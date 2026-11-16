@@ -32,6 +32,15 @@ export type MarketStatus =
   /** Final outcome set; winners can redeem. */
   | "resolved";
 
+/** A market's stage in words, for badges. */
+export const STATUS_LABEL: Record<MarketStatus, string> = {
+  open: "Open",
+  closed: "Awaiting result",
+  proposed: "Result proposed",
+  disputed: "Disputed",
+  resolved: "Resolved",
+};
+
 /**
  * Where a market is in its lifecycle. The contract doesn't enforce the deadline yet,
  * so "closed" is the app's view of it rather than something the chain rejects.
@@ -74,4 +83,83 @@ export function toDeadline(date: Date): bigint {
 /** The current time in the same units as a market's deadline. */
 export function nowInSeconds(): bigint {
   return toDeadline(new Date());
+}
+
+const Q96 = 1n << 96n;
+
+export type TokenAmounts = { yes: bigint; no: bigint };
+
+/**
+ * What a pool holds, from its price and liquidity. A market's pool is one position spread
+ * over the whole price range, so it behaves like a constant-product pool whose reserves
+ * are x = L / √P (token0) and y = L · √P (token1).
+ */
+export function getPoolReserves(sqrtPriceX96: bigint, liquidity: bigint, yesIsCurrency0: boolean): TokenAmounts {
+  const token0 = (liquidity * Q96) / sqrtPriceX96;
+  const token1 = (liquidity * sqrtPriceX96) / Q96;
+  return yesIsCurrency0 ? { yes: token0, no: token1 } : { yes: token1, no: token0 };
+}
+
+export type BetQuote = {
+  /** Shares of the chosen side the bettor ends up holding. */
+  shares: bigint;
+  /** What those shares redeem for if their side wins, assuming nobody bets after. */
+  payoutIfWins: bigint;
+  /** The chance of YES once the bet has moved the price, from 0 to 1. */
+  yesProbability: number | null;
+};
+
+/**
+ * What a bet of `amount` ETH would do, modelled the way the contract does it: it mints
+ * `amount` of both tokens, swaps the opposite side's tokens into the pool for more of the
+ * chosen side (no pool fee), and hands over everything it got. Winners later split the
+ * market's ETH in proportion to their shares of the winning token held outside the pool.
+ */
+export function quoteBet({
+  side,
+  amount,
+  reserves,
+  supplies,
+  balance,
+}: {
+  side: Side;
+  amount: bigint;
+  /** The pool's current reserves. */
+  reserves: TokenAmounts;
+  /** Total supply of each token. */
+  supplies: TokenAmounts;
+  /** The market's ETH balance, before this bet. */
+  balance: bigint;
+}): BetQuote {
+  const buyYes = side === Outcome.Yes;
+  const reserveWin = buyYes ? reserves.yes : reserves.no;
+  const reserveOther = buyYes ? reserves.no : reserves.yes;
+
+  const swapOut = (reserveWin * amount) / (reserveOther + amount);
+  const shares = amount + swapOut;
+
+  const newWin = reserveWin - swapOut;
+  const newOther = reserveOther + amount;
+  const circulating = (buyYes ? supplies.yes : supplies.no) + amount - newWin;
+  const payoutIfWins = circulating > 0n ? ((balance + amount) * shares) / circulating : 0n;
+
+  const yesReserve = buyYes ? newWin : newOther;
+  const noReserve = buyYes ? newOther : newWin;
+  const total = yesReserve + noReserve;
+  return {
+    shares,
+    payoutIfWins,
+    yesProbability: total === 0n ? null : Number((noReserve * PRECISION) / total) / Number(PRECISION),
+  };
+}
+
+/**
+ * What a holder gets by redeeming in a resolved market: the market's ETH split by their
+ * share of the winning token held outside the pool, as `redeemMarket` computes it.
+ */
+export function getRedeemAmount(market: MarketData, position: TokenAmounts): bigint {
+  const winning =
+    market.finalOutcome === Outcome.Yes ? position.yes : market.finalOutcome === Outcome.No ? position.no : 0n;
+  const circulating = market.winningSupplyAtResolve - market.poolWinningBalanceAtResolve;
+  return circulating > 0n ? (market.balance * winning) / circulating : 0n;
 }

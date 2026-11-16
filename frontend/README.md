@@ -52,7 +52,7 @@ Market code lives in `src/lib/markets/`:
   first, so a revert is reported with its reason before the wallet opens.
 - `hooks.ts`: React hooks over them: `useMarkets`, `useMarket`, `usePosition` and
   `useCreateMarket`, `usePlaceBet`, `useProposeOutcome`, `useDisputeOutcome`, `useRedeem`.
-- `market.ts`: types and pure helpers (outcomes, status, odds).
+- `market.ts`: types and pure helpers (outcomes, status, odds, bet quotes, redeem amounts).
 
 Show any failure with `getErrorMessage` from `src/lib/contracts/errors.ts`, which turns
 contract errors and wallet rejections into short messages.
@@ -66,6 +66,7 @@ src/
     markets/        /markets (app pages have no footer)
   components/       page sections (Hero, Explore, HowItWorks, Benefits, Faq, Footer)
     markets/        market list, market tile, odds bar
+      detail/       the /markets/[id] page: odds, bet panel, propose / dispute / redeem, progress
     wallet/         Privy/wagmi providers, sign-in button, account menu, mini-app login
   lib/              chain, wagmi and Privy config, GSAP/Lenis setup, shared hooks, demo data
     contracts/      generated ABI, factory address and config, error messages

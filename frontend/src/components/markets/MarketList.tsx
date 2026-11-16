@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { getErrorMessage } from "@/lib/contracts/errors";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
 import { useMarkets } from "@/lib/markets/hooks";
 import { getMarketStatus, type Market, type MarketStatus } from "@/lib/markets/market";
 import { useNow } from "@/lib/useNow";
 import MarketTile from "./MarketTile";
+import Notice from "./Notice";
 
 type Filter = { id: "all" | "open" | "resolving" | "resolved"; label: string; statuses: readonly MarketStatus[] | null };
 
@@ -208,15 +209,6 @@ export default function MarketList() {
         </ul>
       )}
     </>
-  );
-}
-
-function Notice({ title, role, children }: { title: string; role?: "alert"; children: ReactNode }) {
-  return (
-    <div role={role} className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-14 text-center">
-      <p className="font-display text-2xl font-medium tracking-tight">{title}</p>
-      <div className="mx-auto mt-3 max-w-[460px] text-white/60">{children}</div>
-    </div>
   );
 }
 

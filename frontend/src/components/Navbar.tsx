@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Close, Menu } from "./icons";
 import { LogoMark } from "./Logo";
 import ConnectWalletButton from "./wallet/ConnectWalletButton";
@@ -21,6 +21,33 @@ const links = [
 const JITTER = 4; // ignore tiny scroll wobbles so the bar doesn't flicker
 const DESKTOP = "(min-width: 1024px)"; // lg: inline links replace the menu
 
+type NavLinkProps = { href: string; className: string; onClick?: () => void; children: ReactNode };
+
+function CurrentAwareLink({ href, className, onClick, children }: NavLinkProps) {
+  const pathname = usePathname();
+  return (
+    <Link href={href} aria-current={href === pathname ? "page" : undefined} onClick={onClick} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+// Marks the link to the current page. Reading the pathname has to wait for the request on
+// routes like /markets/[id], so it sits in Suspense; until then the link renders unmarked.
+function NavLink(props: NavLinkProps) {
+  return (
+    <Suspense
+      fallback={
+        <Link href={props.href} onClick={props.onClick} className={props.className}>
+          {props.children}
+        </Link>
+      }
+    >
+      <CurrentAwareLink {...props} />
+    </Suspense>
+  );
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -28,8 +55,6 @@ export default function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
-  const pathname = usePathname();
-  const current = (href: string) => (href === pathname ? "page" : undefined);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -91,13 +116,9 @@ export default function Navbar() {
         <ul className="hidden gap-10 lg:flex">
           {links.map(([label, href]) => (
             <li key={label}>
-              <Link
-                href={href}
-                aria-current={current(href)}
-                className="transition-colors hover:text-brand aria-[current=page]:text-brand"
-              >
+              <NavLink href={href} className="transition-colors hover:text-brand aria-[current=page]:text-brand">
                 {label}
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -133,14 +154,13 @@ export default function Navbar() {
           <ul className="mx-auto max-w-[1200px]">
             {links.map(([label, href]) => (
               <li key={label} className="border-b border-white/10 last:border-b-0">
-                <Link
+                <NavLink
                   href={href}
-                  aria-current={current(href)}
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand aria-[current=page]:text-brand"
                 >
                   {label}
-                </Link>
+                </NavLink>
               </li>
             ))}
           </ul>

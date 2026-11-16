@@ -5,7 +5,7 @@ import { useAccount, useConfig, type Config } from "wagmi";
 import { hashFn } from "wagmi/query";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
 import type { MarketData } from "./market";
-import { fetchMarket, fetchMarkets, fetchPosition } from "./reads";
+import { fetchMarket, fetchMarkets, fetchPoolState, fetchPosition } from "./reads";
 import { createMarket, disputeOutcome, placeBet, proposeOutcome, redeem } from "./writes";
 
 /** Query keys for market data, so a write can refresh everything it may have changed. */
@@ -13,6 +13,7 @@ export const marketKeys = {
   all: ["markets"] as const,
   list: (limit: number) => [...marketKeys.all, "list", limit] as const,
   detail: (id: bigint) => [...marketKeys.all, "detail", id] as const,
+  pool: (id: bigint) => [...marketKeys.all, "pool", id] as const,
   position: (id: bigint, account: string) => [...marketKeys.all, "position", id, account] as const,
 };
 
@@ -42,6 +43,16 @@ export function useMarket(id: bigint | undefined) {
     ...queryOptions,
     queryKey: marketKeys.detail(id ?? 0n),
     queryFn: id === undefined ? skipToken : () => fetchMarket(config, id),
+  });
+}
+
+/** What a market's pool holds and how much of each token exists, for quoting bets. Idle until the market is known. */
+export function usePoolState(market: Pick<MarketData, "marketplaceID" | "pool" | "yesToken" | "noToken"> | undefined) {
+  const config = useConfig();
+  return useQuery({
+    ...queryOptions,
+    queryKey: marketKeys.pool(market?.marketplaceID ?? 0n),
+    queryFn: market ? () => fetchPoolState(config, market) : skipToken,
   });
 }
 

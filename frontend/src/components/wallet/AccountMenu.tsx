@@ -5,11 +5,9 @@ import { useExportWallet, usePrivy, useWallets, type User } from "@privy-io/reac
 import type { Address } from "viem";
 import { useBalance } from "wagmi";
 import { appChain } from "@/lib/chain";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, shortAddress } from "@/lib/format";
 import { Check, Copy, ExternalLink, Key, LogOut } from "../icons";
 import { pill } from "./walletStyles";
-
-const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 
 /** Who the user is, in the most recognisable form available: Farcaster handle, email, address. */
 function displayName(user: User | null, address: Address) {
