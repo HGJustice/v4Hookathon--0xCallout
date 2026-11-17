@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { getErrorMessage } from "@/lib/contracts/errors";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
-import { formatRelativeTime } from "@/lib/format";
 import { useMarket } from "@/lib/markets/hooks";
-import { getMarketStatus, STATUS_LABEL, type Market } from "@/lib/markets/market";
+import { getMarketStatus, Outcome, type Market, type Side } from "@/lib/markets/market";
 import { useNow } from "@/lib/useNow";
-import { ArrowRight } from "../../icons";
 import Notice from "../Notice";
-import OddsCard from "./OddsCard";
+import ChanceHero from "./ChanceHero";
+import MarketDetails from "./MarketDetails";
+import MarketHeader from "./MarketHeader";
 import PositionCard from "./PositionCard";
 import { DisputedPanel, DisputePanel, ProposePanel, RedeemPanel } from "./ResolutionPanels";
 import StatusTimeline from "./StatusTimeline";
 import TradePanel from "./TradePanel";
 
-/** One market: its odds and progress on the left, and whatever you can do with it right now on the right. */
+/** One market on a single column: the question, the odds, whatever you can do right now, then how it resolves and the details. */
 export default function MarketDetail({ id }: { id: string }) {
   const market = useMarket(BigInt(id));
   const now = useNow();
@@ -59,53 +61,34 @@ function BackLink() {
 
 function Detail({ market, now }: { market: Market; now: number }) {
   const status = getMarketStatus(market, BigInt(Math.floor(now / 1000)));
-  const deadline = Number(market.deadline) * 1000;
+  // `?side=yes|no` (from the buttons on the markets list) opens the bet form straight away.
+  const searchParams = useSearchParams();
+  const [side, setSide] = useState<Side | null>(() => {
+    const requested = searchParams.get("side");
+    return requested === "yes" ? Outcome.Yes : requested === "no" ? Outcome.No : null;
+  });
+  const betting = status === "open";
 
   return (
-    <div>
-      <Link
-        href="/markets"
-        className="inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"
-      >
-        <ArrowRight className="size-4 rotate-180" /> All markets
-      </Link>
+    <div className="mx-auto w-full max-w-[720px]">
+      <MarketHeader market={market} now={now} />
+      <ChanceHero market={market} canBet={betting} side={side} onSide={setSide} />
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span
-          className={`inline-flex h-8 items-center rounded-full border px-3.5 text-sm font-medium ${
-            status === "open" ? "border-yes/50 text-yes" : "border-white/20 text-white/80"
-          }`}
-        >
-          {STATUS_LABEL[status]}
-        </span>
-        {status !== "resolved" && (
-          <span className="text-sm text-white/60">
-            {deadline > now ? `Ends ${formatRelativeTime(deadline, now)}` : `Ended ${formatRelativeTime(deadline, now)}`}
-          </span>
-        )}
+      <div className="mt-6">
+        {betting && side !== null && <TradePanel key={side} market={market} side={side} onClose={() => setSide(null)} />}
+        {status === "closed" && <ProposePanel market={market} />}
+        {status === "proposed" && <DisputePanel market={market} />}
+        {status === "disputed" && <DisputedPanel market={market} />}
+        {status === "resolved" && <RedeemPanel market={market} />}
       </div>
 
-      <h1 className="mt-4 max-w-[900px] font-display text-2xl leading-snug font-semibold tracking-tight text-white sm:text-4xl sm:leading-tight">
-        {market.title}
-      </h1>
-
-      {/* The odds and the action start on the same line; on a phone they stack in that order. */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-8">
-        <div className="min-w-0 lg:col-start-1">
-          <OddsCard market={market} now={now} />
-        </div>
-
-        <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
-          {status === "open" && <TradePanel market={market} />}
-          {status === "closed" && <ProposePanel market={market} />}
-          {status === "proposed" && <DisputePanel market={market} />}
-          {status === "disputed" && <DisputedPanel market={market} />}
-          {status === "resolved" && <RedeemPanel market={market} />}
-        </aside>
-
-        <div className="min-w-0 space-y-6 lg:col-start-1">
-          <PositionCard market={market} />
+      <div className="mt-12 space-y-10">
+        <PositionCard market={market} />
+        <div className="border-t border-white/10 pt-10">
           <StatusTimeline market={market} now={now} />
+        </div>
+        <div className="border-t border-white/10 pt-10">
+          <MarketDetails market={market} />
         </div>
       </div>
     </div>
@@ -114,15 +97,16 @@ function Detail({ market, now }: { market: Market; now: number }) {
 
 export function DetailSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading market" aria-hidden="false">
+    <div aria-busy="true" aria-label="Loading market" className="mx-auto w-full max-w-[720px]">
       <div aria-hidden="true">
-        <div className="h-5 w-28 animate-pulse rounded-md bg-white/[0.06]" />
-        <div className="mt-5 h-8 w-32 animate-pulse rounded-full bg-white/[0.06]" />
-        <div className="mt-4 h-10 max-w-[600px] animate-pulse rounded-lg bg-white/[0.06]" />
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-8">
-          <div className="h-[300px] animate-pulse rounded-3xl border border-white/10 bg-white/[0.03]" />
-          <div className="h-[460px] animate-pulse rounded-3xl border border-white/10 bg-white/[0.03] lg:col-start-2 lg:row-span-2 lg:row-start-1" />
-          <div className="h-[260px] animate-pulse rounded-3xl border border-white/10 bg-white/[0.03] lg:col-start-1" />
+        <div className="h-9 w-32 animate-pulse rounded-full bg-white/[0.06]" />
+        <div className="mt-6 h-24 animate-pulse rounded-2xl bg-white/[0.06]" />
+        <div className="mt-5 h-7 w-3/4 animate-pulse rounded-lg bg-white/[0.06]" />
+        <div className="mt-10 h-20 w-56 animate-pulse rounded-2xl bg-white/[0.06]" />
+        <div className="mt-6 h-3 animate-pulse rounded-full bg-white/[0.06]" />
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="h-14 animate-pulse rounded-full bg-white/[0.06]" />
+          <div className="h-14 animate-pulse rounded-full bg-white/[0.06]" />
         </div>
       </div>
     </div>

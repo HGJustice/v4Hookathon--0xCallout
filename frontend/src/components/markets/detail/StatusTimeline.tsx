@@ -1,7 +1,6 @@
 import { formatDateTime, formatRelativeTime } from "@/lib/format";
 import { getMarketStatus, getOutcomeLabel, Outcome, type Market } from "@/lib/markets/market";
 import { Check } from "../../icons";
-import Card, { leanOf } from "./Card";
 
 type StepState = "done" | "current" | "todo";
 type Step = { title: string; detail?: string; state: StepState };
@@ -48,9 +47,13 @@ function buildSteps(market: Market, now: number): Step[] {
 export default function StatusTimeline({ market, now }: { market: Market; now: number }) {
   const steps = buildSteps(market, now);
   return (
-    <Card aria-label="Progress" lean={leanOf(market)}>
-      <h2 className="font-display text-lg font-semibold tracking-tight">Progress</h2>
-      <ol className="mt-5">
+    <section aria-label="How this market resolves">
+      <h2 className="font-display text-lg font-semibold tracking-tight">How this market resolves</h2>
+      <p className="mt-2 max-w-[560px] text-[15px] leading-7 text-white/65">
+        After the deadline anyone can propose the result. If nobody disputes it, the resolver finalises it; if someone
+        does, the multisig decides. Winners then redeem their shares for their cut of the pot.
+      </p>
+      <ol className="mt-6">
         {steps.map((step, i) => (
           <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0" aria-current={step.state === "current" ? "step" : undefined}>
             {i < steps.length - 1 && (
@@ -80,6 +83,6 @@ export default function StatusTimeline({ market, now }: { market: Market; now: n
           </li>
         ))}
       </ol>
-    </Card>
+    </section>
   );
 }

@@ -1,27 +1,27 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import { appChain } from "@/lib/chain";
 import { formatAmount, formatEth, formatShares, parseEthInput } from "@/lib/format";
 import { usePlaceBet, usePoolState } from "@/lib/markets/hooks";
+import { Close } from "../../icons";
 import { Outcome, quoteBet, type Market, type Side } from "@/lib/markets/market";
 import { monoLabel } from "../styles";
 import Card from "./Card";
 import ConnectPrompt from "./ConnectPrompt";
-import OutcomeCards from "./OutcomeCards";
 import TxStatus from "./TxStatus";
 
 const QUICK_AMOUNTS = ["0.01", "0.05", "0.1"];
 
 const percent = (probability: number | null) => (probability === null ? "–" : `${Math.round(probability * 100)}%`);
 
-/** Buy YES or NO shares in an open market, with a live quote of what the bet gets you. */
-export default function TradePanel({ market }: { market: Market }) {
-  const searchParams = useSearchParams();
-  const [side, setSide] = useState<Side>(searchParams.get("side") === "no" ? Outcome.No : Outcome.Yes);
+/**
+ * Buy shares of `side` in an open market, with a live quote of what the bet gets you. The
+ * page remounts it when the side changes (key), so each side starts from a clean form.
+ */
+export default function TradePanel({ market, side, onClose }: { market: Market; side: Side; onClose: () => void }) {
   const [input, setInput] = useState("");
   const { address } = useAccount();
   const balance = useBalance({ address, chainId: appChain.id });
@@ -67,19 +67,19 @@ export default function TradePanel({ market }: { market: Market }) {
   }
 
   return (
-    <Card lean={side === Outcome.Yes ? "yes" : "no"}>
-      <h2 className="font-display text-xl font-semibold tracking-tight">Place a bet</h2>
-
-      <div className="mt-5">
-        <OutcomeCards
-          value={side}
-          onChange={(next) => {
-            touch();
-            setSide(next);
-          }}
-          yes={market.yesProbability === null ? null : Math.round(market.yesProbability * 100)}
-          disabled={bet.isPending}
-        />
+    <Card lean={side === Outcome.Yes ? "yes" : "no"} className="animate-fade-up">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="font-display text-xl font-semibold tracking-tight">
+          Bet <span className={side === Outcome.Yes ? "text-yes" : "text-no"}>{sideName}</span>
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close the bet form"
+          className="flex size-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <Close className="size-5" />
+        </button>
       </div>
 
       <label className="mt-5 block">
