@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp } from "../../icons";
-import { Outcome, type Market, type Side } from "@/lib/markets/market";
+import { getOutcomeLabel, Outcome, type Market, type Side } from "@/lib/markets/market";
+import { focusRing } from "../styles";
 
 /**
  * The market's odds as one huge number over a split bar, and, while betting is open, the two
@@ -8,11 +9,14 @@ import { Outcome, type Market, type Side } from "@/lib/markets/market";
 export default function ChanceHero({
   market,
   canBet,
+  result,
   side,
   onSide,
 }: {
   market: Market;
   canBet: boolean;
+  /** The final outcome once the market is resolved; null while it is still undecided. */
+  result: number | null;
   side: Side | null;
   onSide: (side: Side | null) => void;
 }) {
@@ -26,12 +30,25 @@ export default function ChanceHero({
 
   return (
     <section aria-label="Odds" className="mt-10">
-      <p className="flex items-baseline gap-3">
-        <span className="font-display text-7xl leading-none font-semibold tracking-tight tabular-nums sm:text-8xl">
-          {yes ?? "–"}%
-        </span>
-        <span className="text-xl text-white/60">chance of YES</span>
-      </p>
+      {result === null ? (
+        <p className="flex items-baseline gap-3">
+          <span className="font-display text-7xl leading-none font-semibold tracking-tight tabular-nums sm:text-8xl">
+            {yes ?? "–"}%
+          </span>
+          <span className="text-xl text-white/60">chance of YES</span>
+        </p>
+      ) : (
+        <p className="flex items-baseline gap-3">
+          <span
+            className={`font-display text-7xl leading-none font-semibold tracking-tight sm:text-8xl ${
+              result === Outcome.Yes ? "text-yes" : result === Outcome.No ? "text-no" : ""
+            }`}
+          >
+            {getOutcomeLabel(result)}
+          </span>
+          <span className="text-xl text-white/60">is the result</span>
+        </p>
+      )}
 
       <div className="mt-6 flex h-3 gap-1 overflow-hidden rounded-full" aria-hidden="true">
         {yes === null ? (
@@ -43,7 +60,7 @@ export default function ChanceHero({
           </>
         )}
       </div>
-      <p className="mt-2.5 flex justify-between font-mono text-sm tabular-nums">
+      <p className="mt-2.5 flex justify-between font-mono text-sm tabular-nums" aria-label={result === null ? "Current odds" : "Final odds"}>
         <span className="text-yes">YES {yes ?? "–"}%</span>
         <span className="text-no">NO {no ?? "–"}%</span>
       </p>
@@ -56,7 +73,7 @@ export default function ChanceHero({
               type="button"
               aria-pressed={side === value}
               onClick={() => onSide(side === value ? null : value)}
-              className={`${fill} flex h-14 items-center justify-center gap-2 rounded-full text-base font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white aria-pressed:ring-2 aria-pressed:ring-white aria-pressed:ring-offset-2 aria-pressed:ring-offset-[#0b0b10]`}
+              className={`${fill} flex h-14 items-center justify-center gap-2 rounded-full text-base font-semibold text-black transition hover:brightness-110 active:scale-[0.98] aria-pressed:ring-2 aria-pressed:ring-white aria-pressed:ring-offset-2 aria-pressed:ring-offset-background ${focusRing}`}
             >
               {label} <Icon className="size-5" />
             </button>

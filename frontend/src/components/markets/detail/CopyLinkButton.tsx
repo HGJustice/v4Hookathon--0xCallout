@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, LinkIcon } from "../../icons";
+import { focusRing } from "../styles";
 
 /** Copies this page's address, with a short "Copied" confirmation. */
 export default function CopyLinkButton() {
@@ -27,10 +28,10 @@ export default function CopyLinkButton() {
       type="button"
       onClick={copy}
       aria-label={copied ? "Link copied" : "Copy link"}
-      className="flex h-9 items-center gap-2 rounded-full border border-white/15 px-3.5 text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white"
+      className={`flex h-9 items-center gap-2 rounded-full border border-white/15 px-3.5 text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white ${focusRing}`}
     >
       {copied ? <Check className="size-4" /> : <LinkIcon />}
-      {copied ? "Copied" : "Copy link"}
+      <span aria-live="polite">{copied ? "Copied" : "Copy link"}</span>
     </button>
   );
 }

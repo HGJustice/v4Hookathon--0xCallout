@@ -8,7 +8,7 @@ import { formatAmount, formatEth, formatShares, parseEthInput } from "@/lib/form
 import { usePlaceBet, usePoolState } from "@/lib/markets/hooks";
 import { Close } from "../../icons";
 import { Outcome, quoteBet, type Market, type Side } from "@/lib/markets/market";
-import { monoLabel } from "../styles";
+import { focusRing, monoLabel } from "../styles";
 import Card from "./Card";
 import ConnectPrompt from "./ConnectPrompt";
 import TxStatus from "./TxStatus";
@@ -21,7 +21,18 @@ const percent = (probability: number | null) => (probability === null ? "–" : 
  * Buy shares of `side` in an open market, with a live quote of what the bet gets you. The
  * page remounts it when the side changes (key), so each side starts from a clean form.
  */
-export default function TradePanel({ market, side, onClose }: { market: Market; side: Side; onClose: () => void }) {
+export default function TradePanel({
+  market,
+  side,
+  autoFocus = false,
+  onClose,
+}: {
+  market: Market;
+  side: Side;
+  /** Put the cursor in the amount field (when the user just opened the form). */
+  autoFocus?: boolean;
+  onClose: () => void;
+}) {
   const [input, setInput] = useState("");
   const { address } = useAccount();
   const balance = useBalance({ address, chainId: appChain.id });
@@ -67,7 +78,14 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
   }
 
   return (
-    <Card lean={side === Outcome.Yes ? "yes" : "no"} className="animate-fade-up">
+    <Card
+      lean={side === Outcome.Yes ? "yes" : "no"}
+      className="animate-fade-up"
+      aria-label={`Bet ${sideName}`}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") onClose();
+      }}
+    >
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-display text-xl font-semibold tracking-tight">
           Bet <span className={side === Outcome.Yes ? "text-yes" : "text-no"}>{sideName}</span>
@@ -76,7 +94,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
           type="button"
           onClick={onClose}
           aria-label="Close the bet form"
-          className="flex size-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          className={`flex size-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}
         >
           <Close className="size-5" />
         </button>
@@ -90,6 +108,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
             autoComplete="off"
             placeholder="0.00"
             value={input}
+            autoFocus={autoFocus}
             disabled={bet.isPending}
             onChange={(event) => {
               // Plain decimals only, up to 18 places; anything else is ignored as it's typed.
@@ -98,7 +117,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
                 setInput(event.target.value);
               }
             }}
-            className="h-14 w-full rounded-full border border-white/15 bg-white/[0.03] pr-16 pl-6 font-mono text-xl tabular-nums transition-colors placeholder:text-white/30 hover:border-white/30 focus:border-white/40 focus:outline-none disabled:opacity-60"
+            className="h-14 w-full rounded-full border border-white/15 bg-white/[0.03] pr-16 pl-6 font-mono text-xl tabular-nums transition-colors placeholder:text-white/30 hover:border-white/30 focus:border-white/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-white/10 focus:outline-none disabled:opacity-60"
           />
           <span className="pointer-events-none absolute top-1/2 right-6 -translate-y-1/2 text-white/50">ETH</span>
         </div>
@@ -114,7 +133,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
               touch();
               setInput(quick);
             }}
-            className="h-9 rounded-full border border-white/15 px-4 font-mono text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white disabled:opacity-50"
+            className={`h-9 rounded-full border border-white/15 px-4 font-mono text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white disabled:opacity-50 ${focusRing}`}
           >
             {quick}
           </button>
@@ -126,7 +145,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
         )}
       </div>
 
-      <dl className="mt-6 space-y-3 border-t border-white/10 pt-5 text-sm">
+      <dl className="mt-6 space-y-3 border-t border-white/10 pt-5 text-sm" aria-live="polite">
         <Row label="You get" value={quote ? `${formatShares(quote.shares)} ${sideName} shares` : "–"} />
         <Row
           label={`If ${sideName} wins`}
@@ -145,7 +164,7 @@ export default function TradePanel({ market, side, onClose }: { market: Market; 
             type="button"
             disabled={!canBuy}
             onClick={buy}
-            className={`h-12 w-full rounded-full font-medium text-black transition disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`h-12 w-full rounded-full font-medium text-black transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing} ${
               side === Outcome.Yes ? "bg-yes hover:brightness-110" : "bg-no hover:brightness-110"
             }`}
           >

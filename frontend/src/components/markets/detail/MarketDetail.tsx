@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/lib/contracts/errors";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
 import { useMarket } from "@/lib/markets/hooks";
@@ -68,14 +68,32 @@ function Detail({ market, now }: { market: Market; now: number }) {
     return requested === "yes" ? Outcome.Yes : requested === "no" ? Outcome.No : null;
   });
   const betting = status === "open";
+  // Only a click moves focus into the form, so opening it from a link doesn't jump the page.
+  const [focusBet, setFocusBet] = useState(false);
+
+  // The tab, history and bookmarks name the market rather than the generic route title.
+  useEffect(() => {
+    document.title = `${market.title} | Multiverse Markets`;
+  }, [market.title]);
 
   return (
     <div className="mx-auto w-full max-w-[720px]">
       <MarketHeader market={market} now={now} />
-      <ChanceHero market={market} canBet={betting} side={side} onSide={setSide} />
+      <ChanceHero
+        market={market}
+        canBet={betting}
+        result={status === "resolved" ? market.finalOutcome : null}
+        side={side}
+        onSide={(next) => {
+          setFocusBet(next !== null);
+          setSide(next);
+        }}
+      />
 
       <div className="mt-6">
-        {betting && side !== null && <TradePanel key={side} market={market} side={side} onClose={() => setSide(null)} />}
+        {betting && side !== null && (
+          <TradePanel key={side} market={market} side={side} autoFocus={focusBet} onClose={() => setSide(null)} />
+        )}
         {status === "closed" && <ProposePanel market={market} />}
         {status === "proposed" && <DisputePanel market={market} />}
         {status === "disputed" && <DisputedPanel market={market} />}
@@ -84,12 +102,8 @@ function Detail({ market, now }: { market: Market; now: number }) {
 
       <div className="mt-12 space-y-10">
         <PositionCard market={market} />
-        <div className="border-t border-white/10 pt-10">
-          <StatusTimeline market={market} now={now} />
-        </div>
-        <div className="border-t border-white/10 pt-10">
-          <MarketDetails market={market} />
-        </div>
+        <StatusTimeline market={market} now={now} />
+        <MarketDetails market={market} />
       </div>
     </div>
   );

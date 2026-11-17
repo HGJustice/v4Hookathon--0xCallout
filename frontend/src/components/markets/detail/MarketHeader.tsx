@@ -3,6 +3,7 @@ import { appChain } from "@/lib/chain";
 import { formatEth, formatRelativeTime, shortAddress } from "@/lib/format";
 import { getMarketStatus, STATUS_LABEL, type Market } from "@/lib/markets/market";
 import { ArrowRight, Clock, Eth, User } from "../../icons";
+import { focusRing } from "../styles";
 import CopyLinkButton from "./CopyLinkButton";
 
 const explorer = appChain.blockExplorers.default;
@@ -17,14 +18,19 @@ export default function MarketHeader({ market, now }: { market: Market; now: num
       <div className="flex items-center justify-between gap-4">
         <Link
           href="/markets"
-          className="inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"
+          className={`inline-flex items-center gap-2 rounded text-sm text-white/60 transition-colors hover:text-white ${focusRing}`}
         >
           <ArrowRight className="size-4 rotate-180" /> All markets
         </Link>
         <CopyLinkButton />
       </div>
 
-      <h1 className="mt-6 font-display text-3xl leading-tight font-semibold tracking-tight text-white sm:text-4xl">
+      {/* Long questions step down a size so they don't dominate the page. */}
+      <h1
+        className={`mt-6 font-display leading-tight font-semibold tracking-tight text-balance text-white ${
+          market.title.length > 90 ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"
+        }`}
+      >
         {market.title}
       </h1>
 
@@ -47,7 +53,7 @@ export default function MarketHeader({ market, now }: { market: Market; now: num
               href={`${explorer.url}/address/${market.initializer}`}
               target="_blank"
               rel="noreferrer"
-              className="font-mono transition-colors hover:text-brand"
+              className={`rounded font-mono transition-colors hover:text-brand ${focusRing}`}
             >
               {shortAddress(market.initializer)}
             </a>

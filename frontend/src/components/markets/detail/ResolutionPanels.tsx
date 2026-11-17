@@ -6,6 +6,7 @@ import { formatEth, formatShares } from "@/lib/format";
 import { useDisputeOutcome, usePosition, useProposeOutcome, useRedeem } from "@/lib/markets/hooks";
 import { getOutcomeLabel, getRedeemAmount, Outcome, type Market, type Side } from "@/lib/markets/market";
 import { FEES } from "@/lib/protocol";
+import { focusRing } from "../styles";
 import ConnectPrompt from "./ConnectPrompt";
 import Panel from "./Panel";
 import SidePicker from "./SidePicker";
@@ -14,7 +15,7 @@ import TxStatus from "./TxStatus";
 const body = "text-[15px] leading-7 text-white/70";
 
 const primaryButton =
-  "h-12 w-full rounded-full bg-linear-to-r from-brand to-brand-soft font-medium text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40";
+  `h-12 w-full rounded-full bg-linear-to-r from-brand to-brand-soft font-medium text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
 
 /** After the deadline, before anyone has said how it ended: propose the result. */
 export function ProposePanel({ market }: { market: Market }) {
@@ -92,7 +93,7 @@ export function DisputePanel({ market }: { market: Market }) {
           type="button"
           disabled={outcome === null || dispute.isPending}
           onClick={() => outcome && dispute.mutate({ marketId: market.marketplaceID, outcome })}
-          className="h-12 w-full rounded-full border border-white/25 font-medium text-white transition-colors hover:border-white/50 disabled:cursor-not-allowed disabled:opacity-40"
+          className={`h-12 w-full rounded-full border border-white/25 font-medium text-white transition-colors hover:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
         >
           {dispute.isPending ? "Disputing…" : outcome ? `Dispute: it was ${getOutcomeLabel(outcome)}` : "Choose an outcome"}
         </button>

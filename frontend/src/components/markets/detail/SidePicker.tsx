@@ -1,4 +1,5 @@
 import { Outcome, type Side } from "@/lib/markets/market";
+import { focusRing } from "../styles";
 
 const OPTIONS = [
   { side: Outcome.Yes, label: "Yes", active: "border-yes bg-yes/15 text-yes" },
@@ -26,7 +27,7 @@ export default function SidePicker({
           aria-pressed={value === side}
           disabled={disabled}
           onClick={() => onChange(side)}
-          className={`h-11 rounded-full border text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`h-11 rounded-full border text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${focusRing} ${
             value === side ? active : "border-white/15 text-white/70 hover:border-white/40 hover:text-white"
           }`}
         >
