@@ -5,6 +5,7 @@ import {
   keccak256,
   parseAbi,
   parseAbiParameters,
+  toHex,
   type Address,
   type Hex,
 } from "viem";
@@ -12,7 +13,7 @@ import type { Config } from "wagmi";
 import { readContracts } from "wagmi/actions";
 import { appChain } from "@/lib/chain";
 import { requireMarketplaceFactory } from "@/lib/contracts/marketplaceFactory";
-import { getYesProbability, type Market, type MarketData } from "./market";
+import { getPoolReserves, getYesProbability, type Market, type MarketData, type TokenAmounts } from "./market";
 
 // Reads go through the app chain's RPC (every call carries its chainId), so they work
 // without a connected wallet and whatever network the wallet is on.
@@ -80,9 +81,12 @@ const extsloadAbi = parseAbi(["function extsload(bytes32 slot) view returns (byt
 const POOLS_SLOT = 6n;
 /** slot0 packs sqrtPriceX96 into its lowest 160 bits (then tick and fees). */
 const SQRT_PRICE_MASK = (1n << 160n) - 1n;
+/** A pool's liquidity sits this many slots after slot0, in the lowest 128 bits (StateLibrary.LIQUIDITY_OFFSET). */
+const LIQUIDITY_OFFSET = 3n;
+const LIQUIDITY_MASK = (1n << 128n) - 1n;
 
-/** Storage slot of a pool's slot0: keccak256(abi.encode(poolId, POOLS_SLOT)), as StateLibrary does. */
-function slot0Slot(pool: MarketData["pool"]): Hex {
+/** Where a pool's state starts in PoolManager storage: keccak256(abi.encode(poolId, POOLS_SLOT)), as StateLibrary does. Slot0 is first. */
+function poolStateSlot(pool: MarketData["pool"]): Hex {
   const poolId = keccak256(
     encodeAbiParameters(parseAbiParameters("address, address, uint24, int24, address"), [
       pool.currency0,
@@ -110,16 +114,47 @@ async function withOdds(config: Config, poolManager: Address, markets: readonly 
           address: poolManager,
           abi: extsloadAbi,
           functionName: "extsload",
-          args: [slot0Slot(market.pool)],
+          args: [poolStateSlot(market.pool)],
           chainId: appChain.id,
         }) as const,
     ),
   });
   return markets.map((market, i) => ({
     ...market,
+    poolManager,
     yesProbability: getYesProbability(
       BigInt(slots[i]) & SQRT_PRICE_MASK,
       isAddressEqual(market.yesToken, market.pool.currency0),
     ),
   }));
+}
+
+/** The numbers a bet quote needs: what the market's pool holds and how much of each token exists. */
+export type PoolState = { reserves: TokenAmounts; supplies: TokenAmounts };
+
+export async function fetchPoolState(
+  config: Config,
+  market: Pick<Market, "pool" | "yesToken" | "noToken" | "poolManager">,
+): Promise<PoolState> {
+  requireMarketplaceFactory();
+  const { poolManager } = market;
+  const slot = poolStateSlot(market.pool);
+  const liquiditySlot = toHex(BigInt(slot) + LIQUIDITY_OFFSET, { size: 32 });
+  const [slot0, liquidity, yesSupply, noSupply] = await readContracts(config, {
+    allowFailure: false,
+    contracts: [
+      { address: poolManager, abi: extsloadAbi, functionName: "extsload", args: [slot], chainId: appChain.id },
+      { address: poolManager, abi: extsloadAbi, functionName: "extsload", args: [liquiditySlot], chainId: appChain.id },
+      { address: market.yesToken, abi: erc20Abi, functionName: "totalSupply", chainId: appChain.id },
+      { address: market.noToken, abi: erc20Abi, functionName: "totalSupply", chainId: appChain.id },
+    ],
+  });
+  return {
+    reserves: getPoolReserves(
+      BigInt(slot0) & SQRT_PRICE_MASK,
+      BigInt(liquidity) & LIQUIDITY_MASK,
+      isAddressEqual(market.yesToken, market.pool.currency0),
+    ),
+    supplies: { yes: yesSupply, no: noSupply },
+  };
 }

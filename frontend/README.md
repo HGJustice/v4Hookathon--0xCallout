@@ -37,6 +37,7 @@ The **App secret** is for servers only. Never put it in a `NEXT_PUBLIC_` variabl
 | `npm run start` | Serve the production build       |
 | `npm run lint`  | ESLint, plus a check that `src/lib/protocol.ts` fees match the contract |
 | `npm run generate` | Regenerate the contract ABI from `../contracts` (needs Foundry) |
+| `npm test`      | Unit tests for the quote, payout and amount-parsing math (`tests/`) |
 
 ## Contracts
 
@@ -52,7 +53,10 @@ Market code lives in `src/lib/markets/`:
   first, so a revert is reported with its reason before the wallet opens.
 - `hooks.ts`: React hooks over them: `useMarkets`, `useMarket`, `usePosition` and
   `useCreateMarket`, `usePlaceBet`, `useProposeOutcome`, `useDisputeOutcome`, `useRedeem`.
-- `market.ts`: types and pure helpers (outcomes, status, odds).
+- `market.ts`: types and pure helpers (outcomes, status, odds, bet quotes, redeem amounts).
+
+`scripts/verify-quotes-on-fork.mts` checks those quotes against the real contract on a local
+fork (instructions in its header); run it whenever the contract's bet or redeem logic changes.
 
 Show any failure with `getErrorMessage` from `src/lib/contracts/errors.ts`, which turns
 contract errors and wallet rejections into short messages.
@@ -61,8 +65,12 @@ contract errors and wallet rejections into short messages.
 
 ```
 src/
-  app/              layout (fonts, providers), page, global styles, favicon
+  app/              root layout (fonts, providers, navbar), global styles, favicon
+    (landing)/      home page; its layout adds the site footer
+    markets/        /markets (app pages have no footer)
   components/       page sections (Hero, Explore, HowItWorks, Benefits, Faq, Footer)
+    markets/        market list, market tile, odds bar
+      detail/       the /markets/[id] page: odds, bet panel, propose / dispute / redeem, progress
     wallet/         Privy/wagmi providers, sign-in button, account menu, mini-app login
   lib/              chain, wagmi and Privy config, GSAP/Lenis setup, shared hooks, demo data
     contracts/      generated ABI, factory address and config, error messages

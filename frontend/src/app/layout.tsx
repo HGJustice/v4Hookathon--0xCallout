@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CosmicBackground from "@/components/CosmicBackground";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import WalletProviders from "@/components/wallet/WalletProviders";
@@ -29,7 +28,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <WalletProviders>
           <Navbar />
           {children}
-          <Footer />
         </WalletProviders>
       </body>
     </html>

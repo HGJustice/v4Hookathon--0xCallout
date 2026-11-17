@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Close, Menu } from "./icons";
 import { LogoMark } from "./Logo";
 import ConnectWalletButton from "./wallet/ConnectWalletButton";
 
+// Absolute links, so the section links work from every page, not just the home page.
 const links = [
-  ["Markets", "#markets"],
-  ["How it works", "#how-it-works"],
-  ["Use cases", "#benefits"],
-  ["FAQ", "#faq"],
+  ["Markets", "/markets"],
+  ["How it works", "/#how-it-works"],
+  ["Use cases", "/#benefits"],
+  ["FAQ", "/#faq"],
 ];
 
 // Behaves like cian.app's navbar: transparent at the very top, hidden while you
@@ -18,6 +20,33 @@ const links = [
 // focus is inside it or one of its menus is open, so nothing slides away mid-use.
 const JITTER = 4; // ignore tiny scroll wobbles so the bar doesn't flicker
 const DESKTOP = "(min-width: 1024px)"; // lg: inline links replace the menu
+
+type NavLinkProps = { href: string; className: string; onClick?: () => void; children: ReactNode };
+
+function CurrentAwareLink({ href, className, onClick, children }: NavLinkProps) {
+  const pathname = usePathname();
+  return (
+    <Link href={href} aria-current={href === pathname ? "page" : undefined} onClick={onClick} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+// Marks the link to the current page. Reading the pathname has to wait for the request on
+// routes like /markets/[id], so it sits in Suspense; until then the link renders unmarked.
+function NavLink(props: NavLinkProps) {
+  return (
+    <Suspense
+      fallback={
+        <Link href={props.href} onClick={props.onClick} className={props.className}>
+          {props.children}
+        </Link>
+      }
+    >
+      <CurrentAwareLink {...props} />
+    </Suspense>
+  );
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -87,9 +116,9 @@ export default function Navbar() {
         <ul className="hidden gap-10 lg:flex">
           {links.map(([label, href]) => (
             <li key={label}>
-              <a href={href} className="transition-colors hover:text-brand">
+              <NavLink href={href} className="transition-colors hover:text-brand aria-[current=page]:text-brand">
                 {label}
-              </a>
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -125,13 +154,13 @@ export default function Navbar() {
           <ul className="mx-auto max-w-[1200px]">
             {links.map(([label, href]) => (
               <li key={label} className="border-b border-white/10 last:border-b-0">
-                <a
+                <NavLink
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand"
+                  className="flex items-center justify-between py-4 font-display text-2xl font-medium tracking-tight transition-colors hover:text-brand aria-[current=page]:text-brand"
                 >
                   {label}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>

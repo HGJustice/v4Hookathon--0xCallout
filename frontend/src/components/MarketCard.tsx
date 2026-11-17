@@ -1,5 +1,6 @@
 import { DEMO_MARKET } from "@/lib/demoMarket";
 import { FEES } from "@/lib/protocol";
+import OddsBar from "./markets/OddsBar";
 
 // A prediction-market card in the style of the app: question, live odds bar, YES / NO
 // prices and the market terms, for the same demo market as the hero's timeline.
@@ -20,15 +21,7 @@ export default function MarketCard() {
       </p>
       <h4 className="mt-4 font-display text-xl font-medium tracking-tight sm:text-2xl">{question}</h4>
 
-      {/* Odds bar: YES share in blush, NO share in violet. */}
-      <div className="mt-6 flex items-center justify-between font-mono text-sm tabular-nums">
-        <span className="text-yes">YES {yes}%</span>
-        <span className="text-no">{no}% NO</span>
-      </div>
-      <div className="mt-2 flex h-2 gap-1 overflow-hidden rounded-full" aria-hidden="true">
-        <span className="rounded-full bg-yes" style={{ width: `${yes}%` }} />
-        <span className="flex-1 rounded-full bg-no" />
-      </div>
+      <OddsBar yes={yes} className="mt-6" />
 
       <div className="mt-6 grid grid-cols-2 gap-3 font-mono text-sm">
         <span className="flex h-12 items-center justify-between rounded-2xl border border-yes/30 bg-yes/10 px-4 text-yes">
