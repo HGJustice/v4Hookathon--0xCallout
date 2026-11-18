@@ -1,103 +1,73 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { ReactNode } from "react";
 import { formatEth, formatRelativeTime } from "@/lib/format";
 import { getMarketStatus, getOutcomeLabel, Outcome, type Market, type MarketStatus } from "@/lib/markets/market";
-import OddsGauge from "./OddsGauge";
-import { monoLabel } from "./styles";
 
 /** An outcome in its own colour: YES in blush, NO in violet. */
 function OutcomeWord({ outcome }: { outcome: Outcome }) {
-  if (outcome === Outcome.Yes) return <span className="font-semibold text-yes">YES</span>;
-  if (outcome === Outcome.No) return <span className="font-semibold text-no">NO</span>;
-  return <span className="font-semibold">{getOutcomeLabel(outcome)}</span>;
+  if (outcome === Outcome.Yes) return <span className="text-yes">YES</span>;
+  if (outcome === Outcome.No) return <span className="text-no">NO</span>;
+  return <span className="text-white">{getOutcomeLabel(outcome)}</span>;
 }
 
-/** What the card says once a market is past betting: a label, and the outcome if there is one. */
-function summary(market: Market, status: Exclude<MarketStatus, "open">): { label: string; outcome?: Outcome } {
+/** The line above the question, like an article's kicker: the stage and when it ends. */
+function kicker(status: MarketStatus, deadline: number, now: number): string {
+  if (status === "resolved") return "Resolved";
+  const when = formatRelativeTime(deadline, now);
+  return status === "open" ? `Open · ends ${when}` : `Closed · ended ${when}`;
+}
+
+/** The line under the question: the odds while it's open, then where the result stands. */
+function standing(market: Market, status: MarketStatus, yes: number | null): ReactNode {
   switch (status) {
+    case "open":
+      return (
+        <>
+          <span className="text-yes">Yes {yes ?? "–"}%</span>
+          <span className="text-white/25"> · </span>
+          <span className="text-no">No {yes === null ? "–" : 100 - yes}%</span>
+        </>
+      );
     case "closed":
-      return { label: "Waiting for a result" };
+      return "Awaiting result";
     case "proposed":
-      return { label: "Result proposed", outcome: market.proposedOutcome as Outcome };
+      return (
+        <>
+          Proposed: <OutcomeWord outcome={market.proposedOutcome as Outcome} />
+        </>
+      );
     case "disputed":
-      return { label: "Result disputed" };
+      return "Result disputed";
     case "resolved":
-      return { label: "Resolved", outcome: market.finalOutcome as Outcome };
+      return (
+        <>
+          Outcome: <OutcomeWord outcome={market.finalOutcome as Outcome} />
+        </>
+      );
   }
 }
 
-const sideButton =
-  "relative z-10 flex h-11 flex-1 items-center justify-between rounded-full border px-5 text-[15px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
-
-/** The same shape as the Yes/No buttons, with the label on the left and the outcome on the right. */
-function StatusPill({ label, outcome }: { label: string; outcome?: Outcome }) {
-  return (
-    <p className="flex h-11 items-center justify-between rounded-full bg-white/[0.06] px-5 text-[15px] font-medium text-white">
-      <span>{label}</span>
-      {outcome !== undefined && <OutcomeWord outcome={outcome} />}
-    </p>
-  );
-}
-
-/** A market in the grid: the question, the chance of YES, and a way in. The whole card opens the market. */
+/** A market in the grid, laid out like a post: kicker, question, then odds and pot. The whole card opens it. */
 export default function MarketTile({ market, now }: { market: Market; now: number }) {
   const status = getMarketStatus(market, BigInt(Math.floor(now / 1000)));
-  const deadline = Number(market.deadline) * 1000;
   const yes = market.yesProbability === null ? null : Math.round(market.yesProbability * 100);
-  const href = `/markets/${market.marketplaceID}`;
-  // Open markets glow toward the side they lean to, more the more lopsided the odds are.
-  const lean = status === "open" && yes !== null ? (yes >= 50 ? "yes" : "no") : undefined;
-  const tintStrength = yes === null ? 0.16 : 0.16 + (Math.abs(yes - 50) / 50) * 0.14;
 
   return (
-    <article
-      className="market-card relative flex h-full flex-col rounded-3xl border p-6 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]"
-      data-lean={lean}
-      style={lean ? ({ "--tint-a": tintStrength } as CSSProperties) : undefined}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="line-clamp-4 pt-0.5 font-display text-[19px] leading-snug font-semibold tracking-tight text-white">
-          {/* Stretched over the whole card so any click opens the market. */}
-          <Link href={href} className="after:absolute after:inset-0 after:rounded-3xl focus-visible:outline-none">
-            {market.title}
-          </Link>
-        </h3>
-        <OddsGauge yes={yes} />
-      </div>
+    <article className="relative flex h-full flex-col rounded-lg border border-white/10 bg-white/[0.02] p-5 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-white/80">
+      <p className="text-xs font-medium tracking-wide text-white/45 uppercase">
+        {kicker(status, Number(market.deadline) * 1000, now)}
+      </p>
+      <h3 className="mt-3 mb-6 line-clamp-3 font-serif text-[21px] leading-[1.3] font-medium text-white">
+        {/* Stretched over the whole card so any click opens the market. */}
+        <Link href={`/markets/${market.marketplaceID}`} className="after:absolute after:inset-0 focus-visible:outline-none">
+          {market.title}
+        </Link>
+      </h3>
 
-      <div className="mt-auto pt-6">
-        {status === "open" ? (
-          <div className="flex gap-2">
-            <Link
-              href={`${href}?side=yes`}
-              className={`${sideButton} border-yes/50 text-yes outline-yes`}
-            >
-              Yes <span className="font-mono text-sm tabular-nums">{yes ?? "–"}%</span>
-            </Link>
-            <Link
-              href={`${href}?side=no`}
-              className={`${sideButton} border-no/50 text-no outline-no`}
-            >
-              No <span className="font-mono text-sm tabular-nums">{yes === null ? "–" : 100 - yes}%</span>
-            </Link>
-          </div>
-        ) : (
-          <StatusPill {...summary(market, status)} />
-        )}
+      <div className="mt-auto flex items-baseline justify-between gap-4 border-t border-white/10 pt-4 text-sm">
+        <p className="font-medium text-white/70">{standing(market, status, yes)}</p>
+        <p className="shrink-0 font-mono text-white/50 tabular-nums">{formatEth(market.balance)}</p>
       </div>
-
-      <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
-        <div>
-          <dt className={monoLabel}>At stake</dt>
-          <dd className="mt-1.5 font-mono text-sm font-medium text-white tabular-nums">{formatEth(market.balance)}</dd>
-        </div>
-        {status !== "resolved" && (
-          <div className="text-right">
-            <dt className={monoLabel}>{deadline > now ? "Ends" : "Ended"}</dt>
-            <dd className="mt-1.5 text-sm font-medium text-white">{formatRelativeTime(deadline, now)}</dd>
-          </div>
-        )}
-      </dl>
     </article>
   );
 }

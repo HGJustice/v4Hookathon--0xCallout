@@ -176,7 +176,7 @@ function Skeleton() {
       <div className="h-11" aria-hidden="true" />
       <ul role="list" className={`mt-8 ${grid}`} aria-hidden="true">
         {Array.from({ length: 6 }, (_, i) => (
-          <li key={i} className="h-[262px] animate-pulse rounded-3xl border border-white/10 bg-white/[0.03]" />
+          <li key={i} className="h-[172px] animate-pulse rounded-lg border border-white/10 bg-white/[0.02]" />
         ))}
       </ul>
     </div>
