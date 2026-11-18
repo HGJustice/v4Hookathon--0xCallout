@@ -4,6 +4,7 @@ import "./globals.css";
 import PageBackground from "@/components/PageBackground";
 import SmoothScroll from "@/components/SmoothScroll";
 import WalletProviders from "@/components/wallet/WalletProviders";
+import { EDITION_KEY } from "@/lib/edition";
 
 // Type roles (wired to Tailwind's font-display / font-sans / font-mono in globals.css).
 // The landing page:
@@ -25,10 +26,15 @@ export const metadata: Metadata = {
   description: "Turn online arguments into prediction markets.",
 };
 
+// Applies the reader's saved edition (day or night) before the first paint, so the app
+// pages never flash the wrong colours.
+const editionScript = `try{if(localStorage.getItem("${EDITION_KEY}")==="dark")document.documentElement.dataset.paper="dark"}catch{}`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${fonts} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${fonts} h-full antialiased`}>
       <body className="relative min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: editionScript }} />
         <SmoothScroll />
         <PageBackground />
         <WalletProviders>

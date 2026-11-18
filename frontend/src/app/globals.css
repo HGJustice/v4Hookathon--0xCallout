@@ -207,31 +207,41 @@ html.lenis body {
  * Newspaper theme for the app pages (AppShell). It repoints the shared tokens, so the same
  * utilities (text-foreground, bg-brand, rounded-control, font-display…) print in ink on
  * paper here and stay as they are on the landing page.
- *   - Paper and ink: warm ivory with near-black ink; YES and NO in green and red ink.
+ *   - Day edition: warm ivory paper and near-black ink; YES and NO in green and red ink.
+ *   - Night edition (html[data-paper="dark"]): the same warm hue turned down, charcoal paper
+ *     and ivory ink, with YES and NO lifted to lighter, softer tints so they hold contrast
+ *     without glowing. Each colour is written once as light-dark(day, night).
  *   - Type: Playfair Display headlines, IBM Plex Sans text, IBM Plex Mono labels and figures.
  *   - Edges: square corners and thin ink rules instead of shadows and glows.
+ * Set on the root (while an app page is showing) so the page behind the frame is paper too.
  */
-.theme-paper {
-  --background: #f4f0e6;
-  --foreground: #201e1a;
-  --color-brand: #201e1a;
-  --color-brand-soft: #201e1a;
-  --color-yes: #1d6a43;
-  --color-no: #a1282b;
-  --color-raised: #f9f6ee;
+:root:has(.theme-paper) {
+  color-scheme: light;
+  --background: light-dark(#f4f0e6, #16140f);
+  --foreground: light-dark(#201e1a, #e8e2d4);
+  --color-brand: var(--foreground);
+  --color-brand-soft: var(--foreground);
+  --color-yes: light-dark(#1d6a43, #7dbf97);
+  --color-no: light-dark(#a1282b, #e0807a);
+  --color-raised: light-dark(#f9f6ee, #201d17);
   --radius-control: 2px;
   --radius-item: 2px;
   --radius-panel: 2px;
-  --steel-stops: #201e1a, #201e1a;
+  --steel-stops: var(--foreground), var(--foreground);
   --menu-shadow: none;
   --font-role-sans: var(--font-plex-sans);
   --font-role-display: var(--font-playfair);
   --font-role-mono: var(--font-plex-mono);
+}
 
-  color-scheme: light;
-  color: var(--foreground);
-  background-color: var(--background);
-  font-family: var(--font-role-sans), Arial, Helvetica, sans-serif;
+:root[data-paper="dark"]:has(.theme-paper) {
+  color-scheme: dark;
+}
+
+/* Lets components show one thing per edition: night:hidden, hidden night:inline. */
+@custom-variant night (&:where([data-paper="dark"] *));
+
+.theme-paper {
   font-weight: 400;
 }
 
@@ -241,26 +251,27 @@ html.lenis body {
   font-variant-numeric: lining-nums;
 }
 
-/* The page behind the frame (overscroll, short pages) is paper too. */
-body:has(.theme-paper) {
-  background: #f4f0e6;
-}
-
 /* Steel edges become a plain 1px ink rule. */
 .theme-paper .steel-border::before {
   padding: 1px;
   filter: none;
 }
 
-/* Paper grain: a fixed layer of very faint noise printed over everything, ink included. */
+/* A thin rule between newspaper columns (CSS columns). */
+@utility column-rule {
+  column-rule: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
+}
+
+/* Paper grain: a fixed layer of ink, cut by a faint noise mask, printed over everything.
+   Being ink-coloured, it reads as grain on both the day and night paper. */
 .theme-paper::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.12 0 0 0 0 0.1 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
+  background: var(--foreground);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Photos print as black-and-white halftone: greyscale, then cut into a fine dot screen. */

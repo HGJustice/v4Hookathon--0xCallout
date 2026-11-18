@@ -28,14 +28,10 @@ const SORTS: readonly { id: SortId; label: string; compare: (a: Market, b: Marke
   { id: "stake", label: "Most at stake", compare: (a, b) => byBigInt(b.balance, a.balance) },
 ];
 
-// Stories sit in newspaper columns: a hairline rule between columns and under each row.
-// The list runs a gutter wider than its frame on both sides, and the frame clips it, so the
-// outer column rules are hidden and the first column's text lines up with the page edge.
-const frame = "overflow-hidden";
-const grid = "-mx-6 grid sm:grid-cols-2 lg:grid-cols-3";
-const story = "border-b border-l border-foreground/25 px-6 py-7";
-// The first story leads the page, across two columns.
-const leadStory = "sm:col-span-2";
+// Front-page layout: the first story leads across the top, the rest flow down newspaper
+// columns with a rule between them (CSS columns, so the rules always run full height).
+const columns = "column-rule columns-1 gap-12 sm:columns-2 lg:columns-3";
+const story = "break-inside-avoid border-b border-foreground/25 py-7";
 
 // Search box and sort menu share one look: square, ruled in ink.
 const control =
@@ -161,15 +157,13 @@ export default function MarketList() {
           </button>
         </div>
       ) : (
-        <div className={`mt-6 ${frame}`}>
-          <ul role="list" className={grid}>
-            {shown.map((market, i) => (
-              <li key={market.marketplaceID.toString()} className={`${story} ${i === 0 ? leadStory : ""}`}>
-                <MarketTile market={market} now={now} lead={i === 0} />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ul role="list" className={`mt-6 ${columns} [&>li:first-child]:[column-span:all]`}>
+          {shown.map((market, i) => (
+            <li key={market.marketplaceID.toString()} className={story}>
+              <MarketTile market={market} now={now} lead={i === 0} />
+            </li>
+          ))}
+        </ul>
       )}
     </>
   );
@@ -179,17 +173,15 @@ function Skeleton() {
   return (
     <div aria-busy="true" aria-label="Loading markets">
       <div className="mt-6 h-10" aria-hidden="true" />
-      <div className={`mt-6 ${frame}`} aria-hidden="true">
-        <ul role="list" className={grid}>
-          {Array.from({ length: 5 }, (_, i) => (
-            <li key={i} className={`${story} ${i === 0 ? leadStory : ""}`}>
-              <div className="h-3 w-32 animate-pulse bg-foreground/10" />
-              <div className={`mt-3 animate-pulse bg-foreground/10 ${i === 0 ? "h-24" : "h-14"}`} />
-              <div className="mt-4 h-3 w-24 animate-pulse bg-foreground/10" />
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul role="list" className={`mt-6 ${columns} [&>li:first-child]:[column-span:all]`} aria-hidden="true">
+        {Array.from({ length: 7 }, (_, i) => (
+          <li key={i} className={story}>
+            <div className="h-3 w-32 animate-pulse bg-foreground/10" />
+            <div className={`mt-3 animate-pulse bg-foreground/10 ${i === 0 ? "h-24" : "h-14"}`} />
+            <div className="mt-4 h-3 w-24 animate-pulse bg-foreground/10" />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
