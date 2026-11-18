@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { formatEth, formatRelativeTime } from "@/lib/format";
 import { getMarketStatus, getOutcomeLabel, Outcome, type Market, type MarketStatus } from "@/lib/markets/market";
 import OddsGauge from "./OddsGauge";
@@ -12,30 +12,32 @@ function OutcomeWord({ outcome }: { outcome: Outcome }) {
   return <span className="font-semibold">{getOutcomeLabel(outcome)}</span>;
 }
 
-/** What the card says once a market is past betting. */
-function summary(market: Market, status: Exclude<MarketStatus, "open">): ReactNode {
+/** What the card says once a market is past betting: a label, and the outcome if there is one. */
+function summary(market: Market, status: Exclude<MarketStatus, "open">): { label: string; outcome?: Outcome } {
   switch (status) {
     case "closed":
-      return "Waiting for a result";
+      return { label: "Waiting for a result" };
     case "proposed":
-      return (
-        <>
-          Result proposed: <OutcomeWord outcome={market.proposedOutcome as Outcome} />
-        </>
-      );
+      return { label: "Result proposed", outcome: market.proposedOutcome as Outcome };
     case "disputed":
-      return "Result disputed";
+      return { label: "Result disputed" };
     case "resolved":
-      return (
-        <>
-          Resolved <OutcomeWord outcome={market.finalOutcome as Outcome} />
-        </>
-      );
+      return { label: "Resolved", outcome: market.finalOutcome as Outcome };
   }
 }
 
 const sideButton =
   "relative z-10 flex h-11 flex-1 items-center justify-between rounded-full border px-5 text-[15px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
+
+/** The same shape as the Yes/No buttons, with the label on the left and the outcome on the right. */
+function StatusPill({ label, outcome }: { label: string; outcome?: Outcome }) {
+  return (
+    <p className="flex h-11 items-center justify-between rounded-full bg-white/[0.06] px-5 text-[15px] font-medium text-white">
+      <span>{label}</span>
+      {outcome !== undefined && <OutcomeWord outcome={outcome} />}
+    </p>
+  );
+}
 
 /** A market in the grid: the question, the chance of YES, and a way in. The whole card opens the market. */
 export default function MarketTile({ market, now }: { market: Market; now: number }) {
@@ -80,9 +82,7 @@ export default function MarketTile({ market, now }: { market: Market; now: numbe
             </Link>
           </div>
         ) : (
-          <p className="flex h-11 items-center rounded-full bg-white/[0.06] px-5 text-[15px] font-medium text-white">
-            {summary(market, status)}
-          </p>
+          <StatusPill {...summary(market, status)} />
         )}
       </div>
 
