@@ -102,3 +102,19 @@ export const ArrowDown = ({ className = "size-5" }: Props) => (
     <path d="M12 5v14M6 13l6 6 6-6" />
   </svg>
 );
+
+export const Browse = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+  </svg>
+);
+
+export const Plus = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v8M8 12h8" />
+  </svg>
+);

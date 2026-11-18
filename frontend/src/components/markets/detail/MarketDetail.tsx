@@ -73,7 +73,7 @@ function Detail({ market, now }: { market: Market; now: number }) {
 
   // The tab, history and bookmarks name the market rather than the generic route title.
   useEffect(() => {
-    document.title = `${market.title} | Multiverse Markets`;
+    document.title = `${market.title} | 0xCallOut`;
   }, [market.title]);
 
   return (

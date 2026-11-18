@@ -12,7 +12,7 @@ const Highlight = ({ children }: { children: ReactNode }) => <span className="te
 export default function Explore() {
   return (
     <section id="markets" className="relative">
-      <SectionTitle>Explore Multiverse Markets</SectionTitle>
+      <SectionTitle>Explore 0xCallOut</SectionTitle>
 
       {/* Desktop: exactly fills the area under the navbar (h-16 / sm:h-20) with balanced
           columns. Below xl the columns stack and the section flows to its natural height. */}

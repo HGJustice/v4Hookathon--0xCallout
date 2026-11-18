@@ -4,21 +4,10 @@ import { useState } from "react";
 import { getErrorMessage } from "@/lib/contracts/errors";
 import { marketplaceFactory } from "@/lib/contracts/marketplaceFactory";
 import { useMarkets } from "@/lib/markets/hooks";
-import { getMarketStatus, type Market, type MarketStatus } from "@/lib/markets/market";
+import type { Market } from "@/lib/markets/market";
 import { useNow } from "@/lib/useNow";
 import MarketTile from "./MarketTile";
 import Notice from "./Notice";
-
-type Filter = { id: "all" | "open" | "resolving" | "resolved"; label: string; statuses: readonly MarketStatus[] | null };
-
-const FILTERS: readonly Filter[] = [
-  { id: "all", label: "All", statuses: null },
-  { id: "open", label: "Open", statuses: ["open"] },
-  { id: "resolving", label: "Resolving", statuses: ["closed", "proposed", "disputed"] },
-  { id: "resolved", label: "Resolved", statuses: ["resolved"] },
-];
-
-const inFilter = (filter: Filter, status: MarketStatus) => filter.statuses === null || filter.statuses.includes(status);
 
 type SortId = "newest" | "ending" | "stake";
 
@@ -45,11 +34,10 @@ const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 const control =
   "h-11 rounded-full border border-white/15 bg-white/[0.03] text-sm transition-colors hover:border-white/30 focus:border-white/40 focus:bg-white/[0.05] focus:outline-none";
 
-/** Every market, filterable by stage, searchable by question and sortable. */
+/** Every market, searchable by question and sortable. */
 export default function MarketList() {
   const markets = useMarkets();
   const now = useNow();
-  const [filterId, setFilterId] = useState<Filter["id"]>("all");
   const [sortId, setSortId] = useState<SortId>("newest");
   const [query, setQuery] = useState("");
 
@@ -79,40 +67,15 @@ export default function MarketList() {
   }
 
   const nowSeconds = BigInt(Math.floor(now / 1000));
-  const statuses = new Map(markets.data.map((market) => [market, getMarketStatus(market, nowSeconds)]));
-  const active = FILTERS.find(({ id }) => id === filterId)!;
   const needle = query.trim().toLowerCase();
-  const matchesQuery = (market: Market) => !needle || market.title.toLowerCase().includes(needle);
   const { compare } = SORTS.find(({ id }) => id === sortId)!;
   const shown = markets.data
-    .filter((market) => matchesQuery(market) && inFilter(active, statuses.get(market)!))
+    .filter((market) => !needle || market.title.toLowerCase().includes(needle))
     .sort((a, b) => compare(a, b, nowSeconds));
 
   return (
     <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* One row that scrolls sideways on narrow screens rather than wrapping. */}
-        <div
-          role="group"
-          aria-label="Filter markets"
-          className="-mx-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] sm:mx-0 sm:px-0"
-        >
-          {FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              type="button"
-              aria-pressed={filter === active}
-              onClick={() => setFilterId(filter.id)}
-              className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/15 px-5 text-white/70 transition-colors hover:border-white/40 hover:text-white focus-visible:border-white/40 focus-visible:text-white focus-visible:outline-none aria-pressed:border-brand/60 aria-pressed:bg-brand/10 aria-pressed:text-brand"
-            >
-              {filter.label}
-              <span className="text-sm opacity-60 tabular-nums">
-                {markets.data.filter((market) => matchesQuery(market) && inFilter(filter, statuses.get(market)!)).length}
-              </span>
-            </button>
-          ))}
-        </div>
-
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
             <label>
@@ -181,19 +144,14 @@ export default function MarketList() {
 
       {shown.length === 0 ? (
         <div className="mt-8 rounded-3xl border border-white/10 px-6 py-12 text-center text-white/60">
-          <p>{needle ? `No markets match "${query.trim()}".` : `No ${active.label.toLowerCase()} markets right now.`}</p>
-          {(needle || filterId !== "all") && (
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                setFilterId("all");
-              }}
-              className="mt-4 text-white underline underline-offset-4 hover:text-brand"
-            >
-              Clear filters
-            </button>
-          )}
+          <p>No markets match &quot;{query.trim()}&quot;.</p>
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="mt-4 text-white underline underline-offset-4 hover:text-brand"
+          >
+            Clear search
+          </button>
         </div>
       ) : (
         <ul role="list" className={`mt-8 ${grid}`}>

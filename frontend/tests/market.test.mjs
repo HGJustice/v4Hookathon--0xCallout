@@ -2,6 +2,9 @@
 // Node runs the TypeScript sources directly; these modules only import types and viem.
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { isUnsupportedChain, isUserRejection } from "../src/lib/contracts/errorChain.ts";
+import { parseDeadlineParam, toDateTimeLocal } from "../src/lib/markets/create.ts";
+import { isBrowsing, isCreating } from "../src/lib/nav.ts";
 import { parseEthInput } from "../src/lib/format.ts";
 import {
   getMarketStatus,
@@ -114,4 +117,49 @@ test("parseEthInput: plain decimals only, up to 18 places", () => {
   for (const bad of ["", ".", "1e3", "-1", "abc", "1,5", " 1", "0.0000000000000000001"]) {
     assert.equal(parseEthInput(bad), null, `"${bad}" should be rejected`);
   }
+});
+
+test("parseDeadlineParam: Unix seconds or a date, only if still in the future", () => {
+  const now = new Date("2026-06-01T00:00:00Z");
+  assert.equal(parseDeadlineParam("1798761600", now)?.toISOString(), "2027-01-01T00:00:00.000Z");
+  assert.equal(parseDeadlineParam("2026-12-31T22:00:00Z", now)?.toISOString(), "2026-12-31T22:00:00.000Z");
+  assert.equal(parseDeadlineParam("2026-01-01", now), null); // already passed
+  assert.equal(parseDeadlineParam("next friday", now), null); // not a date
+  assert.equal(parseDeadlineParam(null, now), null);
+});
+
+test("toDateTimeLocal: local time to the minute, readable back as the same moment", () => {
+  const date = new Date(2026, 11, 31, 22, 5, 33);
+  assert.equal(toDateTimeLocal(date), "2026-12-31T22:05");
+  assert.equal(new Date(toDateTimeLocal(date)).getTime(), date.getTime() - 33_000);
+});
+
+// What viem and wagmi throw: a named error, sometimes wrapped in another.
+const named = (name, extra = {}, cause) => Object.assign(new Error(name, { cause }), { name }, extra);
+
+test("isUserRejection / isUnsupportedChain: cancelling is not 'wallet can't switch'", () => {
+  const rejected = named("SwitchChainError", {}, named("UserRejectedRequestError", { code: 4001 }));
+  assert.equal(isUserRejection(rejected), true);
+  assert.equal(isUserRejection(named("Error", { code: 4001 })), true);
+
+  // The chain isn't in the wallet (Phantom), or the wallet can't switch at all.
+  assert.equal(isUnsupportedChain(named("SwitchChainError", { code: 4902 })), true);
+  assert.equal(isUnsupportedChain(named("ChainNotConfiguredError")), true);
+  assert.equal(isUnsupportedChain(named("SwitchChainNotSupportedError")), true);
+  assert.equal(isUnsupportedChain(named("Error", {}, named("Error", { code: 4902 }))), true);
+
+  // Other failures keep their own message: a prompt already open, a network error.
+  assert.equal(isUnsupportedChain(named("Error", { code: -32002 })), false);
+  assert.equal(isUnsupportedChain(new Error("network down")), false);
+  assert.equal(isUserRejection("not an error"), false);
+});
+
+test("nav: a market page keeps Browse lit, the create page lights only Create", () => {
+  for (const path of ["/markets", "/markets/7"]) {
+    assert.equal(isBrowsing(path), true, path);
+    assert.equal(isCreating(path), false, path);
+  }
+  assert.equal(isCreating("/markets/new"), true);
+  assert.equal(isBrowsing("/markets/new"), false);
+  assert.equal(isBrowsing("/"), false);
 });

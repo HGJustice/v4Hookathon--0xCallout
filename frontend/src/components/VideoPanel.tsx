@@ -114,7 +114,7 @@ export default function VideoPanel() {
           >
             <div className="mb-5 flex items-start justify-between gap-4">
               <p className="font-display text-xl font-medium tracking-tight sm:text-[28px] sm:leading-[34px]">
-                Multiverse Markets: Don&apos;t just argue, bet on it
+                0xCallOut: Don&apos;t just argue, bet on it
               </p>
               <button ref={closeRef} type="button" aria-label="Close" onClick={() => setOpen(false)}>
                 <Close />

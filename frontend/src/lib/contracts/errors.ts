@@ -1,6 +1,7 @@
 import type { Hash } from "viem";
 import { appChain } from "@/lib/chain";
 import { FEES } from "@/lib/protocol";
+import { causeChain, isUserRejection } from "./errorChain";
 import type { marketplaceFactoryAbi } from "./generated";
 
 /** Thrown when a transaction is mined but reverts. */
@@ -27,6 +28,20 @@ export class InvalidDeadlineError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "InvalidDeadlineError";
+  }
+}
+
+/**
+ * Thrown when the wallet can't switch to the app chain (e.g. Phantom has no Arbitrum Sepolia).
+ * The message is user-facing.
+ */
+export class UnsupportedNetworkError extends Error {
+  constructor(options?: { cause?: unknown }) {
+    super(
+      `Your wallet can't switch to ${appChain.name}. Sign out and use another wallet, or sign in with email.`,
+      options,
+    );
+    this.name = "UnsupportedNetworkError";
   }
 }
 
@@ -59,17 +74,6 @@ const CONTRACT_ERRORS: Record<FactoryErrorName, string> = {
 
 const isContractError = (name: string): name is FactoryErrorName => Object.hasOwn(CONTRACT_ERRORS, name);
 
-type ErrorLike = Error & { code?: unknown; shortMessage?: string; data?: { errorName?: string } };
-
-/** The error and its causes, outermost first (viem and wagmi wrap errors in `cause`). */
-function causeChain(error: unknown): ErrorLike[] {
-  const chain: ErrorLike[] = [];
-  for (let cause = error; cause instanceof Error && chain.length < 10; cause = cause.cause) {
-    chain.push(cause as ErrorLike);
-  }
-  return chain;
-}
-
 /**
  * A short message for showing a failed read or transaction to the user. Errors are matched
  * by `name` rather than `instanceof`, so it still works if a wallet SDK bundles its own
@@ -79,9 +83,10 @@ export function getErrorMessage(error: unknown): string {
   const chain = causeChain(error);
   const find = (name: string) => chain.find((cause) => cause.name === name);
 
-  if (chain.some((cause) => cause.name === "UserRejectedRequestError" || cause.code === 4001)) {
-    return "You cancelled the transaction.";
-  }
+  if (isUserRejection(error)) return "You cancelled the transaction.";
+
+  const unsupported = find("UnsupportedNetworkError");
+  if (unsupported) return unsupported.message;
 
   const reverted = find("ContractFunctionRevertedError");
   const errorName = reverted?.data?.errorName;
