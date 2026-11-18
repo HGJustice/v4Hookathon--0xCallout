@@ -28,14 +28,11 @@ const SORTS: readonly { id: SortId; label: string; compare: (a: Market, b: Marke
   { id: "stake", label: "Most at stake", compare: (a, b) => byBigInt(b.balance, a.balance) },
 ];
 
-// Front-page layout: the first story leads across the top, the rest flow down newspaper
-// columns with a rule between them (CSS columns, so the rules always run full height).
-const columns = "column-rule columns-1 gap-12 sm:columns-2 lg:columns-3";
-const story = "break-inside-avoid border-b border-foreground/25 py-7";
+const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
-// Search box and sort menu share one look: square, ruled in ink.
+// Search box and sort menu share one look.
 const control =
-  "h-10 rounded-xs border border-foreground/40 bg-transparent text-sm focus:border-foreground focus:outline-none";
+  "h-11 rounded-full border border-white/15 bg-white/[0.03] text-sm transition-colors hover:border-white/30 focus:border-white/40 focus:bg-white/[0.05] focus:outline-none";
 
 /** Every market, searchable by question and sortable. */
 export default function MarketList() {
@@ -53,7 +50,7 @@ export default function MarketList() {
           <button
             type="button"
             onClick={() => markets.refetch()}
-            className="mt-6 inline-flex h-11 items-center rounded-xs border border-foreground/40 px-6 text-foreground transition-colors hover:border-foreground/40"
+            className="mt-6 inline-flex h-11 items-center rounded-full border border-white/15 px-6 text-white transition-colors hover:border-white/40"
           >
             Try again
           </button>
@@ -78,7 +75,7 @@ export default function MarketList() {
 
   return (
     <>
-      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
             <label>
@@ -89,7 +86,7 @@ export default function MarketList() {
                 stroke="currentColor"
                 strokeWidth="1.8"
                 strokeLinecap="round"
-                className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-foreground/65"
+                className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-white/40"
                 aria-hidden="true"
               >
                 <circle cx="9" cy="9" r="5.5" />
@@ -100,7 +97,7 @@ export default function MarketList() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search"
-                className={`${control} w-full pr-10 pl-11 placeholder:text-foreground/60 [&::-webkit-search-cancel-button]:hidden`}
+                className={`${control} w-full pr-10 pl-11 placeholder:text-white/40 [&::-webkit-search-cancel-button]:hidden`}
               />
             </label>
             {query && (
@@ -108,7 +105,7 @@ export default function MarketList() {
                 type="button"
                 aria-label="Clear search"
                 onClick={() => setQuery("")}
-                className="absolute top-1/2 right-3 flex size-6 -translate-y-1/2 items-center justify-center rounded-xs text-foreground/65 transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:bg-foreground/10 focus-visible:text-foreground focus-visible:outline-none"
+                className="absolute top-1/2 right-3 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:text-white focus-visible:outline-none"
               >
                 <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="size-3.5" aria-hidden="true">
                   <path d="m5 5 10 10M15 5 5 15" />
@@ -121,7 +118,7 @@ export default function MarketList() {
             <select
               value={sortId}
               onChange={(event) => setSortId(event.target.value as SortId)}
-              className={`${control} cursor-pointer appearance-none pr-10 pl-5 [&>option]:bg-background [&>option]:text-foreground`}
+              className={`${control} cursor-pointer appearance-none pr-10 pl-5 [&>option]:bg-surface [&>option]:text-white`}
             >
               {SORTS.map(({ id, label }) => (
                 <option key={id} value={id}>
@@ -136,7 +133,7 @@ export default function MarketList() {
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-foreground/65"
+              className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-white/50"
               aria-hidden="true"
             >
               <path d="m5 8 5 5 5-5" />
@@ -146,21 +143,25 @@ export default function MarketList() {
       </div>
 
       {shown.length === 0 ? (
-        <div className="mt-6 border-y border-foreground px-6 py-12 text-center text-foreground/70">
+        <div className="mt-8 rounded-3xl border border-white/10 px-6 py-12 text-center text-white/60">
           <p>No markets match &quot;{query.trim()}&quot;.</p>
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="mt-4 text-foreground underline underline-offset-4 hover:text-brand"
+            className="mt-4 text-white underline underline-offset-4 hover:text-brand"
           >
             Clear search
           </button>
         </div>
       ) : (
-        <ul role="list" className={`mt-6 ${columns} [&>li:first-child]:[column-span:all]`}>
+        <ul role="list" className={`mt-8 ${grid}`}>
           {shown.map((market, i) => (
-            <li key={market.marketplaceID.toString()} className={story}>
-              <MarketTile market={market} now={now} lead={i === 0} />
+            <li
+              key={market.marketplaceID.toString()}
+              className="animate-fade-up"
+              style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+            >
+              <MarketTile market={market} now={now} />
             </li>
           ))}
         </ul>
@@ -172,14 +173,10 @@ export default function MarketList() {
 function Skeleton() {
   return (
     <div aria-busy="true" aria-label="Loading markets">
-      <div className="mt-6 h-10" aria-hidden="true" />
-      <ul role="list" className={`mt-6 ${columns} [&>li:first-child]:[column-span:all]`} aria-hidden="true">
-        {Array.from({ length: 7 }, (_, i) => (
-          <li key={i} className={story}>
-            <div className="h-3 w-32 animate-pulse bg-foreground/10" />
-            <div className={`mt-3 animate-pulse bg-foreground/10 ${i === 0 ? "h-24" : "h-14"}`} />
-            <div className="mt-4 h-3 w-24 animate-pulse bg-foreground/10" />
-          </li>
+      <div className="h-11" aria-hidden="true" />
+      <ul role="list" className={`mt-8 ${grid}`} aria-hidden="true">
+        {Array.from({ length: 6 }, (_, i) => (
+          <li key={i} className="paper-card relative h-[172px] animate-pulse rounded-xs" />
         ))}
       </ul>
     </div>

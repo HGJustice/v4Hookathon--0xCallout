@@ -28,7 +28,7 @@ export default function CopyLinkButton() {
       type="button"
       onClick={copy}
       aria-label={copied ? "Link copied" : "Copy link"}
-      className={`flex h-9 items-center gap-2 rounded-xs border border-foreground/40 px-3.5 text-sm text-foreground/70 transition-colors hover:border-foreground/40 hover:text-foreground ${focusRing}`}
+      className={`flex h-9 items-center gap-2 rounded-full border border-white/15 px-3.5 text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white ${focusRing}`}
     >
       {copied ? <Check className="size-4" /> : <LinkIcon />}
       <span aria-live="polite">{copied ? "Copied" : "Copy link"}</span>

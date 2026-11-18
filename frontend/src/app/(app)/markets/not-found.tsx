@@ -8,7 +8,7 @@ export default function MarketNotFound() {
       <Notice title="That's not a market">
         <p>
           The address doesn&apos;t point at a market.{" "}
-          <Link href="/markets" className="text-foreground underline underline-offset-4 hover:text-brand">
+          <Link href="/markets" className="text-white underline underline-offset-4 hover:text-brand">
             See all markets
           </Link>
         </p>

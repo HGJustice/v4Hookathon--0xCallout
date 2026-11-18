@@ -31,7 +31,7 @@ export default function MarketDetail({ id }: { id: string }) {
           <button
             type="button"
             onClick={() => market.refetch()}
-            className="mt-6 inline-flex h-11 items-center rounded-xs border border-foreground/40 px-6 text-foreground transition-colors hover:border-foreground/40"
+            className="mt-6 inline-flex h-11 items-center rounded-full border border-white/15 px-6 text-white transition-colors hover:border-white/40"
           >
             Try again
           </button>
@@ -113,14 +113,14 @@ export function DetailSkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading market" className="mx-auto w-full max-w-[720px]">
       <div aria-hidden="true">
-        <div className="h-9 w-32 animate-pulse rounded-xs bg-foreground/[0.06]" />
-        <div className="mt-6 h-24 animate-pulse rounded-xs bg-foreground/[0.06]" />
-        <div className="mt-5 h-7 w-3/4 animate-pulse rounded-xs bg-foreground/[0.06]" />
-        <div className="mt-10 h-20 w-56 animate-pulse rounded-xs bg-foreground/[0.06]" />
-        <div className="mt-6 h-3 animate-pulse rounded-xs bg-foreground/[0.06]" />
+        <div className="h-9 w-32 animate-pulse rounded-full bg-white/[0.06]" />
+        <div className="mt-6 h-24 animate-pulse rounded-2xl bg-white/[0.06]" />
+        <div className="mt-5 h-7 w-3/4 animate-pulse rounded-lg bg-white/[0.06]" />
+        <div className="mt-10 h-20 w-56 animate-pulse rounded-2xl bg-white/[0.06]" />
+        <div className="mt-6 h-3 animate-pulse rounded-full bg-white/[0.06]" />
         <div className="mt-6 grid grid-cols-2 gap-3">
-          <div className="h-14 animate-pulse rounded-xs bg-foreground/[0.06]" />
-          <div className="h-14 animate-pulse rounded-xs bg-foreground/[0.06]" />
+          <div className="h-14 animate-pulse rounded-full bg-white/[0.06]" />
+          <div className="h-14 animate-pulse rounded-full bg-white/[0.06]" />
         </div>
       </div>
     </div>

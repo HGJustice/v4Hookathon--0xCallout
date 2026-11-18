@@ -12,10 +12,10 @@ import Panel from "./Panel";
 import SidePicker from "./SidePicker";
 import TxStatus from "./TxStatus";
 
-const body = "text-[15px] leading-7 text-foreground/70";
+const body = "text-[15px] leading-7 text-white/70";
 
 const primaryButton =
-  `h-12 w-full rounded-xs bg-brand font-medium text-background transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
+  `h-12 w-full rounded-full bg-linear-to-r from-brand to-brand-soft font-medium text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
 
 /** After the deadline, before anyone has said how it ended: propose the result. */
 export function ProposePanel({ market }: { market: Market }) {
@@ -24,7 +24,7 @@ export function ProposePanel({ market }: { market: Market }) {
   const propose = useProposeOutcome();
 
   return (
-    <Panel title="Propose the result">
+    <Panel market={market} title="Propose the result">
       <p className={body}>
         The deadline has passed. Anyone can propose how this market ended; proposing costs {FEES.outcome} ETH, paid to
         the protocol.
@@ -72,7 +72,7 @@ export function DisputePanel({ market }: { market: Market }) {
   const dispute = useDisputeOutcome();
 
   return (
-    <Panel title={`Proposed result: ${getOutcomeLabel(proposed)}`}>
+    <Panel market={market} title={`Proposed result: ${getOutcomeLabel(proposed)}`}>
       <p className={body}>
         If nobody disputes it, the resolver finalises this result and winners can redeem. If you think it&apos;s wrong,
         dispute it for {FEES.outcome} ETH (paid to the protocol) and the multisig decides.
@@ -93,7 +93,7 @@ export function DisputePanel({ market }: { market: Market }) {
           type="button"
           disabled={outcome === null || dispute.isPending}
           onClick={() => outcome && dispute.mutate({ marketId: market.marketplaceID, outcome })}
-          className={`h-12 w-full rounded-xs border border-foreground/25 font-medium text-foreground transition-colors hover:border-foreground/50 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
+          className={`h-12 w-full rounded-full border border-white/25 font-medium text-white transition-colors hover:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
         >
           {dispute.isPending ? "Disputing…" : outcome ? `Dispute: it was ${getOutcomeLabel(outcome)}` : "Choose an outcome"}
         </button>
@@ -114,7 +114,7 @@ export function DisputePanel({ market }: { market: Market }) {
 /** Disputed: nothing for users to do until the multisig rules. */
 export function DisputedPanel({ market }: { market: Market }) {
   return (
-    <Panel title="Result disputed">
+    <Panel market={market} title="Result disputed">
       <p className={body}>
         {getOutcomeLabel(market.proposedOutcome)} was proposed and then disputed with {getOutcomeLabel(market.disputedOutcome)}.
         The multisig will decide, and winners can redeem once it has.
@@ -132,7 +132,7 @@ export function RedeemPanel({ market }: { market: Market }) {
 
   if (market.finalOutcome === Outcome.Void) {
     return (
-      <Panel title="Market voided">
+      <Panel market={market} title="Market voided">
         <p className={body}>This market was voided, so there&apos;s nothing to redeem.</p>
       </Panel>
     );
@@ -142,7 +142,7 @@ export function RedeemPanel({ market }: { market: Market }) {
   const payout = position.data ? getRedeemAmount(market, position.data) : 0n;
 
   return (
-    <Panel title={`Resolved: ${result}`}>
+    <Panel market={market} title={`Resolved: ${result}`}>
       {!address ? (
         <ConnectPrompt>Sign in to see whether you have winnings to redeem.</ConnectPrompt>
       ) : position.isPending ? (
@@ -150,7 +150,7 @@ export function RedeemPanel({ market }: { market: Market }) {
       ) : !position.data ? (
         <p role="alert" className="text-sm text-red-300">
           Couldn&apos;t load your shares.{" "}
-          <button type="button" onClick={() => position.refetch()} className="underline underline-offset-4 hover:text-foreground">
+          <button type="button" onClick={() => position.refetch()} className="underline underline-offset-4 hover:text-white">
             Try again
           </button>
         </p>
@@ -161,11 +161,11 @@ export function RedeemPanel({ market }: { market: Market }) {
         <>
           <dl className="space-y-3 text-sm">
             <div className="flex items-baseline justify-between gap-4">
-              <dt className="text-foreground/70">Your {result} shares</dt>
+              <dt className="text-white/60">Your {result} shares</dt>
               <dd className="font-mono font-medium tabular-nums">{formatShares(winningShares)}</dd>
             </div>
             <div className="flex items-baseline justify-between gap-4">
-              <dt className="text-foreground/70">You&apos;ll receive</dt>
+              <dt className="text-white/60">You&apos;ll receive</dt>
               <dd className="font-mono text-lg font-medium tabular-nums">{formatEth(payout)}</dd>
             </div>
           </dl>

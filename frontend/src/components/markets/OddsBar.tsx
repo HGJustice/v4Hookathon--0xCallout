@@ -10,13 +10,13 @@ export default function OddsBar({ yes, className = "" }: { yes: number | null; c
         <span className="text-yes">YES {yes ?? "–"}%</span>
         <span className="text-no">{no ?? "–"}% NO</span>
       </div>
-      <div className="mt-2 flex h-2 gap-1 overflow-hidden rounded-xs" aria-hidden="true">
+      <div className="mt-2 flex h-2 gap-1 overflow-hidden rounded-full" aria-hidden="true">
         {yes === null ? (
-          <span className="flex-1 rounded-xs bg-foreground/10" />
+          <span className="flex-1 rounded-full bg-white/10" />
         ) : (
           <>
-            <span className="rounded-xs bg-yes" style={{ width: `${yes}%` }} />
-            <span className="flex-1 rounded-xs bg-no" />
+            <span className="rounded-full bg-yes" style={{ width: `${yes}%` }} />
+            <span className="flex-1 rounded-full bg-no" />
           </>
         )}
       </div>

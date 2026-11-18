@@ -6,20 +6,18 @@
   --foreground: #ededed;
 }
 
-/* Font roles: each points at a loaded font, and a theme (like .theme-paper) can repoint them. */
-:root {
-  --menu-shadow: 0 8px 32px rgb(0 0 0 / 0.4);
-  --font-role-sans: var(--font-geist);
-  --font-role-display: var(--font-bricolage);
-  --font-role-mono: var(--font-geist-mono);
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-role-sans);
-  --font-display: var(--font-role-display);
-  --font-mono: var(--font-role-mono);
+  --font-sans: var(--font-geist);
+  --font-display: var(--font-bricolage);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-geist-mono);
+  /* Newspaper ink on paper, for the market cards; the values live on .paper-card. */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-yes: var(--ink-yes);
+  --color-ink-no: var(--ink-no);
 }
 
 @theme {
@@ -31,14 +29,6 @@
   --color-no: #b3a6ff;
   /* Section surfaces that sit on top of the page backdrop. */
   --color-surface: #0b0b10;
-  /* Floating panels, like the account menu. */
-  --color-raised: #141414;
-
-  /* Corners for things shared by both themes: pills and soft panels on the landing page,
-     square in the newspaper theme. */
-  --radius-control: 9999px;
-  --radius-item: 1rem;
-  --radius-panel: 1.5rem;
 
   --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
@@ -53,7 +43,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-role-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   /* Light body text keeps the airy feel while staying readable on dark backgrounds;
      headlines use the display font (font-display) at medium or semibold. */
   font-weight: 300;
@@ -187,6 +177,63 @@ html.lenis body {
   }
 }
 
+/*
+ * Market card surface (MarketTile): a violet-ink panel, in the same family as the nebula
+ * panels but lighter so it lifts off the page, with a corner glow in the colour of the
+ * side the market leans toward (--tint, blush for YES or violet for NO) and a deep-violet
+ * glow bottom-left for depth. --tint-a sets the glow strength; the tile scales it with how
+ * lopsided the odds are.
+ *
+ * The edge is a 1px hairline cut from a diagonal gradient with a mask: bright at the
+ * top-left, through the card's tint, fading almost to nothing at the bottom-right, as if
+ * lit from one corner. It's still; hovering only brightens it.
+ */
+.market-card {
+  --tint: 150 150 170; /* neutral, for markets that aren't taking bets */
+  --tint-a: 0.07;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(var(--tint) / var(--tint-a)), transparent 72%),
+    radial-gradient(60% 70% at 0% 100%, rgb(110 84 190 / 0.12), transparent 72%),
+    linear-gradient(180deg, #181326 0%, #0f0d17 100%);
+  border-color: transparent; /* the hairline below is the visible edge */
+  position: relative;
+}
+
+.market-card[data-lean="yes"] {
+  --tint: 246 193 211;
+}
+
+.market-card[data-lean="no"] {
+  --tint: 179 166 255;
+}
+
+.market-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px; /* cover the transparent 1px border */
+  border-radius: inherit;
+  padding: 1px; /* hairline thickness */
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.4) 0%,
+    rgb(var(--tint) / 0.5) 30%,
+    rgb(var(--tint) / 0.12) 65%,
+    rgb(255 255 255 / 0.05) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Keyboard focus lifts the hairline; the pointer does nothing. */
+.market-card:has(a:focus-visible)::before {
+  opacity: 1;
+}
+
 /* Privy's sign-in / wallet modal gets the same moving steel edge, drawn as its real border
    rather than a ::before ring: the box is a scroll container, so an overlay would scroll
    away with long content. The padding-box layer repaints Privy's background inside the
@@ -203,79 +250,23 @@ html.lenis body {
     0 8px 32px rgb(0 0 0 / 0.32);
 }
 
-/*
- * Newspaper theme for the app pages (AppShell). It repoints the shared tokens, so the same
- * utilities (text-foreground, bg-brand, rounded-control, font-display…) print in ink on
- * paper here and stay as they are on the landing page.
- *   - Day edition: warm ivory paper and near-black ink; YES and NO in green and red ink.
- *   - Night edition (html[data-paper="dark"]): the same warm hue turned down, charcoal paper
- *     and ivory ink, with YES and NO lifted to lighter, softer tints so they hold contrast
- *     without glowing. Each colour is written once as light-dark(day, night).
- *   - Type: Playfair Display headlines, IBM Plex Sans text, IBM Plex Mono labels and figures.
- *   - Edges: square corners and thin ink rules instead of shadows and glows.
- * Set on the root (while an app page is showing) so the page behind the frame is paper too.
- */
-:root:has(.theme-paper) {
-  color-scheme: light;
-  --background: light-dark(#f4f0e6, #16140f);
-  --foreground: light-dark(#201e1a, #e8e2d4);
-  --color-brand: var(--foreground);
-  --color-brand-soft: var(--foreground);
-  --color-yes: light-dark(#1d6a43, #7dbf97);
-  --color-no: light-dark(#a1282b, #e0807a);
-  --color-raised: light-dark(#f9f6ee, #201d17);
-  --radius-control: 2px;
-  --radius-item: 2px;
-  --radius-panel: 2px;
-  --steel-stops: var(--foreground), var(--foreground);
-  --menu-shadow: none;
-  --font-role-sans: var(--font-plex-sans);
-  --font-role-display: var(--font-playfair);
-  --font-role-mono: var(--font-plex-mono);
+/* Market card printed like a newspaper clipping (MarketTile): ink on paper with a faint
+   grain. color-scheme picks the light or dark paper from the device setting. */
+.paper-card {
+  color-scheme: light dark;
+  --paper: light-dark(#f4f0e6, #16140f);
+  --ink: light-dark(#201e1a, #e8e2d4);
+  --ink-yes: light-dark(#1d6a43, #7dbf97);
+  --ink-no: light-dark(#a1282b, #e0807a);
+  background: var(--paper);
+  color: var(--ink);
 }
-
-:root[data-paper="dark"]:has(.theme-paper) {
-  color-scheme: dark;
-}
-
-/* Lets components show one thing per edition: night:hidden, hidden night:inline. */
-@custom-variant night (&:where([data-paper="dark"] *));
-
-.theme-paper {
-  font-weight: 400;
-}
-
-/* Playfair's default old-style figures sink below the line ("0xCallOut" reads as "ox…");
-   headlines set numbers on the line, as in print. */
-.theme-paper .font-display {
-  font-variant-numeric: lining-nums;
-}
-
-/* Steel edges become a plain 1px ink rule. */
-.theme-paper .steel-border::before {
-  padding: 1px;
-  filter: none;
-}
-
-/* A thin rule between newspaper columns (CSS columns). */
-@utility column-rule {
-  column-rule: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
-}
-
-/* Paper grain: a fixed layer of ink, cut by a faint noise mask, printed over everything.
-   Being ink-coloured, it reads as grain on both the day and night paper. */
-.theme-paper::after {
+.paper-card::after {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 60;
+  border-radius: inherit;
   pointer-events: none;
-  background: var(--foreground);
+  background: var(--ink);
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Photos print as black-and-white halftone: greyscale, then cut into a fine dot screen. */
-.theme-paper [data-photo] {
-  filter: grayscale(1) contrast(1.2);
-  mask: radial-gradient(circle, #000 58%, transparent 64%) 0 0 / 2px 2px;
 }

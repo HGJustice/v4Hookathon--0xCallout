@@ -27,8 +27,8 @@ export default function SidePicker({
           aria-pressed={value === side}
           disabled={disabled}
           onClick={() => onChange(side)}
-          className={`h-11 rounded-xs border text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${focusRing} ${
-            value === side ? active : "border-foreground/40 text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+          className={`h-11 rounded-full border text-[15px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${focusRing} ${
+            value === side ? active : "border-white/15 text-white/70 hover:border-white/40 hover:text-white"
           }`}
         >
           {text}
