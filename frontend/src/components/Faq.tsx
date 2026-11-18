@@ -6,12 +6,12 @@ import SectionTitle from "./SectionTitle";
 
 const FAQS: [question: string, answer: string][] = [
   [
-    "What is Multiverse Markets?",
+    "What is 0xCallOut?",
     "It turns online arguments into prediction markets. Any claim from a Farcaster thread can become a market, and anyone can bet on who's right.",
   ],
   [
     "How do I create a market?",
-    `Tag @multiverse in the thread with the claim and the deadline, for example "@multiverse 1+1=3, resolves Friday". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one takes at least ${FEES.marketSetup} ETH: a ${FEES.protocol} ETH protocol fee, and the rest seeds the market.`,
+    `Tag @0xcallout in the thread with the claim and the deadline, for example "@0xcallout 1+1=3, resolves Friday". The bot replies with a link where everything is already filled in. You can also create a market directly in the mini-app. Creating one takes at least ${FEES.marketSetup} ETH: a ${FEES.protocol} ETH protocol fee, and the rest seeds the market.`,
   ],
   [
     "When does a market go live?",

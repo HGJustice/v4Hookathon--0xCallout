@@ -33,3 +33,6 @@ export function useNow(): number | null {
     () => null,
   );
 }
+
+/** The exact current time in ms, for event handlers that must not use the shared clock's up-to-30s-old value. */
+export const readClock = () => Date.now();

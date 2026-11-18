@@ -26,7 +26,7 @@ export const privyConfig: PrivyClientConfig = {
   appearance: {
     theme: "#141414",
     accentColor: "#f6c1d3",
-    landingHeader: "Sign in to Multiverse",
+    landingHeader: "Sign in to 0xCallOut",
     loginMessage: "Bet on the arguments you care about.",
     showWalletLoginFirst: false,
     walletChainType: "ethereum-only",

@@ -135,7 +135,7 @@ export default function Benefits() {
 
   return (
     <section id="benefits" className="relative">
-      <SectionTitle>Why Multiverse Markets</SectionTitle>
+      <SectionTitle>Why 0xCallOut</SectionTitle>
 
       {/* Desktop: pinned stage with the panel and the deck of swinging cards. */}
       <div ref={stageRef} className="relative hidden h-screen overflow-hidden xl:block">

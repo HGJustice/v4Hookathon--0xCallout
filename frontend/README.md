@@ -1,6 +1,6 @@
-# Multiverse Markets: frontend
+# 0xCallOut: frontend
 
-Landing page and wallet sign-in for Multiverse Markets, which turns Farcaster arguments
+Landing page and wallet sign-in for 0xCallOut, which turns Farcaster arguments
 into prediction markets on Uniswap V4, resolved by Chainlink CRE.
 
 Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS 4, GSAP + Lenis for scroll
@@ -65,11 +65,14 @@ contract errors and wallet rejections into short messages.
 
 ```
 src/
-  app/              root layout (fonts, providers, navbar), global styles, favicon
-    (landing)/      home page; its layout adds the site footer
-    markets/        /markets (app pages have no footer)
+  app/              root layout (fonts, providers), global styles, favicon
+    (landing)/      home page; its layout adds the navbar (logo and sign-in) and footer
+    (app)/          app pages in a sidebar frame, no navbar or footer
+      markets/      /markets, /markets/new and /markets/[id]
   components/       page sections (Hero, Explore, HowItWorks, Benefits, Faq, Footer)
+    app/            the app frame: sidebar, phone bar and tabs
     markets/        market list, market tile, odds bar
+      create/       the create-market form
       detail/       the /markets/[id] page: odds, bet panel, propose / dispute / redeem, progress
     wallet/         Privy/wagmi providers, sign-in button, account menu, mini-app login
   lib/              chain, wagmi and Privy config, GSAP/Lenis setup, shared hooks, demo data

@@ -17,7 +17,13 @@ import {
   writeContract,
   type SimulateContractParameters,
 } from "wagmi/actions";
-import { InvalidDeadlineError, TransactionReplacedError, TransactionRevertedError } from "@/lib/contracts/errors";
+import { isUnsupportedChain, isUserRejection } from "@/lib/contracts/errorChain";
+import {
+  InvalidDeadlineError,
+  TransactionReplacedError,
+  TransactionRevertedError,
+  UnsupportedNetworkError,
+} from "@/lib/contracts/errors";
 import type { marketplaceFactoryAbi } from "@/lib/contracts/generated";
 import { requireMarketplaceFactory } from "@/lib/contracts/marketplaceFactory";
 import { FEES } from "@/lib/protocol";
@@ -112,8 +118,16 @@ async function execute<functionName extends WriteFunction>(
   // `call` is fully typed by this function's signature; wagmi's generics can't follow a
   // generic functionName, so the parameters are widened to the factory's ABI here.
   const { request } = await simulateContract(config, { ...factory, ...call } as SimulateContractParameters<FactoryAbi>);
-  // Embedded wallets switch silently; external ones show a single prompt.
-  if (getAccount(config).chainId !== factory.chainId) await switchChain(config, { chainId: factory.chainId });
+  // Embedded wallets switch silently; external ones show a single prompt. A wallet that
+  // can't switch at all (Phantom has no Arbitrum Sepolia) gets a plain message; any other
+  // failure, including declining the prompt, keeps its own.
+  if (getAccount(config).chainId !== factory.chainId) {
+    try {
+      await switchChain(config, { chainId: factory.chainId });
+    } catch (error) {
+      throw isUnsupportedChain(error) && !isUserRejection(error) ? new UnsupportedNetworkError({ cause: error }) : error;
+    }
+  }
   return confirm(config, await writeContract(config, request), onSubmitted);
 }
 

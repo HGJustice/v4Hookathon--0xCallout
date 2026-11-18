@@ -16,7 +16,7 @@ import SectionTitle from "./SectionTitle";
 const STEPS = [
   {
     title: "Call it out",
-    body: "Two people disagree on Farcaster. One of them tags @multiverse with the claim and the deadline.",
+    body: "Two people disagree on Farcaster. One of them tags @0xcallout with the claim and the deadline.",
     screen: <ThreadScreen />,
   },
   {
@@ -201,7 +201,7 @@ function ThreadScreen() {
         1+1=3. Fight me.
       </Post>
       <Post handle="@kim" time="2m">
-        <span className="font-medium text-white">@multiverse</span> 1+1=3, resolves Friday
+        <span className="font-medium text-white">@0xcallout</span> 1+1=3, resolves Friday
       </Post>
       <p className="flex items-center gap-2 px-1 text-white/40">
         <span className="flex gap-1">
@@ -209,7 +209,7 @@ function ThreadScreen() {
           <span className="size-1.5 rounded-full bg-white/35" />
           <span className="size-1.5 rounded-full bg-white/20" />
         </span>
-        @multiverse is replying
+        @0xcallout is replying
       </p>
     </Screen>
   );
@@ -219,9 +219,9 @@ function BotScreen() {
   return (
     <Screen app="Farcaster">
       <Post handle="@kim" time="2m">
-        <span className="font-medium text-white">@multiverse</span> 1+1=3, resolves Friday
+        <span className="font-medium text-white">@0xcallout</span> 1+1=3, resolves Friday
       </Post>
-      <Post handle="@multiverse" time="now">
+      <Post handle="@0xcallout" time="now">
         Market drafted. Create it in the mini-app.
         <div className="mt-3 rounded-xl border border-white/10 bg-black/40 p-3">
           <p className="text-[15px]">Does 1+1=3?</p>
@@ -237,7 +237,7 @@ function BotScreen() {
 
 function OpenScreen() {
   return (
-    <Screen app="Multiverse · mini-app">
+    <Screen app="0xCallOut · mini-app">
       <p className="text-xl">Does 1+1=3?</p>
       <p className="-mt-2 text-white/45">Ends Friday</p>
       <Row left="Created by @kim" right={`${FEES.marketSetup} ETH ✓`} />
@@ -254,7 +254,7 @@ function OpenScreen() {
 
 function TradeScreen() {
   return (
-    <Screen app="Multiverse · live market">
+    <Screen app="0xCallOut · live market">
       <p className="text-white/45">Does 1+1=3? · Ends Friday</p>
       <p className="-mt-2 text-4xl">
         34% <span className="text-sm text-white/45">chance YES</span>
@@ -284,7 +284,7 @@ function TradeScreen() {
 
 function ResolveScreen() {
   return (
-    <Screen app="Multiverse · resolved">
+    <Screen app="0xCallOut · resolved">
       <p className="text-white/45">Does 1+1=3?</p>
       <p className="-mt-2 text-4xl">NO</p>
       <Row left="✓ Proposed NO" right={`${FEES.outcome} ETH fee`} />

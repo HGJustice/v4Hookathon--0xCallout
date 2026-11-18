@@ -34,9 +34,8 @@ function summary(market: Market, status: Exclude<MarketStatus, "open">): ReactNo
   }
 }
 
-// Outlined at rest; fills with its colour on hover, so the choice reads as a real control.
 const sideButton =
-  "relative z-10 flex h-11 flex-1 items-center justify-between rounded-full border px-5 text-[15px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2";
+  "relative z-10 flex h-11 flex-1 items-center justify-between rounded-full border px-5 text-[15px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2";
 
 /** A market in the grid: the question, the chance of YES, and a way in. The whole card opens the market. */
 export default function MarketTile({ market, now }: { market: Market; now: number }) {
@@ -50,7 +49,7 @@ export default function MarketTile({ market, now }: { market: Market; now: numbe
 
   return (
     <article
-      className="market-card group relative flex h-full flex-col rounded-3xl border p-6 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] transition-[border-color,box-shadow] duration-200 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.1),0_14px_36px_-18px_rgb(var(--tint)/0.55)]"
+      className="market-card relative flex h-full flex-col rounded-3xl border p-6 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]"
       data-lean={lean}
       style={lean ? ({ "--tint-a": tintStrength } as CSSProperties) : undefined}
     >
@@ -69,13 +68,13 @@ export default function MarketTile({ market, now }: { market: Market; now: numbe
           <div className="flex gap-2">
             <Link
               href={`${href}?side=yes`}
-              className={`${sideButton} border-yes/50 text-yes outline-yes hover:bg-yes hover:text-black`}
+              className={`${sideButton} border-yes/50 text-yes outline-yes`}
             >
               Yes <span className="font-mono text-sm tabular-nums">{yes ?? "–"}%</span>
             </Link>
             <Link
               href={`${href}?side=no`}
-              className={`${sideButton} border-no/50 text-no outline-no hover:bg-no hover:text-black`}
+              className={`${sideButton} border-no/50 text-no outline-no`}
             >
               No <span className="font-mono text-sm tabular-nums">{yes === null ? "–" : 100 - yes}%</span>
             </Link>
