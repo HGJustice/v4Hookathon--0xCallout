@@ -36,11 +36,12 @@ function CurrentList({ variant }: { variant: Variant }) {
 const styles: Record<Variant, { list: string; link: string }> = {
   sidebar: {
     list: "space-y-1",
-    link: "flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] text-white/60 aria-[current=page]:bg-white/[0.07] aria-[current=page]:text-white",
+    // The current section is marked with an ink rule on its left, like a section tab in print.
+    link: "-ml-3 flex h-10 items-center gap-3 border-l-2 border-transparent pl-2.5 text-[15px] text-foreground/70 aria-[current=page]:border-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground",
   },
   tabs: {
     list: "flex",
-    link: "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs text-white/60 aria-[current=page]:text-white",
+    link: "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs text-foreground/70 aria-[current=page]:text-foreground",
   },
 };
 

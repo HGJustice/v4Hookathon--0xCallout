@@ -79,7 +79,6 @@ export default function TradePanel({
 
   return (
     <Card
-      lean={side === Outcome.Yes ? "yes" : "no"}
       className="animate-fade-up"
       aria-label={`Bet ${sideName}`}
       onKeyDown={(event) => {
@@ -94,7 +93,7 @@ export default function TradePanel({
           type="button"
           onClick={onClose}
           aria-label="Close the bet form"
-          className={`flex size-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}
+          className={`flex size-9 items-center justify-center rounded-xs text-foreground/70 transition-colors hover:bg-foreground/10 hover:text-foreground ${focusRing}`}
         >
           <Close className="size-5" />
         </button>
@@ -117,9 +116,9 @@ export default function TradePanel({
                 setInput(event.target.value);
               }
             }}
-            className="h-14 w-full rounded-full border border-white/15 bg-white/[0.03] pr-16 pl-6 font-mono text-xl tabular-nums transition-colors placeholder:text-white/30 hover:border-white/30 focus:border-white/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-white/10 focus:outline-none disabled:opacity-60"
+            className="h-14 w-full rounded-xs border border-foreground/40 bg-foreground/[0.03] pr-16 pl-6 font-mono text-xl tabular-nums transition-colors placeholder:text-foreground/50 hover:border-foreground/30 focus:border-foreground/50 focus:bg-foreground/[0.05] focus:ring-4 focus:ring-foreground/10 focus:outline-none disabled:opacity-60"
           />
-          <span className="pointer-events-none absolute top-1/2 right-6 -translate-y-1/2 text-white/50">ETH</span>
+          <span className="pointer-events-none absolute top-1/2 right-6 -translate-y-1/2 text-foreground/65">ETH</span>
         </div>
       </label>
 
@@ -133,19 +132,19 @@ export default function TradePanel({
               touch();
               setInput(quick);
             }}
-            className={`h-9 rounded-full border border-white/15 px-4 font-mono text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white disabled:opacity-50 ${focusRing}`}
+            className={`h-9 rounded-xs border border-foreground/40 px-4 font-mono text-sm text-foreground/70 transition-colors hover:border-foreground/40 hover:text-foreground disabled:opacity-50 ${focusRing}`}
           >
             {quick}
           </button>
         ))}
         {balance.data && (
-          <span className="ml-auto self-center text-sm text-white/50">
+          <span className="ml-auto self-center text-sm text-foreground/65">
             Balance {formatAmount(formatEther(balance.data.value), "ETH")}
           </span>
         )}
       </div>
 
-      <dl className="mt-6 space-y-3 border-t border-white/10 pt-5 text-sm" aria-live="polite">
+      <dl className="mt-6 space-y-3 border-t border-foreground/10 pt-5 text-sm" aria-live="polite">
         <Row label="You get" value={quote ? `${formatShares(quote.shares)} ${sideName} shares` : "–"} />
         <Row
           label={`If ${sideName} wins`}
@@ -164,7 +163,7 @@ export default function TradePanel({
             type="button"
             disabled={!canBuy}
             onClick={buy}
-            className={`h-12 w-full rounded-full font-medium text-black transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing} ${
+            className={`h-12 w-full rounded-xs font-medium text-background transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing} ${
               side === Outcome.Yes ? "bg-yes hover:brightness-110" : "bg-no hover:brightness-110"
             }`}
           >
@@ -179,13 +178,13 @@ export default function TradePanel({
               That&apos;s more than your balance.
             </p>
           ) : notice ? (
-            <p role="alert" className="text-sm text-white/80">
+            <p role="alert" className="text-sm text-foreground/80">
               {notice}
             </p>
           ) : pool.isError ? (
             <p role="alert" className="text-sm text-red-300">
               Couldn&apos;t load the latest prices.{" "}
-              <button type="button" onClick={() => pool.refetch()} className="underline underline-offset-4 hover:text-white">
+              <button type="button" onClick={() => pool.refetch()} className="underline underline-offset-4 hover:text-foreground">
                 Try again
               </button>
             </p>
@@ -208,10 +207,10 @@ function Row({ label, value, hint }: { label: string; value: string; hint?: stri
   return (
     <div>
       <div className="flex items-baseline justify-between gap-4">
-        <dt className="text-white/60">{label}</dt>
-        <dd className="font-mono font-medium text-white tabular-nums">{value}</dd>
+        <dt className="text-foreground/70">{label}</dt>
+        <dd className="font-mono font-medium text-foreground tabular-nums">{value}</dd>
       </div>
-      {hint && <p className="mt-1 text-xs text-white/50">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-foreground/65">{hint}</p>}
     </div>
   );
 }

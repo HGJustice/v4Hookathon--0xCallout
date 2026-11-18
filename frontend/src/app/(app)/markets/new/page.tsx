@@ -13,7 +13,7 @@ export default function CreateMarketPage() {
   return (
     <div className="mx-auto w-full max-w-[720px]">
       <h1 className="font-display text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">Create a market</h1>
-      <p className="mt-3 text-white/60">Ask a question that ends in YES or NO. Anyone can then bet on the answer.</p>
+      <p className="mt-3 text-foreground/70">Ask a question that ends in YES or NO. Anyone can then bet on the answer.</p>
       <Suspense fallback={null}>
         <CreateMarketForm />
       </Suspense>

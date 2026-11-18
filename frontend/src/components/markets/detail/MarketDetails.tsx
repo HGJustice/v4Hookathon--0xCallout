@@ -11,7 +11,7 @@ const explorer = appChain.blockExplorers.default;
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-6 py-3.5">
-      <dt className="text-white/60">{label}</dt>
+      <dt className="text-foreground/70">{label}</dt>
       <dd className="text-right font-medium">{children}</dd>
     </div>
   );
@@ -34,7 +34,7 @@ function ExplorerLink({ path, children }: { path: string; children: string }) {
 export default function MarketDetails({ market }: { market: Market }) {
   return (
     <Section title="Details">
-      <dl className="mt-2 divide-y divide-white/10 text-[15px]">
+      <dl className="mt-2 divide-y divide-foreground/10 text-[15px]">
         <Row label="Market">#{market.marketplaceID.toString()}</Row>
         <Row label="Ends">{formatDateTime(Number(market.deadline) * 1000)}</Row>
         <Row label="Created by">

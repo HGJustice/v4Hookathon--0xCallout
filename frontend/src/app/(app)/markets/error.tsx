@@ -18,13 +18,13 @@ export default function MarketsError({ error, reset }: { error: Error & { digest
           <button
             type="button"
             onClick={reset}
-            className="inline-flex h-11 items-center rounded-full bg-linear-to-r from-brand to-brand-soft px-6 font-medium text-black transition hover:brightness-110"
+            className="inline-flex h-11 items-center rounded-xs bg-brand px-6 font-medium text-background transition hover:brightness-110"
           >
             Try again
           </button>
           <Link
             href="/markets"
-            className="inline-flex h-11 items-center rounded-full border border-white/15 px-6 text-white transition-colors hover:border-white/40"
+            className="inline-flex h-11 items-center rounded-xs border border-foreground/40 px-6 text-foreground transition-colors hover:border-foreground/40"
           >
             All markets
           </Link>

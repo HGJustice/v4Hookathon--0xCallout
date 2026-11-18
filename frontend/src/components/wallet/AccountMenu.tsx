@@ -16,7 +16,7 @@ function displayName(user: User | null, address: Address) {
 }
 
 const item =
-  "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none";
+  "flex w-full items-center gap-3 rounded-item px-3 py-2.5 text-left transition-colors hover:bg-foreground/5 focus-visible:bg-foreground/5 focus-visible:outline-none";
 const explorer = appChain.blockExplorers.default;
 
 /** Where the panel opens: under the pill (navbar), or above it (a pill at the bottom of the sidebar). */
@@ -102,24 +102,24 @@ export default function AccountMenu({ address, placement = "below" }: { address:
 
       {open && (
         <div id={panelId} className={`absolute w-72 ${PLACEMENT[placement]}`}>
-          <div className="steel-border rounded-3xl bg-[#141414] p-2 text-sm shadow-[0_8px_32px_rgb(0_0_0/0.4)]">
+          <div className="steel-border rounded-panel bg-raised p-2 text-sm shadow-(--menu-shadow)">
             <div className="flex items-center gap-3 p-3">
               <Avatar src={avatar} className="size-10" />
               <div className="min-w-0">
                 <p className="truncate text-base font-normal">{name}</p>
-                <p className="text-white/50">
+                <p className="text-foreground/50">
                   {balance ? formatAmount(balance.formatted, balance.symbol) : "…"}{" "}
                   · {appChain.name}
                 </p>
               </div>
             </div>
 
-            <div className="mx-3 my-1 h-px bg-white/10" />
+            <div className="mx-3 my-1 h-px bg-foreground/10" />
 
             <button type="button" onClick={copyAddress} className={item}>
               {copied ? <Check className="size-4 text-brand" /> : <Copy />}
               <span className="flex-1">{copied ? "Copied" : "Copy address"}</span>
-              <span className="text-white/40">{shortAddress(address)}</span>
+              <span className="text-foreground/40">{shortAddress(address)}</span>
             </button>
             <a
               href={`${explorer.url}/address/${address}`}
@@ -137,7 +137,7 @@ export default function AccountMenu({ address, placement = "below" }: { address:
               </button>
             )}
 
-            <div className="mx-3 my-1 h-px bg-white/10" />
+            <div className="mx-3 my-1 h-px bg-foreground/10" />
 
             <button
               type="button"
@@ -145,7 +145,7 @@ export default function AccountMenu({ address, placement = "below" }: { address:
                 setOpen(false);
                 void logout();
               }}
-              className={`${item} text-white/60 hover:text-white`}
+              className={`${item} text-foreground/60 hover:text-foreground`}
             >
               <LogOut />
               Log out
@@ -162,7 +162,7 @@ function Avatar({ src, className }: { src?: string; className: string }) {
   return (
     <span
       aria-hidden="true"
-      className={`${className} flex shrink-0 items-center justify-center rounded-full bg-white/10 bg-cover bg-center text-white/70`}
+      className={`${className} flex shrink-0 items-center justify-center rounded-full bg-foreground/10 bg-cover bg-center text-foreground/70`}
       style={src ? { backgroundImage: `url(${JSON.stringify(src)})` } : undefined}
     >
       {!src && <UserIcon className="size-3/5" />}

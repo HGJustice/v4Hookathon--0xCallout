@@ -35,7 +35,7 @@ export default function ChanceHero({
           <span className="font-display text-7xl leading-none font-semibold tracking-tight tabular-nums sm:text-8xl">
             {yes ?? "–"}%
           </span>
-          <span className="text-xl text-white/60">chance of YES</span>
+          <span className="text-xl text-foreground/70">chance of YES</span>
         </p>
       ) : (
         <p className="flex items-baseline gap-3">
@@ -46,17 +46,17 @@ export default function ChanceHero({
           >
             {getOutcomeLabel(result)}
           </span>
-          <span className="text-xl text-white/60">is the result</span>
+          <span className="text-xl text-foreground/70">is the result</span>
         </p>
       )}
 
-      <div className="mt-6 flex h-3 gap-1 overflow-hidden rounded-full" aria-hidden="true">
+      <div className="mt-6 flex h-3 gap-1 overflow-hidden rounded-xs" aria-hidden="true">
         {yes === null ? (
-          <span className="flex-1 rounded-full bg-white/10" />
+          <span className="flex-1 rounded-xs bg-foreground/10" />
         ) : (
           <>
-            <span className="rounded-full bg-yes transition-[width] duration-300" style={{ width: `${yes}%` }} />
-            <span className="flex-1 rounded-full bg-no" />
+            <span className="rounded-xs bg-yes transition-[width] duration-300" style={{ width: `${yes}%` }} />
+            <span className="flex-1 rounded-xs bg-no" />
           </>
         )}
       </div>
@@ -73,7 +73,7 @@ export default function ChanceHero({
               type="button"
               aria-pressed={side === value}
               onClick={() => onSide(side === value ? null : value)}
-              className={`${fill} flex h-14 items-center justify-center gap-2 rounded-full text-base font-semibold text-black transition hover:brightness-110 active:scale-[0.98] aria-pressed:ring-2 aria-pressed:ring-white aria-pressed:ring-offset-2 aria-pressed:ring-offset-background ${focusRing}`}
+              className={`${fill} flex h-14 items-center justify-center gap-2 rounded-xs text-base font-semibold text-background transition hover:brightness-110 active:scale-[0.98] aria-pressed:ring-2 aria-pressed:ring-foreground aria-pressed:ring-offset-2 aria-pressed:ring-offset-background ${focusRing}`}
             >
               {label} <Icon className="size-5" />
             </button>

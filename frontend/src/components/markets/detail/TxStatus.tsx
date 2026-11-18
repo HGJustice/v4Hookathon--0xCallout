@@ -38,7 +38,7 @@ export default function TxStatus({
 }) {
   if (isPending) {
     return (
-      <p role="status" className="text-sm text-white/70">
+      <p role="status" className="text-sm text-foreground/70">
         {hash ? (
           <>
             Waiting for the network… <TxLink hash={hash}>View transaction</TxLink>
@@ -58,7 +58,7 @@ export default function TxStatus({
   }
   if (isSuccess) {
     return (
-      <p role="status" className="text-sm text-white/80">
+      <p role="status" className="text-sm text-foreground/80">
         {success} {hash && <TxLink hash={hash}>View transaction</TxLink>}
       </p>
     );

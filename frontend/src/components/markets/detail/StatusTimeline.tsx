@@ -49,7 +49,7 @@ export default function StatusTimeline({ market, now }: { market: Market; now: n
   const steps = buildSteps(market, now);
   return (
     <Section title="How this market resolves">
-      <p className="mt-2 max-w-[560px] text-[15px] leading-7 text-white/65">
+      <p className="mt-2 max-w-[560px] text-[15px] leading-7 text-foreground/65">
         After the deadline anyone can propose the result. If nobody disputes it, the resolver finalises it; if someone
         does, the multisig decides. Winners then redeem their shares for their cut of the pot.
       </p>
@@ -59,26 +59,26 @@ export default function StatusTimeline({ market, now }: { market: Market; now: n
             {i < steps.length - 1 && (
               <span
                 aria-hidden="true"
-                className={`absolute top-7 bottom-0 left-3 w-px -translate-x-1/2 ${step.state === "done" ? "bg-white/40" : "bg-white/10"}`}
+                className={`absolute top-7 bottom-0 left-3 w-px -translate-x-1/2 ${step.state === "done" ? "bg-foreground/40" : "bg-foreground/10"}`}
               />
             )}
             <span
               aria-hidden="true"
               className={`relative flex size-6 shrink-0 items-center justify-center rounded-full ${
                 step.state === "done"
-                  ? "bg-white text-black"
+                  ? "bg-foreground text-background"
                   : step.state === "current"
                     ? "border-2 border-brand bg-brand/15"
-                    : "border border-white/20"
+                    : "border border-foreground/20"
               }`}
             >
               {step.state === "done" && <Check className="size-3.5" />}
             </span>
             <div className="min-w-0 pt-px">
-              <p className={`text-[15px] font-medium ${step.state === "todo" ? "text-white/50" : "text-white"}`}>
+              <p className={`text-[15px] font-medium ${step.state === "todo" ? "text-foreground/65" : "text-foreground"}`}>
                 {step.title}
               </p>
-              {step.detail && <p className="mt-0.5 text-sm text-white/60">{step.detail}</p>}
+              {step.detail && <p className="mt-0.5 text-sm text-foreground/70">{step.detail}</p>}
             </div>
           </li>
         ))}

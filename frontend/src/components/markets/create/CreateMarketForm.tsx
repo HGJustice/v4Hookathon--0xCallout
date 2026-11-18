@@ -28,10 +28,10 @@ const DAY_MS = 86_400_000;
 type Preset = "custom" | (typeof DEADLINE_PRESETS)[number]["id"];
 
 const field =
-  "w-full rounded-2xl border border-white/15 bg-transparent px-5 text-white placeholder:text-white/30 focus:border-white/50 focus:outline-none";
+  "w-full rounded-xs border border-foreground/40 bg-transparent px-5 text-foreground placeholder:text-foreground/50 focus:border-foreground focus:outline-none";
 const choice = (selected: boolean) =>
-  `h-11 rounded-full border px-4 text-sm ${focusRing} ${
-    selected ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/70"
+  `h-11 rounded-xs border px-4 text-sm ${focusRing} ${
+    selected ? "border-foreground bg-foreground text-background" : "border-foreground/40 text-foreground/80"
   }`;
 
 /**
@@ -187,7 +187,7 @@ function Form({ titleParam, deadlineParam }: { titleParam: string | null; deadli
             }}
             className={`${field} h-14 pr-16 font-mono text-xl tabular-nums`}
           />
-          <span className="pointer-events-none absolute top-1/2 right-5 -translate-y-1/2 text-white/50">ETH</span>
+          <span className="pointer-events-none absolute top-1/2 right-5 -translate-y-1/2 text-foreground/65">ETH</span>
         </div>
         <div className="mt-3 grid grid-cols-4 gap-2">
           {SEED_PRESETS.map((value) => (
@@ -205,12 +205,12 @@ function Form({ titleParam, deadlineParam }: { titleParam: string | null; deadli
         </div>
       </Field>
 
-      <dl className="space-y-3 border-t border-white/10 pt-8 text-sm">
+      <dl className="space-y-3 border-t border-foreground/10 pt-8 text-sm">
         <Row label="Starting odds" value="50% YES · 50% NO" />
         <Row label="Protocol fee" value={formatEth(PROTOCOL_FEE)} />
         <Row label="Opens the pool with" value={amount && !tooLow ? formatEth(amount - PROTOCOL_FEE) : "–"} />
-        <div className="flex items-baseline justify-between gap-4 border-t border-white/10 pt-3">
-          <dt className="font-medium text-white">You pay</dt>
+        <div className="flex items-baseline justify-between gap-4 border-t border-foreground/10 pt-3">
+          <dt className="font-medium text-foreground">You pay</dt>
           <dd className="font-mono text-base font-medium tabular-nums">{amount ? formatEth(amount) : "–"}</dd>
         </div>
       </dl>
@@ -220,7 +220,7 @@ function Form({ titleParam, deadlineParam }: { titleParam: string | null; deadli
           <button
             type="submit"
             disabled={!canCreate}
-            className={`h-12 w-full rounded-full bg-brand font-medium text-black disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
+            className={`h-12 w-full rounded-xs bg-brand font-medium text-background disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`}
           >
             {create.isPending ? "Creating market…" : "Create market"}
           </button>
@@ -263,7 +263,7 @@ function Field({
 }) {
   const note = `${id}-note`;
   const message = (
-    <p id={note} role={error ? "alert" : undefined} className={`mt-2 min-h-5 text-sm ${error ? "text-red-300" : "text-white/50"}`}>
+    <p id={note} role={error ? "alert" : undefined} className={`mt-2 min-h-5 text-sm ${error ? "text-red-300" : "text-foreground/65"}`}>
       {error ?? hint}
     </p>
   );
@@ -283,7 +283,7 @@ function Field({
         <label htmlFor={id} className={monoLabel}>
           {label}
         </label>
-        {aside && <span className="text-xs text-white/50">{aside}</span>}
+        {aside && <span className="text-xs text-foreground/65">{aside}</span>}
       </div>
       {children}
       {message}
@@ -294,7 +294,7 @@ function Field({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-white/60">{label}</dt>
+      <dt className="text-foreground/70">{label}</dt>
       <dd className="font-mono tabular-nums">{value}</dd>
     </div>
   );

@@ -18,7 +18,7 @@ export default function MarketHeader({ market, now }: { market: Market; now: num
       <div className="flex items-center justify-between gap-4">
         <Link
           href="/markets"
-          className={`inline-flex items-center gap-2 rounded text-sm text-white/60 transition-colors hover:text-white ${focusRing}`}
+          className={`inline-flex items-center gap-2 rounded text-sm text-foreground/70 transition-colors hover:text-foreground ${focusRing}`}
         >
           <ArrowRight className="size-4 rotate-180" /> All markets
         </Link>
@@ -27,19 +27,19 @@ export default function MarketHeader({ market, now }: { market: Market; now: num
 
       {/* Long questions step down a size so they don't dominate the page. */}
       <h1
-        className={`mt-6 font-display leading-tight font-semibold tracking-tight text-balance text-white ${
+        className={`mt-6 font-display leading-tight font-semibold tracking-tight text-balance text-foreground ${
           market.title.length > 90 ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"
         }`}
       >
         {market.title}
       </h1>
 
-      <dl className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/65">
+      <dl className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-foreground/65">
         <div>
           <dt className="sr-only">Status</dt>
           <dd
-            className={`inline-flex h-7 items-center rounded-full border px-3 font-medium ${
-              status === "open" ? "border-yes/50 text-yes" : "border-white/20 text-white/80"
+            className={`inline-flex h-7 items-center rounded-xs border px-3 font-medium ${
+              status === "open" ? "border-yes/50 text-yes" : "border-foreground/20 text-foreground/80"
             }`}
           >
             {STATUS_LABEL[status]}

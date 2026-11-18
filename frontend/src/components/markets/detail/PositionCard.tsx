@@ -16,16 +16,16 @@ export default function PositionCard({ market }: { market: Market }) {
   return (
     <Section title="Your position">
       {position.isPending ? (
-        <div className="mt-4 h-14 animate-pulse rounded-2xl bg-white/[0.05]" aria-hidden="true" />
+        <div className="mt-4 h-14 animate-pulse rounded-xs bg-foreground/[0.05]" aria-hidden="true" />
       ) : !position.data ? (
-        <p className="mt-3 text-[15px] text-white/60">
+        <p className="mt-3 text-[15px] text-foreground/70">
           Couldn&apos;t load your shares.{" "}
-          <button type="button" onClick={() => position.refetch()} className="underline underline-offset-4 hover:text-white">
+          <button type="button" onClick={() => position.refetch()} className="underline underline-offset-4 hover:text-foreground">
             Try again
           </button>
         </p>
       ) : position.data.yes === 0n && position.data.no === 0n ? (
-        <p className="mt-3 text-[15px] text-white/60">You don&apos;t hold any shares in this market yet.</p>
+        <p className="mt-3 text-[15px] text-foreground/70">You don&apos;t hold any shares in this market yet.</p>
       ) : (
         <dl className="mt-5 grid grid-cols-2 gap-6">
           <div>
