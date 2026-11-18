@@ -11,7 +11,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist);
   --font-display: var(--font-bricolage);
+  --font-serif: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
+  /* Newspaper ink on paper, for the market cards; the values live on .paper-card. */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-yes: var(--ink-yes);
+  --color-ink-no: var(--ink-no);
 }
 
 @theme {
@@ -58,17 +64,6 @@ html.lenis body {
   *::after {
     animation: none !important;
   }
-}
-
-/* Odds gauge (OddsGauge): the YES arc sweeps in from empty when a card appears. */
-@keyframes gauge-fill {
-  from {
-    stroke-dasharray: 0 100;
-  }
-}
-
-.gauge-fill {
-  animation: gauge-fill 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
 }
 
 /* Soft brand-colour light behind every page (PageBackground). */
@@ -253,4 +248,25 @@ html.lenis body {
   box-shadow:
     0 0 24px rgb(255 255 255 / 0.12),
     0 8px 32px rgb(0 0 0 / 0.32);
+}
+
+/* Market card printed like a newspaper clipping (MarketTile): ink on paper with a faint
+   grain. color-scheme picks the light or dark paper from the device setting. */
+.paper-card {
+  color-scheme: light dark;
+  --paper: light-dark(#f4f0e6, #16140f);
+  --ink: light-dark(#201e1a, #e8e2d4);
+  --ink-yes: light-dark(#1d6a43, #7dbf97);
+  --ink-no: light-dark(#a1282b, #e0807a);
+  background: var(--paper);
+  color: var(--ink);
+}
+.paper-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--ink);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
