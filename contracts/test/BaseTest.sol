@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {Test, console} from "forge-std/Test.sol";
-import {PoolManager} from "v4-hooks-public/lib/v4-core/src/PoolManager.sol";
-import {IPoolManager} from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
+import {Test} from "forge-std/Test.sol";
+import {
+    IPoolManager
+} from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
 import {Deployers} from "v4-hooks-public/lib/v4-core/test/utils/Deployers.sol";
 import {MarketplaceFactory} from "../src/Marketplace/MarketplaceFactory.sol";
 
 abstract contract BaseTest is Test, Deployers {
     MarketplaceFactory public marketplaceContract;
 
+    address owner = makeAddr("owner");
     address multiSig = makeAddr("multiSig");
     address chainlinkCre = makeAddr("chainlinkCre");
+    address hookAddress = makeAddr("hookAddress");
+
     address user1 = makeAddr("user1");
     address user2 = makeAddr("user2");
     address user3 = makeAddr("user3");
@@ -28,6 +32,7 @@ abstract contract BaseTest is Test, Deployers {
         deal(user5, 1 ether);
 
         deployFreshManagerAndRouters();
+
         marketplaceContract = new MarketplaceFactory(
             IPoolManager(address(manager)),
             multiSig,
