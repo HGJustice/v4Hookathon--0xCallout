@@ -27,8 +27,11 @@ contract NoToken is ERC20 {
         return "NO";
     }
 
-    function mintNoToken(uint256 _amount) external OnlyMarketFactory {
-        _mint(marketFactory, _amount);
+    function mintNoToken(
+        uint256 _amount,
+        address _addy
+    ) external OnlyMarketFactory {
+        _mint(_addy, _amount);
     }
 
     function burnNoToken(
