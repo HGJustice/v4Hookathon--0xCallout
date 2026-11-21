@@ -2,39 +2,21 @@ import Link from "next/link";
 import { ArrowRight } from "./icons";
 import { LogoMark } from "./Logo";
 
-// Four-column footer, laid out like cian.app's. Links without a real page yet point
-// to the closest section on the home page, or to "#" for external/legal pages.
+// Footer link columns, as absolute links so they work from every page. Only links with a
+// real destination: add Community (social profiles), Legal and Docs once those pages exist.
 const COLUMNS: [title: string, links: [label: string, href: string][]][] = [
   [
     "Product",
     [
-      ["Create a market", "#how-it-works"],
-      ["Explore markets", "#markets"],
-      ["Leaderboard", "#markets"],
+      ["Create a market", "/#how-it-works"],
+      ["Explore markets", "/markets"],
     ],
   ],
   [
     "Learn",
     [
-      ["How it works", "#how-it-works"],
-      ["Docs", "#faq"],
-      ["FAQ", "#faq"],
-    ],
-  ],
-  [
-    "Community",
-    [
-      ["Farcaster", "#"],
-      ["X", "#"],
-      ["Telegram", "#"],
-    ],
-  ],
-  [
-    "Legal",
-    [
-      ["Terms", "#"],
-      ["Privacy", "#"],
-      ["Risk disclosure", "#"],
+      ["How it works", "/#how-it-works"],
+      ["FAQ", "/#faq"],
     ],
   ],
 ];
@@ -47,29 +29,29 @@ export default function Footer() {
           <div className="max-w-[360px]">
             <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-semibold tracking-tight">
               <LogoMark className="size-8 shrink-0" />
-              Multiverse Markets
+              0xCallOut
             </Link>
             <p className="mt-5 leading-7 text-white/60">
               Turn online arguments into prediction markets. Built on Uniswap V4, resolved by Chainlink CRE with a multisig for disputes.
             </p>
-            <a
-              href="#how-it-works"
+            <Link
+              href="/#how-it-works"
               className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-linear-to-r from-brand to-brand-soft px-6 text-black transition hover:brightness-110"
             >
-              Launch App <ArrowRight />
-            </a>
+              Get started <ArrowRight />
+            </Link>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-4 xl:gap-20">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 xl:gap-20">
             {COLUMNS.map(([title, links]) => (
               <div key={title}>
                 <p className="text-sm text-white/40">{title}</p>
                 <ul className="mt-5 space-y-3">
                   {links.map(([label, href]) => (
                     <li key={label}>
-                      <a href={href} className="transition-colors hover:text-brand">
+                      <Link href={href} className="transition-colors hover:text-brand">
                         {label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -79,7 +61,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-20 flex flex-col gap-3 border-t border-white/10 py-8 text-sm text-white/40 sm:flex-row sm:justify-between">
-          <p>© 2026 Multiverse Markets</p>
+          <p>© 2026 0xCallOut</p>
           <p>Prediction markets involve risk. Testnet demo.</p>
         </div>
       </div>
@@ -89,7 +71,7 @@ export default function Footer() {
         aria-hidden="true"
         className="pointer-events-none -mb-[2vw] text-center bg-linear-to-b from-white/[0.09] to-transparent bg-clip-text font-display text-[14vw] leading-[0.8] font-semibold tracking-tight text-transparent select-none"
       >
-        Multiverse
+        0xCallOut
       </p>
     </footer>
   );

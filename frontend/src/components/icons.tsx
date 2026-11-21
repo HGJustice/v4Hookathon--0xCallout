@@ -63,3 +63,58 @@ export const Menu = ({ className = "size-5" }: Props) => (
     <path d="M4 8h16M4 16h16" />
   </svg>
 );
+
+export const Clock = ({ className = "size-4" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
+export const User = ({ className = "size-4" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21a8 8 0 0 1 16 0" />
+  </svg>
+);
+
+/** An Ethereum diamond: for amounts of ETH. */
+export const Eth = ({ className = "size-4" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M12 2.5l6 9.5-6 3.5-6-3.5 6-9.5zM6 14.5l6 7 6-7" />
+  </svg>
+);
+
+export const LinkIcon = ({ className = "size-4" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
+  </svg>
+);
+
+export const ArrowUp = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M12 19V5M6 11l6-6 6 6" />
+  </svg>
+);
+
+export const ArrowDown = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M12 5v14M6 13l6 6 6-6" />
+  </svg>
+);
+
+export const Browse = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+  </svg>
+);
+
+export const Plus = ({ className = "size-5" }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v8M8 12h8" />
+  </svg>
+);

@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { FEES } from "@/lib/protocol";
 import SectionTitle from "./SectionTitle";
 
 const BENEFITS = [
@@ -25,7 +26,7 @@ const BENEFITS = [
     letter: "D",
     title: "Decentralised Resolution",
     body: "Undisputed outcomes are finalised by Chainlink CRE. Disputed ones go to a multisig.",
-    detail: "Proposing or disputing costs a 0.05 ETH fee, so neither is free to abuse.",
+    detail: `Proposing or disputing costs a ${FEES.outcome} ETH fee, so neither is free to abuse.`,
     tag: "Powered by Chainlink CRE",
   },
   {
@@ -134,7 +135,7 @@ export default function Benefits() {
 
   return (
     <section id="benefits" className="relative">
-      <SectionTitle>Why Multiverse Markets</SectionTitle>
+      <SectionTitle>Why 0xCallOut</SectionTitle>
 
       {/* Desktop: pinned stage with the panel and the deck of swinging cards. */}
       <div ref={stageRef} className="relative hidden h-screen overflow-hidden xl:block">

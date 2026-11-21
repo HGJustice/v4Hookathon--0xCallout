@@ -180,14 +180,30 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
             : currentMarket.yesToken ==
                 Currency.unwrap(currentMarket.pool.currency0);
 
+        bytes memory hookData = abi.encode(
+            currentMarket.yesReserves,
+            currentMarket.noReserves,
+            currentMarket.yesToken ==
+                Currency.unwrap(currentMarket.pool.currency0)
+        );
+
         bytes memory data = abi.encode(
             currentMarket.pool,
             msg.value,
             CallbackAction.PlaceBet,
             zeroForOne,
-            msg.sender
+            msg.sender,
+            hookData
         );
-        poolManager.unlock(data);
+        uint256 amountOut = abi.decode(poolManager.unlock(data), (uint256));
+
+        if (_decision) {
+            currentMarket.noReserves += msg.value;
+            currentMarket.yesReserves -= amountOut;
+        } else {
+            currentMarket.yesReserves += msg.value;
+            currentMarket.noReserves -= amountOut;
+        }
 
         if (_decision) {
             yesToken.transfer(msg.sender, msg.value);
@@ -324,10 +340,16 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
     function withdrawProtocolFees() external {
         if (msg.sender != owner) revert OnlyOwnerAccess();
 
-        (bool success, ) = payable(owner).call{value: address(this).balance}( //testing purpeses withdraw all eth
+        (bool success, ) = payable(owner).call{value: address(this).balance}(
+            //testing purpeses withdraw all eth
             ""
         );
         require(success, "Transfer of protocolFees failed");
+    }
+
+    function setHookAddress(address _hookAddress) external {
+        if (msg.sender != owner) revert OnlyOwnerAccess();
+        hookContract = _hookAddress;
     }
 
     function _resolveMarket(
@@ -340,27 +362,19 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
         currentMarket.resolved = true;
         currentMarket.finalOutcome = _outcome;
 
-        (uint256 poolAmount0, uint256 poolAmount1) = _getPoolTokenBalance(
-            currentMarket.pool
-        );
-
         if (currentMarket.finalOutcome == PredictionOutcome.Yes) {
             currentMarket.winningSupplyAtResolve = YesToken(
                 currentMarket.yesToken
             ).totalSupply();
 
             currentMarket.poolWinningBalanceAtResolve = currentMarket
-                .yesToken == Currency.unwrap(currentMarket.pool.currency0)
-                ? poolAmount0
-                : poolAmount1;
+                .yesReserves;
         } else if (currentMarket.finalOutcome == PredictionOutcome.No) {
             currentMarket.winningSupplyAtResolve = NoToken(
                 currentMarket.noToken
             ).totalSupply();
-            currentMarket.poolWinningBalanceAtResolve = currentMarket.noToken ==
-                Currency.unwrap(currentMarket.pool.currency0)
-                ? poolAmount0
-                : poolAmount1;
+            currentMarket.poolWinningBalanceAtResolve = currentMarket
+                .noReserves;
         }
     }
 

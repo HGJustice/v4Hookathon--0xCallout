@@ -4,11 +4,10 @@ import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
 import { useExportWallet, usePrivy, useWallets, type User } from "@privy-io/react-auth";
 import type { Address } from "viem";
 import { useBalance } from "wagmi";
-import { appChain } from "@/lib/wagmi";
-import { Check, Copy, ExternalLink, Key, LogOut } from "../icons";
+import { appChain } from "@/lib/chain";
+import { formatAmount, shortAddress } from "@/lib/format";
+import { Check, Copy, ExternalLink, Key, LogOut, User as UserIcon } from "../icons";
 import { pill } from "./walletStyles";
-
-const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 
 /** Who the user is, in the most recognisable form available: Farcaster handle, email, address. */
 function displayName(user: User | null, address: Address) {
@@ -20,8 +19,15 @@ const item =
   "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none";
 const explorer = appChain.blockExplorers.default;
 
+/** Where the panel opens: under the pill (navbar), or above it (a pill at the bottom of the sidebar). */
+export type MenuPlacement = "below" | "above";
+const PLACEMENT: Record<MenuPlacement, string> = {
+  below: "top-full right-0 mt-3",
+  above: "bottom-full left-0 mb-3",
+};
+
 /** Signed-in pill (avatar + name) that opens a small account panel. */
-export default function AccountMenu({ address }: { address: Address }) {
+export default function AccountMenu({ address, placement = "below" }: { address: Address; placement?: MenuPlacement }) {
   const { user, logout } = usePrivy();
   const { wallets } = useWallets();
   const { exportWallet } = useExportWallet();
@@ -73,7 +79,8 @@ export default function AccountMenu({ address }: { address: Address }) {
   };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(address).then(
+    // navigator.clipboard only exists in secure contexts (HTTPS or localhost).
+    navigator.clipboard?.writeText(address).then(
       () => setCopied(true),
       () => {}, // clipboard blocked: the address stays visible in the panel
     );
@@ -87,23 +94,21 @@ export default function AccountMenu({ address }: { address: Address }) {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((isOpen) => !isOpen)}
-        className={`${pill} steel-border hover:text-brand`}
+        className={`${pill} steel-border max-w-full hover:text-brand`}
       >
         <Avatar src={avatar} className="size-5 sm:size-6" />
         <span className="max-w-32 truncate sm:max-w-44">{name}</span>
       </button>
 
       {open && (
-        <div id={panelId} className="absolute right-0 top-full mt-3 w-72">
+        <div id={panelId} className={`absolute w-72 ${PLACEMENT[placement]}`}>
           <div className="steel-border rounded-3xl bg-[#141414] p-2 text-sm shadow-[0_8px_32px_rgb(0_0_0/0.4)]">
             <div className="flex items-center gap-3 p-3">
               <Avatar src={avatar} className="size-10" />
               <div className="min-w-0">
                 <p className="truncate text-base font-normal">{name}</p>
                 <p className="text-white/50">
-                  {balance
-                    ? `${Number(balance.formatted).toLocaleString("en-US", { maximumFractionDigits: 4 })} ${balance.symbol}`
-                    : "…"}{" "}
+                  {balance ? formatAmount(balance.formatted, balance.symbol) : "…"}{" "}
                   · {appChain.name}
                 </p>
               </div>
@@ -152,13 +157,15 @@ export default function AccountMenu({ address }: { address: Address }) {
   );
 }
 
-/** Farcaster profile picture when there is one, otherwise the brand gradient. */
+/** Farcaster profile picture when there is one, otherwise a user icon. */
 function Avatar({ src, className }: { src?: string; className: string }) {
   return (
     <span
       aria-hidden="true"
-      className={`${className} shrink-0 rounded-full bg-linear-to-br from-brand to-brand-soft bg-cover bg-center`}
+      className={`${className} flex shrink-0 items-center justify-center rounded-full bg-white/10 bg-cover bg-center text-white/70`}
       style={src ? { backgroundImage: `url(${JSON.stringify(src)})` } : undefined}
-    />
+    >
+      {!src && <UserIcon className="size-3/5" />}
+    </span>
   );
 }

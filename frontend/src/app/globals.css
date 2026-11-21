@@ -11,7 +11,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist);
   --font-display: var(--font-bricolage);
+  --font-serif: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
+  /* Newspaper ink on paper, for the market cards; the values live on .paper-card. */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-yes: var(--ink-yes);
+  --color-ink-no: var(--ink-no);
 }
 
 @theme {
@@ -21,7 +27,7 @@
   /* The two universes: YES glows blush, NO glows violet. */
   --color-yes: #f6c1d3;
   --color-no: #b3a6ff;
-  /* Section surfaces that sit on top of the starfield. */
+  /* Section surfaces that sit on top of the page backdrop. */
   --color-surface: #0b0b10;
 
   --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -60,40 +66,12 @@ html.lenis body {
   }
 }
 
-/*
- * Deep-space backdrop (CosmicBackground): two star layers tiled at sizes that don't
- * divide into each other, so the pattern never visibly repeats, plus soft nebula light
- * in the brand colours. The near layer twinkles slowly.
- */
-.cosmos-nebula {
+/* Soft brand-colour light behind every page (PageBackground). */
+.page-glow {
   background:
     radial-gradient(38% 32% at 88% 6%, rgb(246 193 211 / 0.16), transparent 70%),
     radial-gradient(42% 38% at 4% 48%, rgb(179 166 255 / 0.12), transparent 70%),
     radial-gradient(34% 28% at 72% 96%, rgb(178 79 122 / 0.12), transparent 70%);
-}
-.cosmos-stars-far {
-  background-image:
-    radial-gradient(1px 1px at 23px 41px, rgb(255 255 255 / 0.55), transparent),
-    radial-gradient(1px 1px at 131px 17px, rgb(255 255 255 / 0.35), transparent),
-    radial-gradient(1px 1px at 71px 133px, rgb(255 255 255 / 0.45), transparent),
-    radial-gradient(1px 1px at 197px 101px, rgb(255 255 255 / 0.3), transparent),
-    radial-gradient(1px 1px at 163px 211px, rgb(255 255 255 / 0.5), transparent),
-    radial-gradient(1px 1px at 11px 187px, rgb(255 255 255 / 0.3), transparent);
-  background-size: 233px 233px;
-}
-.cosmos-stars-near {
-  background-image:
-    radial-gradient(1.5px 1.5px at 59px 83px, rgb(255 255 255 / 0.85), transparent),
-    radial-gradient(1.5px 1.5px at 283px 29px, rgb(246 193 211 / 0.8), transparent),
-    radial-gradient(1.5px 1.5px at 211px 307px, rgb(255 255 255 / 0.7), transparent),
-    radial-gradient(1.5px 1.5px at 331px 239px, rgb(179 166 255 / 0.8), transparent);
-  background-size: 377px 377px;
-  animation: twinkle 5s ease-in-out infinite alternate;
-}
-@keyframes twinkle {
-  from {
-    opacity: 0.45;
-  }
 }
 
 /* Timeline split: paths draw in from their start (pathLength="1"). The resting state is
@@ -199,6 +177,63 @@ html.lenis body {
   }
 }
 
+/*
+ * Market card surface (MarketTile): a violet-ink panel, in the same family as the nebula
+ * panels but lighter so it lifts off the page, with a corner glow in the colour of the
+ * side the market leans toward (--tint, blush for YES or violet for NO) and a deep-violet
+ * glow bottom-left for depth. --tint-a sets the glow strength; the tile scales it with how
+ * lopsided the odds are.
+ *
+ * The edge is a 1px hairline cut from a diagonal gradient with a mask: bright at the
+ * top-left, through the card's tint, fading almost to nothing at the bottom-right, as if
+ * lit from one corner. It's still; hovering only brightens it.
+ */
+.market-card {
+  --tint: 150 150 170; /* neutral, for markets that aren't taking bets */
+  --tint-a: 0.07;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(var(--tint) / var(--tint-a)), transparent 72%),
+    radial-gradient(60% 70% at 0% 100%, rgb(110 84 190 / 0.12), transparent 72%),
+    linear-gradient(180deg, #181326 0%, #0f0d17 100%);
+  border-color: transparent; /* the hairline below is the visible edge */
+  position: relative;
+}
+
+.market-card[data-lean="yes"] {
+  --tint: 246 193 211;
+}
+
+.market-card[data-lean="no"] {
+  --tint: 179 166 255;
+}
+
+.market-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px; /* cover the transparent 1px border */
+  border-radius: inherit;
+  padding: 1px; /* hairline thickness */
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.4) 0%,
+    rgb(var(--tint) / 0.5) 30%,
+    rgb(var(--tint) / 0.12) 65%,
+    rgb(255 255 255 / 0.05) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Keyboard focus lifts the hairline; the pointer does nothing. */
+.market-card:has(a:focus-visible)::before {
+  opacity: 1;
+}
+
 /* Privy's sign-in / wallet modal gets the same moving steel edge, drawn as its real border
    rather than a ::before ring: the box is a scroll container, so an overlay would scroll
    away with long content. The padding-box layer repaints Privy's background inside the
@@ -213,4 +248,25 @@ html.lenis body {
   box-shadow:
     0 0 24px rgb(255 255 255 / 0.12),
     0 8px 32px rgb(0 0 0 / 0.32);
+}
+
+/* Market card printed like a newspaper clipping (MarketTile): ink on paper with a faint
+   grain. color-scheme picks the light or dark paper from the device setting. */
+.paper-card {
+  color-scheme: light dark;
+  --paper: light-dark(#f4f0e6, #16140f);
+  --ink: light-dark(#201e1a, #e8e2d4);
+  --ink-yes: light-dark(#1d6a43, #7dbf97);
+  --ink-no: light-dark(#a1282b, #e0807a);
+  background: var(--paper);
+  color: var(--ink);
+}
+.paper-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--ink);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }

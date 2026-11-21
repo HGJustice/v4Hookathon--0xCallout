@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight } from "./icons";
 import TimelineSplit from "./TimelineSplit";
 import VideoPanel from "./VideoPanel";
@@ -17,18 +18,18 @@ export default function Hero() {
             bet on.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              href="#how-it-works"
+            <Link
+              href="/markets/new"
               className="flex h-11 items-center gap-2 rounded-full bg-linear-to-r from-brand to-brand-soft px-6 text-black transition hover:brightness-110"
             >
               Start a Market <ArrowRight />
-            </a>
-            <a
-              href="#markets"
+            </Link>
+            <Link
+              href="/markets"
               className="steel-border steel-shine flex h-11 items-center rounded-full px-6 transition-colors hover:text-brand"
             >
               Explore Markets
-            </a>
+            </Link>
           </div>
         </div>
         <TimelineSplit />

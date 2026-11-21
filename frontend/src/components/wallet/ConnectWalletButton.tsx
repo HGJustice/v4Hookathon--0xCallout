@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { useConnectWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSetActiveWallet } from "@privy-io/wagmi";
-import { useAccount, useSwitchChain } from "wagmi";
+import { useAccount } from "wagmi";
 import { privyAppId } from "@/lib/privy";
-import { appChain } from "@/lib/wagmi";
-import AccountMenu from "./AccountMenu";
+import AccountMenu, { type MenuPlacement } from "./AccountMenu";
 import { primaryPill } from "./walletStyles";
 
 /** How long to wait for Privy to hand its wallet to wagmi before offering to connect. */
@@ -15,9 +14,11 @@ const WALLET_SYNC_GRACE_MS = 3000;
 /**
  * The navbar's wallet control, one step at a time:
  * Sign in → (signed in, no wallet in this browser) Connect Wallet →
- * (wrong network) Switch to Base Sepolia → account menu.
+ * account menu. The wallet's network doesn't matter here: reads use the app's own RPC, and
+ * each transaction asks the wallet to switch networks when it's sent. A "switch network"
+ * button in the navbar would hide the account menu from anyone whose wallet can't switch.
  */
-export default function ConnectWalletButton() {
+export default function ConnectWalletButton({ menuPlacement }: { menuPlacement?: MenuPlacement }) {
   if (!privyAppId) {
     return (
       <button
@@ -30,16 +31,15 @@ export default function ConnectWalletButton() {
       </button>
     );
   }
-  return <WalletButton />;
+  return <WalletButton menuPlacement={menuPlacement} />;
 }
 
-function WalletButton() {
+function WalletButton({ menuPlacement }: { menuPlacement?: MenuPlacement }) {
   const { ready, authenticated, login } = usePrivy();
   const { ready: walletsReady, wallets } = useWallets();
   const { connectWallet } = useConnectWallet();
   const { setActiveWallet } = useSetActiveWallet();
-  const { address, chainId } = useAccount();
-  const { switchChain, isPending: switching } = useSwitchChain();
+  const { address } = useAccount();
 
   // While a wallet exists but wagmi hasn't picked it up yet, hold off briefly to avoid a
   // "Connect" flash, but never forever, or the user would be left with no button at all.
@@ -78,20 +78,7 @@ function WalletButton() {
     );
   }
 
-  if (chainId !== appChain.id) {
-    return (
-      <button
-        type="button"
-        disabled={switching}
-        onClick={() => switchChain({ chainId: appChain.id })}
-        className={`${primaryPill} disabled:opacity-60`}
-      >
-        Switch to {appChain.name}
-      </button>
-    );
-  }
-
-  return <AccountMenu address={address} />;
+  return <AccountMenu address={address} placement={menuPlacement} />;
 }
 
 /** True once `active` has stayed true for `ms`; false again as soon as it turns false. */

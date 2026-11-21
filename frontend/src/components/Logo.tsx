@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-// The Multiverse Markets mark: two chrome rings, the two sides of an argument (or two
+// The 0xCallOut mark: two chrome rings, the two sides of an argument (or two
 // parallel universes), whose overlap, the market, is the only part in colour.
 // Drawn on a 64-unit grid; the viewBox crops to the rings so it sits tight next to text.
 // The same drawing lives in src/app/icon.svg (favicon) and public/logo.svg.

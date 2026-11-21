@@ -1,5 +1,3 @@
-<<<<<<< refs/remotes/origin/marketplace
-=======
 # 0xCallout
 
 ## Introduction
@@ -43,4 +41,4 @@ Presentation Slides:
 ## Tests
 
 ## Future Roadmap
->>>>>>> local
+
