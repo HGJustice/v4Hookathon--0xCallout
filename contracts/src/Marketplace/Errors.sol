@@ -22,3 +22,8 @@ error CannotBeUnresolved();
 error MarketplaceAlreadyProposed();
 error MarketplaceAlreadyDisputed();
 error DisputedOutcomeCannotBeProposed();
+error InsufficientEscrowBetAmount();
+error EscrowMustBeOpen();
+error EscrowExpired();
+error InvalidEMarketplaceID();
+error NotEnoughSetupEscrowMarket();

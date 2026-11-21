@@ -27,8 +27,11 @@ contract YesToken is ERC20 {
         return "YES";
     }
 
-    function mintYesToken(uint256 _amount) external OnlyMarketFactory {
-        _mint(marketFactory, _amount);
+    function mintYesToken(
+        uint256 _amount,
+        address _addy
+    ) external OnlyMarketFactory {
+        _mint(_addy, _amount);
     }
 
     function burnYesToken(

@@ -11,9 +11,12 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
     uint256 constant PROTOCOL_FEE = 0.001 ether;
     uint256 constant MARKET_SETUP_FEE = 0.005 ether;
     uint256 constant PROPOSE_OUTCOME_FEE = 0.005 ether;
+    uint256 constant MIN_SEED = 0.005 ether;
 
     uint256 public marketplaceID = 1;
+    uint256 public eMarketplaceID = 1;
     mapping(uint256 => Marketplace) marketplaces;
+    mapping(uint256 => EscrowMarket) escrowMarketplaces;
     uint256 public protocolFeeBalance = 0;
     address immutable owner;
     address immutable multiSig;
@@ -95,6 +98,64 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
         return marketplaces[_marketplaceID];
     }
 
+    function createEscrowMarket(
+        string calldata _title,
+        bool _decision,
+        uint256 _betAmount,
+        uint256 _deadline
+    ) external payable {
+        if (msg.value != _betAmount + MIN_SEED)
+            revert NotEnoughSetupEscrowMarket();
+        if (msg.value < MARKET_SETUP_FEE) revert InsufficientSetupFee();
+        if (bytes(_title).length < 10) revert TitleNotLongEnough();
+
+        uint256 seedAmount = msg.value - _betAmount;
+
+        EscrowMarket memory newMarket = EscrowMarket({
+            eMarketplaceID: eMarketplaceID,
+            title: _title,
+            user1: msg.sender,
+            user1Decision: _decision,
+            seedAmount: seedAmount,
+            user2: address(0),
+            betAmount: _betAmount,
+            deadline: _deadline,
+            escrowExpiry: block.timestamp + 1 days,
+            status: EscrowStatus.Open
+        });
+
+        escrowMarketplaces[eMarketplaceID] = newMarket;
+
+        emit EscrowMarketCreated();
+        eMarketplaceID++;
+    }
+
+    function acceptEscrowMarket(uint256 _eMarketplaceID) external payable {
+        if (_eMarketplaceID >= eMarketplaceID) revert InvalidEMarketplaceID();
+        EscrowMarket storage currentEscrowMarket = escrowMarketplaces[
+            _eMarketplaceID
+        ];
+        if (currentEscrowMarket.status == EscrowStatus.Closed)
+            revert EscrowMustBeOpen();
+        // if (block.timestamp > currentEscrowMarket.escrowExpiry)
+        //     revert EscrowExpired();
+        if (msg.value != currentEscrowMarket.betAmount)
+            revert InsufficientEscrowBetAmount();
+
+        currentEscrowMarket.user2 = msg.sender;
+        currentEscrowMarket.status = EscrowStatus.Closed;
+
+        _createFullMarketFromEscrow(_eMarketplaceID);
+
+        emit EscrowMarketAccepted();
+    }
+
+    function getEscrowMarket(
+        uint256 _eMarketplaceID
+    ) external view returns (EscrowMarket memory) {
+        return escrowMarketplaces[_eMarketplaceID];
+    }
+
     function betMarket(
         uint256 _marketplaceID,
         bool _decision
@@ -108,9 +169,9 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
 
         YesToken yesToken = YesToken(currentMarket.yesToken);
         NoToken noToken = NoToken(currentMarket.noToken);
-        yesToken.mintYesToken(msg.value);
+        yesToken.mintYesToken(msg.value, address(this));
         yesToken.approve(address(poolManager), msg.value);
-        noToken.mintNoToken(msg.value);
+        noToken.mintNoToken(msg.value, address(this));
         noToken.approve(address(poolManager), msg.value);
 
         bool zeroForOne = _decision
@@ -323,12 +384,83 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
     ) private returns (address, address) {
         YesToken newYesToken = new YesToken(_marketplaceID);
         NoToken newNoToken = new NoToken(_marketplaceID);
-        newYesToken.mintYesToken(_amount);
+        newYesToken.mintYesToken(_amount, address(this));
         newYesToken.approve(address(poolManager), _amount);
-        newNoToken.mintNoToken(_amount);
+        newNoToken.mintNoToken(_amount, address(this));
         newNoToken.approve(address(poolManager), _amount);
 
         return (address(newYesToken), address(newNoToken));
+    }
+
+    function _createFullMarketFromEscrow(uint256 _eMarketplaceID) private {
+        EscrowMarket memory currentEscrowMarket = escrowMarketplaces[
+            _eMarketplaceID
+        ];
+
+        (address newYesToken, address newNoToken) = _mintApproveYesNoTokens(
+            marketplaceID,
+            currentEscrowMarket.seedAmount
+        );
+        PoolKey memory newMarketKey = _createPoolKey(newYesToken, newNoToken);
+        _createPoolAddLiquidity(newMarketKey, currentEscrowMarket.seedAmount);
+
+        if (currentEscrowMarket.user1Decision) {
+            YesToken(newYesToken).mintYesToken(
+                currentEscrowMarket.betAmount * 2,
+                currentEscrowMarket.user1
+            );
+            NoToken(newNoToken).mintNoToken(
+                currentEscrowMarket.betAmount * 2,
+                currentEscrowMarket.user2
+            );
+        } else {
+            YesToken(newYesToken).mintYesToken(
+                currentEscrowMarket.betAmount * 2,
+                currentEscrowMarket.user2
+            );
+            NoToken(newNoToken).mintNoToken(
+                currentEscrowMarket.betAmount * 2,
+                currentEscrowMarket.user1
+            );
+        }
+
+        uint256 newBalance = currentEscrowMarket.seedAmount +
+            currentEscrowMarket.betAmount *
+            2;
+
+        Marketplace memory newMarketplace = Marketplace({
+            marketplaceID: marketplaceID,
+            title: currentEscrowMarket.title,
+            initializer: currentEscrowMarket.user1,
+            resolved: false,
+            balance: newBalance,
+            deadline: currentEscrowMarket.deadline,
+            proposedOutcome: PredictionOutcome.Unresolved,
+            proposedAt: 0,
+            outcomeDisputed: false,
+            disputedOutcome: PredictionOutcome.Unresolved,
+            finalOutcome: PredictionOutcome.Unresolved,
+            pool: newMarketKey,
+            yesToken: newYesToken,
+            noToken: newNoToken,
+            winningSupplyAtResolve: 0,
+            poolWinningBalanceAtResolve: 0,
+            yesReserves: currentEscrowMarket.seedAmount,
+            noReserves: currentEscrowMarket.seedAmount
+        });
+        marketplaces[marketplaceID] = newMarketplace;
+
+        emit MarketCreated(
+            marketplaceID,
+            currentEscrowMarket.title,
+            currentEscrowMarket.user1,
+            currentEscrowMarket.seedAmount,
+            currentEscrowMarket.deadline,
+            newMarketKey,
+            newYesToken,
+            newNoToken
+        );
+        marketplaceID++;
     }
 
     receive() external payable {}

@@ -4,7 +4,6 @@ pragma solidity 0.8.26;
 import {PoolKey} from "v4-hooks-public/lib/v4-core/src/types/PoolKey.sol";
 
 interface IMarketplaceFactory {
-
     struct Marketplace {
         uint256 marketplaceID;
         string title;
@@ -26,11 +25,29 @@ interface IMarketplaceFactory {
         uint256 noReserves;
     }
 
+    struct EscrowMarket {
+        uint256 eMarketplaceID;
+        string title;
+        address user1;
+        bool user1Decision;
+        uint256 seedAmount;
+        address user2;
+        uint256 betAmount;
+        uint256 deadline;
+        uint256 escrowExpiry;
+        EscrowStatus status;
+    }
+
     enum PredictionOutcome {
         Unresolved,
         Yes,
         No,
         Void
+    }
+
+    enum EscrowStatus {
+        Open,
+        Closed
     }
 
     event MarketCreated(
@@ -44,11 +61,15 @@ interface IMarketplaceFactory {
         address noToken
     );
 
+    event EscrowMarketCreated();
+
+    event EscrowMarketAccepted();
+
     event MarketBet(
         uint256 marketplaceID,
         string title,
         uint256 newBalance,
-        address indexed user,
+        address user,
         PoolKey pool
     );
 
@@ -66,23 +87,50 @@ interface IMarketplaceFactory {
         uint256 timestamp
     );
 
-    function createMarket(string calldata title, uint256 deadline) external payable;
+    function createMarket(
+        string calldata title,
+        uint256 deadline
+    ) external payable;
+
+    function createEscrowMarket(
+        string calldata title,
+        bool decision,
+        uint256 betAmount,
+        uint256 deadline
+    ) external payable;
+
+    function acceptEscrowMarket(uint256 eMarketplaceID) external payable;
 
     function betMarket(uint256 marketplaceID, bool decision) external payable;
 
-    function proposeOutcome(uint256 marketplaceID, PredictionOutcome outcome) external payable;
+    function proposeOutcome(
+        uint256 marketplaceID,
+        PredictionOutcome outcome
+    ) external payable;
 
-    function disputeOutcome(uint256 marketplaceID, PredictionOutcome outcome) external payable;
+    function disputeOutcome(
+        uint256 marketplaceID,
+        PredictionOutcome outcome
+    ) external payable;
 
     function redeemMarket(uint256 marketplaceID) external;
 
     function finaliseUndisputedMarket(uint256 marketplaceID) external;
 
-    function finaliseDisputedMarket(uint256 marketplaceID, PredictionOutcome outcome) external;
+    function finaliseDisputedMarket(
+        uint256 marketplaceID,
+        PredictionOutcome outcome
+    ) external;
 
     function withdrawProtocolFees() external;
-  
-    function getMarket(uint256 marketplaceID) external view returns (Marketplace memory);
+
+    function getMarket(
+        uint256 marketplaceID
+    ) external view returns (Marketplace memory);
+
+    function getEscrowMarket(
+        uint256 eMarketplaceID
+    ) external view returns (EscrowMarket memory);
 
     function marketplaceID() external view returns (uint256);
 
