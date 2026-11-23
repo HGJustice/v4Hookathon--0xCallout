@@ -8,7 +8,7 @@ const address = z
 
 const scheme = z
     .object({
-        NEURAL_API_KEY: z.string(),
+        NEYNAR_API_KEY: z.string(),
         NEYNAR_WEBHOOK_SECRET: z.string(),
         BOT_FID: z.coerce.number().int().positive(),
         BOT_SGINER_UUID: z.string(),
