@@ -29,8 +29,6 @@ contract CalloutHook is BaseHook {
 
     MarketplaceFactory private immutable marketplaceFactory;
 
-    uint256 constant B = 1;
-
     error AddLiquidityNotAllowed();
     error OnlyMarketplaceFactory();
 
@@ -59,29 +57,16 @@ contract CalloutHook is BaseHook {
         if (sender != address(marketplaceFactory))
             revert OnlyMarketplaceFactory();
 
-        (uint256 yesReserves, uint256 noReserves, bool yesIsCurrency0) = abi
-            .decode(hookData, (uint256, uint256, bool));
-
-        uint256 betAmount = uint256(-params.amountSpecified);
-        bool bettingYes = params.zeroForOne != yesIsCurrency0;
-
-        uint256 poolPaysOut = _getSwapAmountOut(
-            yesReserves,
-            noReserves,
-            betAmount,
-            bettingYes
+        (uint256 betAmount, uint256 poolPaysOut) = _getPoolPaysOutBetAmount(
+            params,
+            hookData
         );
 
-        (Currency inCur, Currency outCur) = params.zeroForOne
-            ? (key.currency0, key.currency1)
-            : (key.currency1, key.currency0);
-
-        inCur.take(poolManager, address(this), betAmount, true);
-        outCur.settle(poolManager, address(this), poolPaysOut, true);
-
-        BeforeSwapDelta beforeSwapDelta = toBeforeSwapDelta(
-            SafeCast.toInt128(betAmount),
-            -SafeCast.toInt128(poolPaysOut)
+        BeforeSwapDelta beforeSwapDelta = _getBeforeSwapDelta(
+            params.zeroForOne,
+            key,
+            betAmount,
+            poolPaysOut
         );
 
         return (BaseHook.beforeSwap.selector, beforeSwapDelta, 0);
@@ -91,10 +76,11 @@ contract CalloutHook is BaseHook {
         uint256 _currentYesReserves,
         uint256 _currentNoReserves,
         uint256 _betAmount,
-        bool _yes
+        bool _yes,
+        uint256 _B
     ) private pure returns (uint256) {
-        int256 yesTerm = LMSRLibrary._getTerm(B, _currentYesReserves);
-        int256 noTerm = LMSRLibrary._getTerm(B, _currentNoReserves);
+        int256 yesTerm = LMSRLibrary._getTerm(_B, _currentYesReserves);
+        int256 noTerm = LMSRLibrary._getTerm(_B, _currentNoReserves);
         int256 score = LMSRLibrary._getScore(yesTerm, noTerm);
 
         if (_yes)
@@ -103,7 +89,7 @@ contract CalloutHook is BaseHook {
                     _currentYesReserves,
                     _currentNoReserves,
                     _betAmount,
-                    B,
+                    _B,
                     score
                 );
 
@@ -112,9 +98,55 @@ contract CalloutHook is BaseHook {
                 _currentNoReserves,
                 _currentYesReserves,
                 _betAmount,
-                B,
+                _B,
                 score
             );
+    }
+
+    function _getPoolPaysOutBetAmount(
+        SwapParams calldata _params,
+        bytes calldata _hookData
+    ) private pure returns (uint256, uint256) {
+        (
+            uint256 yesReserves,
+            uint256 noReserves,
+            bool yesIsCurrency0,
+            uint256 B
+        ) = abi.decode(_hookData, (uint256, uint256, bool, uint256));
+
+        uint256 betAmount = uint256(-_params.amountSpecified);
+        bool bettingYes = _params.zeroForOne != yesIsCurrency0;
+
+        uint256 poolPaysOut = _getSwapAmountOut(
+            yesReserves,
+            noReserves,
+            betAmount,
+            bettingYes,
+            B
+        );
+
+        return (betAmount, poolPaysOut);
+    }
+
+    function _getBeforeSwapDelta(
+        bool _zeroForOne,
+        PoolKey calldata _key,
+        uint256 _betAmount,
+        uint256 _poolPaysOut
+    ) private returns (BeforeSwapDelta) {
+        (Currency inCur, Currency outCur) = _zeroForOne
+            ? (_key.currency0, _key.currency1)
+            : (_key.currency1, _key.currency0);
+
+        inCur.take(poolManager, address(this), _betAmount, true);
+        outCur.settle(poolManager, address(this), _poolPaysOut, true);
+
+        BeforeSwapDelta beforeSwapDelta = toBeforeSwapDelta(
+            SafeCast.toInt128(_betAmount),
+            -SafeCast.toInt128(_poolPaysOut)
+        );
+
+        return beforeSwapDelta;
     }
 
     function getHookPermissions()
