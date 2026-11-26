@@ -21,15 +21,18 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
     address immutable owner;
     address immutable multiSig;
     address immutable chainlinkCre;
+    address immutable bot;
 
     constructor(
         IPoolManager _poolManager,
         address _multiSig,
-        address _chainlinkCre
+        address _chainlinkCre,
+        address _bot
     ) PoolManagerLogic(_poolManager) {
         owner = msg.sender;
         multiSig = _multiSig;
         chainlinkCre = _chainlinkCre;
+        bot = _bot;
     }
 
     modifier checkMarketplaceID(uint256 _marketplaceID) {
@@ -70,6 +73,7 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
             disputedOutcome: PredictionOutcome.Unresolved,
             finalOutcome: PredictionOutcome.Unresolved,
             pool: newMarketKey,
+            B: (amountAfterFee * 10) / 7,
             yesToken: newYesToken,
             noToken: newNoToken,
             winningSupplyAtResolve: 0,
@@ -100,23 +104,18 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
 
     function createEscrowMarket(
         string calldata _title,
-        bool _decision,
         uint256 _betAmount,
         uint256 _deadline
-    ) external payable {
-        if (msg.value != _betAmount + MIN_SEED)
-            revert NotEnoughSetupEscrowMarket();
-        if (msg.value < MARKET_SETUP_FEE) revert InsufficientSetupFee();
+    ) external {
+        if (msg.sender != bot) revert BotOnlyAccess();
         if (bytes(_title).length < 10) revert TitleNotLongEnough();
-
-        uint256 seedAmount = msg.value - _betAmount;
 
         EscrowMarket memory newMarket = EscrowMarket({
             eMarketplaceID: eMarketplaceID,
             title: _title,
-            user1: msg.sender,
-            user1Decision: _decision,
-            seedAmount: seedAmount,
+            user1: address(0),
+            user1Decision: false,
+            seedAmount: 0,
             user2: address(0),
             betAmount: _betAmount,
             deadline: _deadline,
@@ -130,7 +129,10 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
         eMarketplaceID++;
     }
 
-    function acceptEscrowMarket(uint256 _eMarketplaceID) external payable {
+    function acceptEscrowMarket(
+        uint256 _eMarketplaceID,
+        bool _decision
+    ) external payable {
         if (_eMarketplaceID >= eMarketplaceID) revert InvalidEMarketplaceID();
         EscrowMarket storage currentEscrowMarket = escrowMarketplaces[
             _eMarketplaceID
@@ -139,8 +141,25 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
             revert EscrowMustBeOpen();
         // if (block.timestamp > currentEscrowMarket.escrowExpiry)
         //     revert EscrowExpired();
+
+        if (currentEscrowMarket.user1 == address(0)) {
+            if (msg.value != currentEscrowMarket.betAmount + MIN_SEED)
+                revert NotEnoughSetupEscrowMarket();
+
+            uint256 seedAmount = msg.value - currentEscrowMarket.betAmount;
+
+            currentEscrowMarket.user1 = msg.sender;
+            currentEscrowMarket.user1Decision = _decision;
+            currentEscrowMarket.seedAmount = seedAmount;
+
+            emit EscrowMarketAccepted();
+            return;
+        }
+
         if (msg.value != currentEscrowMarket.betAmount)
             revert InsufficientEscrowBetAmount();
+        if (_decision == currentEscrowMarket.user1Decision)
+            revert SideAlreadyTaken();
 
         currentEscrowMarket.user2 = msg.sender;
         currentEscrowMarket.status = EscrowStatus.Closed;
@@ -184,7 +203,8 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
             currentMarket.yesReserves,
             currentMarket.noReserves,
             currentMarket.yesToken ==
-                Currency.unwrap(currentMarket.pool.currency0)
+                Currency.unwrap(currentMarket.pool.currency0),
+            currentMarket.B
         );
 
         bytes memory data = abi.encode(
@@ -441,6 +461,7 @@ contract MarketplaceFactory is IMarketplaceFactory, PoolManagerLogic {
             disputedOutcome: PredictionOutcome.Unresolved,
             finalOutcome: PredictionOutcome.Unresolved,
             pool: newMarketKey,
+            B: (currentEscrowMarket.seedAmount * 10) / 7,
             yesToken: newYesToken,
             noToken: newNoToken,
             winningSupplyAtResolve: 0,

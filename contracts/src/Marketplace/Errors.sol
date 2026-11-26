@@ -27,3 +27,5 @@ error EscrowMustBeOpen();
 error EscrowExpired();
 error InvalidEMarketplaceID();
 error NotEnoughSetupEscrowMarket();
+error BotOnlyAccess();
+error SideAlreadyTaken();

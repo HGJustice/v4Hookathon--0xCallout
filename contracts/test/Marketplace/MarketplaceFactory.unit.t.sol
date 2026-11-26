@@ -2,8 +2,13 @@
 pragma solidity 0.8.26;
 
 import {BaseTest} from "../Basetest.sol";
-import {PoolId, PoolIdLibrary} from "v4-hooks-public/lib/v4-core/src/types/PoolId.sol";
-import {StateLibrary} from "v4-hooks-public/lib/v4-core/src/libraries/StateLibrary.sol";
+import {
+    PoolId,
+    PoolIdLibrary
+} from "v4-hooks-public/lib/v4-core/src/types/PoolId.sol";
+import {
+    StateLibrary
+} from "v4-hooks-public/lib/v4-core/src/libraries/StateLibrary.sol";
 import "forge-std/console.sol";
 import "../../src/Marketplace/MarketplaceFactory.sol";
 
@@ -32,12 +37,9 @@ contract MarketplaceFactoryUnit is BaseTest {
             uint8(market.finalOutcome),
             uint8(IMarketplaceFactory.PredictionOutcome.Unresolved)
         );
-        PoolId poolId = market.pool.toId();
-        (uint160 sqrtPriceX96, int24 tick, , ) = manager.getSlot0(poolId);
-        assertEq(sqrtPriceX96, 79228162514264337593543950336);
-        assertEq(tick, 0);
-        uint128 liquidity = manager.getLiquidity(poolId);
-        assertGt(liquidity, 0);
+        assertEq(market.yesReserves, 0.049 ether);
+        assertEq(market.noReserves, 0.049 ether);
+        assertEq(market.B, 0.07 ether);
     }
 
     function test__multipleMarkets() external {
@@ -181,4 +183,36 @@ contract MarketplaceFactoryUnit is BaseTest {
         _redeemMarket(1, user3);
         assertGt(user3.balance, user2.balance);
     }
+
+    function test_createEscrowMarketIntoMarketplace() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "1+1=3 what do you think",
+            0.010 ether,
+            3444232323
+        );
+        MarketplaceFactory.EscrowMarket
+            memory currentEscrowMarket = marketplaceContract.getEscrowMarket(1);
+        assertEq(currentEscrowMarket.eMarketplaceID, 1);
+        assertEq(currentEscrowMarket.user1, address(0));
+        assertEq(currentEscrowMarket.user2, address(0));
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, true);
+
+        vm.prank(user2);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, false);
+
+        MarketplaceFactory.Marketplace memory currentMarketplace = _getMarket(
+            1
+        );
+        assertEq(currentMarketplace.marketplaceID, 1);
+        assertEq(currentMarketplace.initializer, user1);
+        assertEq(currentMarketplace.yesReserves, 0.005 ether);
+        assertEq(currentMarketplace.noReserves, 0.005 ether);
+    }
+
+    // function test_user1AcceptsEscrow() external {}
+
+    // function test_user2AcceptsAndCreatesMarket() external {}
 }

@@ -7,14 +7,17 @@ import {
 } from "v4-hooks-public/lib/v4-core/src/interfaces/IPoolManager.sol";
 import {Deployers} from "v4-hooks-public/lib/v4-core/test/utils/Deployers.sol";
 import {MarketplaceFactory} from "../src/Marketplace/MarketplaceFactory.sol";
+import {Hooks} from "v4-hooks-public/lib/v4-core/src/libraries/Hooks.sol";
+import {CalloutHook} from "../src/Hook/CalloutHook.sol";
 
 abstract contract BaseTest is Test, Deployers {
     MarketplaceFactory public marketplaceContract;
+    CalloutHook hook;
 
     address owner = makeAddr("owner");
     address multiSig = makeAddr("multiSig");
     address chainlinkCre = makeAddr("chainlinkCre");
-    address hookAddress = makeAddr("hookAddress");
+    address bot = makeAddr("bot");
 
     address user1 = makeAddr("user1");
     address user2 = makeAddr("user2");
@@ -36,8 +39,24 @@ abstract contract BaseTest is Test, Deployers {
         marketplaceContract = new MarketplaceFactory(
             IPoolManager(address(manager)),
             multiSig,
-            chainlinkCre
+            chainlinkCre,
+            bot
         );
+
+        address hookAddress = address(
+            uint160(
+                Hooks.BEFORE_ADD_LIQUIDITY_FLAG |
+                    Hooks.BEFORE_SWAP_FLAG |
+                    Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
+            )
+        );
+        deployCodeTo(
+            "CalloutHook.sol",
+            abi.encode(manager, address(marketplaceContract)),
+            hookAddress
+        );
+        hook = CalloutHook(hookAddress);
+        marketplaceContract.setHookAddress(hookAddress);
     }
 
     function _createDefaultMarket(address _user, uint256 _amount) internal {

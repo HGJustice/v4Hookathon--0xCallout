@@ -17,6 +17,7 @@ interface IMarketplaceFactory {
         PredictionOutcome disputedOutcome;
         PredictionOutcome finalOutcome;
         PoolKey pool;
+        uint256 B;
         address yesToken;
         address noToken;
         uint256 winningSupplyAtResolve;
@@ -94,12 +95,14 @@ interface IMarketplaceFactory {
 
     function createEscrowMarket(
         string calldata title,
-        bool decision,
         uint256 betAmount,
         uint256 deadline
-    ) external payable;
+    ) external;
 
-    function acceptEscrowMarket(uint256 eMarketplaceID) external payable;
+    function acceptEscrowMarket(
+        uint256 eMarketplaceID,
+        bool decision
+    ) external payable;
 
     function betMarket(uint256 marketplaceID, bool decision) external payable;
 
