@@ -11,7 +11,7 @@ contract DeployMarketplaceScript is Script {
     address multiSig = 0x2eF691B20E7c79D02c5Ac5ba0D5cC6DC73aB3b79; // any custom accress too eth account at the momment
     address chainlinkCre = 0x980C4E9E9887DC85155Ce2b65ac62A6f6F3d2731; // any custom accress too eth account at the momment
     address uniArbitrumPoolManager = 0xFB3e0C6F74eB1a21CC1Da29aeC80D2Dfe6C9a317;
-    address bot;
+    address bot = 0x7CF99947DD8F70f2728f68954B272F4ef6c24A17;
     uint256 deployerPrivateKey = vm.envUint("PK");
 
     function run() public {

@@ -10,6 +10,12 @@ Built for the Atrium Hookathon (UHI11).
 
 ## Links
 
+Live Demo:
+
+Submission Video:
+
+Presentation Slides:
+
 **Hook Contract:**
 
 - [CalloutHook.sol](./contracts/src/Hook/CalloutHook.sol)
@@ -20,15 +26,14 @@ Built for the Atrium Hookathon (UHI11).
 
 - [IMarketplaceFactory.sol](./contracts/src/Marketplace/IMarketplaceFactory.sol)
 - [MarketplaceFactory.sol](./contracts/src/Marketplace/MarketplaceFactory.sol)
-- [PoolmManagerLogic.sol](./contracts/src/Marketplace/PoolManagerLogic.sol)
+- [PoolManagerLogic.sol](./contracts/src/Marketplace/PoolManagerLogic.sol)
 - [Errors.sol](./contracts/src/Marketplace/Errors.sol)
+- [Marketplace Tests](./contracts/test/Marketplace/)
+
+**ERC20 Contracts:**
 
 - [YesToken.sol](./contracts/src/erc20s/yesToken.sol/)
 - [NoToken.sol](./contracts/src/erc20s/noToken.sol/)
-
-Submission Video:
-
-Presentation Slides:
 
 ## Problems being solved
 
@@ -41,4 +46,3 @@ Presentation Slides:
 ## Tests
 
 ## Future Roadmap
-

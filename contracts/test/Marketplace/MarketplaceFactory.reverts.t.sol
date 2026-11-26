@@ -171,4 +171,77 @@ contract MarketplaceFactoryReverts is BaseTest {
         vm.expectRevert(MarketplaceDisputed.selector);
         _finaliseMarketChainlinkCre(1);
     }
+
+    function test_botOnlyAccess() external {
+        vm.prank(user1);
+        vm.expectRevert(BotOnlyAccess.selector);
+        marketplaceContract.createEscrowMarket(
+            "yooooooooo",
+            0.010 ether,
+            43434334343423
+        );
+    }
+
+    function test_user1NotSendEnough() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "yooooooooo",
+            0.010 ether,
+            43434334343423
+        );
+
+        vm.prank(user1);
+        vm.expectRevert(NotEnoughSetupEscrowMarket.selector);
+        marketplaceContract.acceptEscrowMarket{value: 0.01 ether}(1, true);
+    }
+
+    function test_user2NotSendEnough() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "yooooooooo",
+            0.010 ether,
+            43434334343423
+        );
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, true);
+
+        vm.prank(user2);
+        vm.expectRevert(InsufficientEscrowBetAmount.selector);
+        marketplaceContract.acceptEscrowMarket{value: 0.001 ether}(1, false);
+    }
+
+    function test_user2PickWrongSide() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "yooooooooo",
+            0.010 ether,
+            43434334343423
+        );
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, true);
+
+        vm.prank(user2);
+        vm.expectRevert(SideAlreadyTaken.selector);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, true);
+    }
+
+    function test_escrowMarketIsClosed() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "yooooooooo",
+            0.010 ether,
+            43434334343423
+        );
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, true);
+        vm.prank(user2);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, false);
+
+        vm.prank(user3);
+        vm.expectRevert(EscrowMustBeOpen.selector);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, false);
+    }
 }

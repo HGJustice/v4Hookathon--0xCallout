@@ -184,6 +184,47 @@ contract MarketplaceFactoryUnit is BaseTest {
         assertGt(user3.balance, user2.balance);
     }
 
+    function test_botCreatesEscrowMarket() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "1+1=3 what do you think",
+            0.010 ether,
+            3444232323
+        );
+        MarketplaceFactory.EscrowMarket
+            memory currentEscrowMarket = marketplaceContract.getEscrowMarket(1);
+        assertEq(currentEscrowMarket.eMarketplaceID, 1);
+        assertEq(currentEscrowMarket.user1, address(0));
+        assertEq(currentEscrowMarket.user2, address(0));
+    }
+
+    function test_user1AcceptsEscrow() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "1+1=3 what do you think",
+            0.010 ether,
+            3444232323
+        );
+        MarketplaceFactory.EscrowMarket
+            memory currentEscrowMarket = marketplaceContract.getEscrowMarket(1);
+        assertEq(currentEscrowMarket.eMarketplaceID, 1);
+        assertEq(currentEscrowMarket.user1, address(0));
+        assertEq(currentEscrowMarket.user2, address(0));
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, true);
+
+        MarketplaceFactory.EscrowMarket
+            memory escrowMarket = marketplaceContract.getEscrowMarket(1);
+        assertEq(escrowMarket.user1, user1);
+        assertEq(escrowMarket.user1Decision, true);
+        assertEq(escrowMarket.seedAmount, 0.005 ether);
+        assertEq(
+            uint8(escrowMarket.status),
+            uint8(IMarketplaceFactory.EscrowStatus.Open)
+        );
+    }
+
     function test_createEscrowMarketIntoMarketplace() external {
         vm.prank(bot);
         marketplaceContract.createEscrowMarket(
@@ -206,13 +247,109 @@ contract MarketplaceFactoryUnit is BaseTest {
         MarketplaceFactory.Marketplace memory currentMarketplace = _getMarket(
             1
         );
+        YesToken yesToken = YesToken(currentMarketplace.yesToken);
+        NoToken noToken = NoToken(currentMarketplace.noToken);
+
+        MarketplaceFactory.EscrowMarket
+            memory newEscrowMarket = marketplaceContract.getEscrowMarket(1);
+
+        assertEq(newEscrowMarket.user2, user2);
+        assertEq(
+            uint8(newEscrowMarket.status),
+            uint8(IMarketplaceFactory.EscrowStatus.Closed)
+        );
         assertEq(currentMarketplace.marketplaceID, 1);
         assertEq(currentMarketplace.initializer, user1);
         assertEq(currentMarketplace.yesReserves, 0.005 ether);
         assertEq(currentMarketplace.noReserves, 0.005 ether);
+        assertEq(currentMarketplace.balance, 0.025 ether);
+        assertEq(currentMarketplace.B, 7142857142857142);
+        assertEq(yesToken.balanceOf(user1), 0.02 ether);
+        assertEq(noToken.balanceOf(user2), 0.02 ether);
     }
 
-    // function test_user1AcceptsEscrow() external {}
+    function test_createEscrowMarketIntoMarketplaceOpposite() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "1+1=3 what do you think",
+            0.010 ether,
+            3444232323
+        );
+        MarketplaceFactory.EscrowMarket
+            memory currentEscrowMarket = marketplaceContract.getEscrowMarket(1);
+        assertEq(currentEscrowMarket.eMarketplaceID, 1);
+        assertEq(currentEscrowMarket.user1, address(0));
+        assertEq(currentEscrowMarket.user2, address(0));
 
-    // function test_user2AcceptsAndCreatesMarket() external {}
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, false);
+
+        vm.prank(user2);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, true);
+
+        MarketplaceFactory.Marketplace memory currentMarketplace = _getMarket(
+            1
+        );
+        YesToken yesToken = YesToken(currentMarketplace.yesToken);
+        NoToken noToken = NoToken(currentMarketplace.noToken);
+
+        MarketplaceFactory.EscrowMarket
+            memory newEscrowMarket = marketplaceContract.getEscrowMarket(1);
+
+        assertEq(newEscrowMarket.user2, user2);
+        assertEq(
+            uint8(newEscrowMarket.status),
+            uint8(IMarketplaceFactory.EscrowStatus.Closed)
+        );
+        assertEq(currentMarketplace.marketplaceID, 1);
+        assertEq(currentMarketplace.initializer, user1);
+        assertEq(currentMarketplace.yesReserves, 0.005 ether);
+        assertEq(currentMarketplace.noReserves, 0.005 ether);
+        assertEq(currentMarketplace.balance, 0.025 ether);
+        assertEq(currentMarketplace.B, 7142857142857142);
+        assertEq(yesToken.balanceOf(user2), 0.02 ether);
+        assertEq(noToken.balanceOf(user1), 0.02 ether);
+    }
+
+    function test_fullEscrowCycle() external {
+        vm.prank(bot);
+        marketplaceContract.createEscrowMarket(
+            "1+1=3 what do you think",
+            0.010 ether,
+            3444232323
+        );
+
+        vm.prank(user1);
+        marketplaceContract.acceptEscrowMarket{value: 0.015 ether}(1, false);
+        vm.prank(user2);
+        marketplaceContract.acceptEscrowMarket{value: 0.010 ether}(1, true);
+
+        _proposeMarket(
+            user3,
+            0.005 ether,
+            IMarketplaceFactory.PredictionOutcome.No,
+            1
+        );
+        _finaliseMarketChainlinkCre(1);
+        _redeemMarket(1, user1);
+        MarketplaceFactory.Marketplace memory currentMarketplace = _getMarket(
+            1
+        );
+        MarketplaceFactory.EscrowMarket
+            memory currentEscrowMarket = marketplaceContract.getEscrowMarket(1);
+        NoToken noToken = NoToken(currentMarketplace.noToken);
+
+        assertEq(user1.balance, 1.01 ether);
+        assertEq(user2.balance, 0.99 ether);
+        assertEq(noToken.balanceOf(user1), 0.00 ether);
+        assertEq(currentMarketplace.balance, 0 ether);
+        assertEq(
+            uint8(currentMarketplace.finalOutcome),
+            uint8(IMarketplaceFactory.PredictionOutcome.No)
+        );
+        assertEq(
+            uint8(currentEscrowMarket.status),
+            uint8(IMarketplaceFactory.EscrowStatus.Closed)
+        );
+    }
 }
