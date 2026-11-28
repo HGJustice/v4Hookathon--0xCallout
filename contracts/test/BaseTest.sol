@@ -9,6 +9,7 @@ import {Deployers} from "v4-hooks-public/lib/v4-core/test/utils/Deployers.sol";
 import {MarketplaceFactory} from "../src/Marketplace/MarketplaceFactory.sol";
 import {Hooks} from "v4-hooks-public/lib/v4-core/src/libraries/Hooks.sol";
 import {CalloutHook} from "../src/Hook/CalloutHook.sol";
+import "../src/Hook/LMSRLibrary.sol";
 
 abstract contract BaseTest is Test, Deployers {
     MarketplaceFactory public marketplaceContract;
@@ -127,5 +128,24 @@ abstract contract BaseTest is Test, Deployers {
     function _redeemMarket(uint256 _marketplaceID, address _user) internal {
         vm.prank(_user);
         marketplaceContract.redeemMarket(_marketplaceID);
+    }
+
+    function _expectedPayout(
+        uint256 _outReserve,
+        uint256 _inReserve,
+        uint256 _bet,
+        uint256 _b
+    ) internal pure returns (uint256) {
+        int256 outTerm = LMSRLibrary._getTerm(_b, _outReserve);
+        int256 inTerm = LMSRLibrary._getTerm(_b, _inReserve);
+        int256 score = LMSRLibrary._getScore(outTerm, inTerm);
+        return
+            LMSRLibrary._getSwapAmountOut(
+                _outReserve,
+                _inReserve,
+                _bet,
+                _b,
+                score
+            );
     }
 }
